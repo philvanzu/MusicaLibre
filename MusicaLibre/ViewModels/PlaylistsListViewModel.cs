@@ -1,0 +1,157 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
+using DynamicData;
+using DynamicData.Binding;
+using MusicaLibre.Models;
+using MusicaLibre.Services;
+
+namespace MusicaLibre.ViewModels;
+
+public partial class PlaylistsListViewModel : LibraryDataPresenter, ISelectVirtualizableItems
+{
+   private List<PlaylistViewModel> _items = new();
+    private ObservableCollection<PlaylistViewModel> _itemsMutable = new();
+    public ReadOnlyObservableCollection<PlaylistViewModel>? Items { get; set; }
+    
+    [ObservableProperty] private PlaylistViewModel? _selectedItem;
+    partial void OnSelectedItemChanged(PlaylistViewModel? value)
+    {
+        if (!InputManager.CtrlPressed)
+        {
+            foreach (var playlist in _items)
+            {
+                if(playlist != value && playlist.IsSelected)
+                    playlist.IsSelected = false;
+            }
+        } 
+        
+        OnPropertyChanged(nameof(SelectedItemTracks));
+        SelectedItems = _items.Where(x => x.IsSelected).ToList();
+        
+        
+        var selectedTracks = new List<Track>();
+        foreach(var item in SelectedItems)
+            selectedTracks.AddRange(item.Tracks);
+        
+        SelectedTracks = selectedTracks;
+
+    }
+    
+    [ObservableProperty] private List<PlaylistViewModel>? _selectedItems;
+    
+
+    public List<Track>? SelectedItemTracks => SelectedItem?.Tracks;
+    
+    public event EventHandler<SelectedItemChangedEventArgs>? SelectionChanged;
+    public event EventHandler? SortOrderChanged;
+    public event EventHandler<int>? ScrollToIndexRequested;
+    
+    public PlaylistsListViewModel(LibraryViewModel library, List<Track> tracksPool)
+        :base(library, tracksPool)
+    {
+        UpdateAlbumsCollection();
+        Items = new (_itemsMutable);
+    }
+    
+    void UpdateAlbumsCollection()
+    {
+        _items.Clear();
+
+        
+        var playlistIds = TracksPool.Select(x => x.AlbumId).Where(albumId => albumId.HasValue).Distinct().ToList();
+
+        var playlistsPool = Library.Playlists.Values.AsEnumerable();
+        if (playlistIds.Count > 0) playlistsPool = playlistsPool.Where(x => playlistIds.Contains(x.DatabaseIndex));
+        foreach (var item in playlistsPool)
+            _items.Add(new PlaylistViewModel(this, item));
+        
+        Sort();
+    }
+    private IComparer<PlaylistViewModel> GetComparer(PlaylistSortKeys sort, bool ascending)
+    {
+        return sort switch
+        {
+            PlaylistSortKeys.Name => ascending
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.FileName)
+                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.FileName),
+
+            PlaylistSortKeys.Path=>ascending
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.FilePath)
+                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.FilePath),
+
+            PlaylistSortKeys.Added => ascending
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Added.Value)
+                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Added.Value),
+            PlaylistSortKeys.Modified => ascending
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Modified.Value)
+                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Modified.Value),
+            PlaylistSortKeys.Created => ascending
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Created.Value)
+                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Created.Value),
+            PlaylistSortKeys.LastPlayed => ascending
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Played.Value)
+                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Played.Value),
+
+            PlaylistSortKeys.Random => 
+                SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.RandomIndex),
+
+            _ => SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.DatabaseIndex)
+        };
+    }
+
+    public void ShufflePages()
+    {
+        foreach (var item in _items)
+            item.RandomIndex = CryptoRandom.NextInt();
+    }
+    public void Sort()
+    {
+        if(Library.CurrentStep.SortingKeys.Select(x=>  (x is SortingKey<PlaylistSortKeys> sk) && sk.Key == PlaylistSortKeys.Random).Any())
+            ShufflePages();
+        
+        var comparers = Library.CurrentStep.SortingKeys
+            .Select(key => GetComparer((key as SortingKey<PlaylistSortKeys>).Key, key.Asc))
+            .ToList();
+
+        Ascending = Library.CurrentStep.SortingKeys.First().Asc;
+        var sorted = _items.OrderBy(x => x, new CompositeComparer<PlaylistViewModel>(comparers));
+
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(sorted);
+
+        OnPropertyChanged(nameof(Items));
+        //InvokeSortOrderChanged();
+    }
+
+    public override void Reverse()
+    {
+        var reversed =_itemsMutable.Reverse().ToList();
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(reversed);
+        Ascending = !Ascending;
+    }
+
+    public int GetSelectedIndex()
+    {
+        if(Items == null || SelectedItem == null) return -1;
+        return Items.IndexOf(SelectedItem);
+    }
+    public int GetItemIndex(PlaylistViewModel album)=>Items?.IndexOf(album)??-1;
+
+    public override NavCapsuleViewModel? GetCapsule()
+    {
+        if(SelectedItem != null)
+        {
+            return new NavCapsuleViewModel()
+            {
+                Title = SelectedItem.FileName,
+                SubTitle = SelectedItem.FilePath,
+                Artwork = SelectedItem.Artwork,
+            };
+        }
+        return null;
+    }
+}

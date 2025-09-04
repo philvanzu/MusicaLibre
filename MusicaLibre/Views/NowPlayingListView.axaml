@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Views.NowPlayingListView"
+             x:DataType="vm:NowPlayingListViewModel">
+    <ScrollViewer>
+        <ctrl:VirtualizedItemsRepeater ItemsSource="{Binding Tracks}"
+                                       SelectedItem="{Binding SelectedTrack}"
+                                       ElementWidth="0" ElementHeight="64">
+            <ctrl:VirtualizedItemsRepeater.Layout>
+                <StackLayout Orientation="Vertical"/>
+            </ctrl:VirtualizedItemsRepeater.Layout>
+            <ctrl:VirtualizedItemsRepeater.ItemTemplate>
+                <DataTemplate>
+                    <Border Height="56" 
+                            Margin="2 4"
+                            Padding=" 0 0 16 0"
+                            HorizontalAlignment="Stretch"
+                            Tag="{Binding IsPlaying}"
+                            Tapped="TrackItemTapped"
+                            >
+                        <Border.Styles>
+                            <!-- default style -->
+                            <Style Selector="Border[Tag=False]">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderBrush" Value="White"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                            </Style>
+                            <!-- selected style -->
+                            <Style Selector="Border[Tag=True]">
+                                <Setter Property="Background" Value="#5050FF33" />
+                                <Setter Property="BorderBrush" Value="DodgerBlue"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                            </Style>
+                        </Border.Styles>
+                        <Grid ColumnDefinitions="50, *" VerticalAlignment="Center">
+                        <Border BorderBrush="White" BorderThickness="1">
+                            <Image Height="48" Width="48" Source="{Binding Artwork}"/>
+                        </Border>
+                        <Border Grid.Column="1">
+                            <Grid RowDefinitions="0.5*, 0.5*">
+                                <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding Title}"
+                                               FontSize="16" FontWeight="Bold" Margin="8 0"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="NoWrap"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Duration}" />
+                                </Grid>
+                                <Grid Grid.Row="1" ColumnDefinitions="Auto, *">
+                                    <TextBlock Text="▶" IsVisible="{Binding IsPlaying}"
+                                               Margin="8 0"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Artists}" 
+                                               Margin="8 0 "
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="NoWrap"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                    </Border>    
+                </DataTemplate>
+            </ctrl:VirtualizedItemsRepeater.ItemTemplate>
+        </ctrl:VirtualizedItemsRepeater>
+    </ScrollViewer>
+</UserControl>

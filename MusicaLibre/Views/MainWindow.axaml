@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MusicaLibre.ViewModels"
+        xmlns:v="using:MusicaLibre.Views"
+        xmlns:conv="using:MusicaLibre.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MusicaLibre.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="MusicaLibre">
+
+
+    <Window.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+    </Window.Resources>
+
+    <Grid RowDefinitions="48, *">
+        <!--player control -->
+        <Grid Grid.Row="0">
+            <ContentControl>
+                <v:PlayerView DataContext="{Binding Player}"/>
+            </ContentControl>
+        </Grid>
+        
+        <!-- main content -->
+        <Grid Grid.Row="1" ColumnDefinitions="*, 16, 530">
+            <!-- Library view -->
+            <Grid>
+                <ContentControl>
+                    <v:LibraryView DataContext="{Binding Library}" />
+                </ContentControl>
+            </Grid>
+            <GridSplitter Grid.Column="1"
+                          Width="16"
+                          VerticalAlignment="Stretch"
+                          Background="Transparent"
+                          BorderBrush="DarkGray"
+                          BorderThickness="1"
+                          ShowsPreview="True" />
+            <!--Now Playing -->
+            <Grid Grid.Column="2" RowDefinitions="1*, 5, 0*">
+                <Grid  RowDefinitions="150,16, *" DataContext="{Binding Library}">
+                    <ContentControl >
+                        <v:NowPlayingView DataContext="{Binding NowPlayingList.PlayingTrack}"/>
+                    </ContentControl>
+                    <Border Grid.Row="1" BorderBrush="White" BorderThickness="0" Height="16"/>
+                    <Grid Grid.Row="2">
+                        <ContentControl>
+                            <v:NowPlayingListView DataContext="{Binding NowPlayingList}"/>
+                        </ContentControl> 
+                    </Grid>
+                </Grid>
+                <GridSplitter Grid.Row="1"
+                    Height="5"
+                    HorizontalAlignment="Stretch"
+                    Background="DarkGray"
+                    ShowsPreview="True"/>
+                <Grid Grid.Row="2">
+                    <TextBlock>Selected item details</TextBlock>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        
+    </Grid>
+
+</Window>

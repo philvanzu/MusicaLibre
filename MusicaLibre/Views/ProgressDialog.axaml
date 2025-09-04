@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MusicaLibre.Views.ProgressDialog"
+        x:DataType="vm:ProgressDialogViewModel"
+        Title="Progress"
+        Width="800"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#505050">
+    
+    <Grid Margin="16" RowDefinitions="Auto, Auto, Auto">
+        <TextBlock Grid.Row="0" 
+                   Text="{Binding Message}" 
+                   FontSize="16"
+                   Margin="0,0,0,12"
+                   HorizontalAlignment="Center"/>
+
+        <ProgressBar Grid.Row="1"
+                     Minimum="0" Maximum="1"
+                     Value="{Binding ProgressValue}"
+                     IsIndeterminate="{Binding IsIndeterminate}"
+                     Height="24"/>
+        <Button Grid.Row="2" Content="Cancel" Margin="16"
+                Command="{Binding CancelPressedCommand}"/>
+    </Grid>
+</Window>

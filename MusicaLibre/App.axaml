@@ -1,0 +1,35 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MusicaLibre.App"
+             xmlns:local="using:MusicaLibre"
+             xmlns:ctrl="using:MusicaLibre.Controls"
+             RequestedThemeVariant="Default">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+    <Application.Resources>
+
+    </Application.Resources>
+    <Application.Styles>
+        <FluentTheme />
+        
+        <Style Selector="ctrl|IconButton">
+            <Setter Property="Fill" Value="DarkGray" />
+            <Setter Property="PointerOver" Value="LightGray"/>
+            <Setter Property="Pressed" Value="White" />
+            <Setter Property="Disabled" Value="DimGray" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ctrl:IconButton">
+                        <Border Background="Transparent" IsHitTestVisible="True">
+                            <Path x:Name="PART_path" Data="{TemplateBinding IconData}" Stretch="Uniform" IsHitTestVisible="False"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
+    </Application.Styles>
+</Application>

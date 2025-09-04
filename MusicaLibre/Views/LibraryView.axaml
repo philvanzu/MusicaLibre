@@ -1,0 +1,181 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:v="clr-namespace:MusicaLibre.Views"
+             xmlns:conv="clr-namespace:MusicaLibre.Converters"
+             xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Views.LibraryView"
+             x:DataType="vm:LibraryViewModel">
+    <UserControl.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:BoolToUpDownArrowConverter x:Key="BoolToUpDownArrow"/>
+        <conv:NullToInverseBooleanConverter x:Key="NullToInverseBoolean" />
+        <conv:StringNotEmptyToBoolConverter x:Key="StringNotEmptyToBoolConverter"/>
+    </UserControl.Resources>
+    <Grid RowDefinitions="80, *" >
+        
+        <!-- Library toolbar-->
+        <Grid ColumnDefinitions="*, Auto" Background="#333333">
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Grid ColumnDefinitions="44, *">
+                    <Grid Grid.Column="0"  DataContext="{Binding Navigator}">
+                        <!--Back Nav-->
+                        <Border ></Border>
+                        
+
+                        <ctrl:IconButton Command="{Binding Library.NavigateBackCommand}"
+                                         IsVisible="{Binding CanGoBack}"
+                                         Fill="DarkGray"
+                                         PointerOver="LightGray"
+                                         Pressed="White"
+                                         Disabled="DimGray"
+                                         IconData="M38,52 A2,2 0 0 1 36.59,51.41 L12.59,27.41 A2,2 0 0 1 12.59,24.59 L36.59,0.59 A2,2 0 0 1 39.41,0.59 2,2 0 0 1 39.41,3.41 L16.83,26 39.41,48.59 A2,2 0 0 1 38,52 Z"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         Padding="0 4" Height="48" Margin="8 0"/>
+                    </Grid>
+                    <!-- Capsule -->
+                    <Grid  Grid.Column="1" ColumnDefinitions="80, *" DataContext="{Binding Capsule}">
+                        <Grid Grid.Column="0">
+                            <!--⥏⥐⥑-->
+                            <TextBlock Text="⥏⥐⥑" Margin="8 0" FontSize="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <!-- Capsule thumbnail -->
+                            <Image Source="{Binding Thumbnail}"
+                                   IsVisible="{Binding Thumbnail, Converter={StaticResource NullToBoolean}}"
+                                   Width="78" Height="78" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                        </Grid>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16 0 ">
+                            <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="Bold" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding SubTitle}" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding CurrentOrderingText}"/>
+                        </StackPanel>
+                    </Grid>
+
+
+                </Grid>
+                
+                <!--<Separator Width="1" Height="24" Margin="8,0"/>-->
+            </StackPanel>
+            
+            <!-- Right of Library toolbar -->
+            <Grid Grid.Column="1" RowDefinitions="*, *">
+                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <!--<Separator Width="1" Height="24" Margin="8,0"/>-->
+                    <!--Ordering Combobox-->
+                    <ComboBox ItemsSource="{Binding Settings.OrderingOptions}"
+                              SelectedIndex = "{Binding Settings.SelectedOrdering}" 
+                              VerticalAlignment="Center"/>
+                    <!--Ascending button-->
+                    <Button DataContext = "{Binding DataPresenter}"
+                            Content = "{Binding Ascending, Converter={StaticResource BoolToUpDownArrow}}"
+                            Command="{Binding Reverse}"
+                            Margin="8 0"/>
+                    <!-- Ordering Options -->
+                    <Button Width="24" Height="24" Padding="2" Background="Transparent" BorderBrush="Transparent"
+                            ToolTip.Tip="Change Library Settings" Margin="8 0 16 0 "
+                            Command="{Binding ManageCustomOrderingsCommand}">
+                        <Button.Styles>
+                            <Style Selector="Path#GearIconPath">
+                                <Setter Property="Stroke" Value="LightGray"/>
+                            </Style>
+                            <Style Selector="Button:pointerover Path#GearIconPath">
+                                <Setter Property="Stroke" Value="White"/>
+                            </Style>
+                        </Button.Styles>
+                        <Path x:Name="GearIconPath" StrokeThickness="1.5" Fill="Transparent" Stretch="Uniform" 
+                              Data="M19.43 12.98c.04-.32.07-.65.07-.98s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.03 7.03 0 0 0-1.69-.98L14.5 2.5a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 0-.5.5l-.38 2.55a7.03 7.03 0 0 0-1.69.98l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98L2.43 14.63a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .6.22l2.49-1c.52.39 1.09.72 1.69.98l.38 2.55a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5l.38-2.55c.6-.26 1.17-.59 1.69-.98l2.49 1a.5.5 0 0 0 .6-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.65zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/>
+                    </Button>
+                    <!--<Separator Width="1" Height="24" Margin="8,0"/>-->
+                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0 0 22 0">
+                    <TextBlock Text="🔍" VerticalAlignment="Center" FontSize="18" />
+                    <Canvas Width="400" Height="30">
+                        <!-- Search TextBox -->
+                        <TextBox x:Name="SearchBox"
+                                 Width="400"
+                                 Height="30"
+                                 Text="{Binding SearchString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Watermark="Search ..." />
+
+                        <!-- Clear Button (small "x") -->
+                        <Button Width="16"
+                                Height="16"
+                                Background="Black"
+                                BorderBrush="Transparent"
+                                Foreground="White"
+                                Command="{Binding ClearSearchCommand}"
+                                Canvas.Left="380"
+                                Canvas.Top="2"
+                                ToolTip.Tip="Clear"
+                                IsVisible="{Binding SearchString, Converter={StaticResource StringNotEmptyToBoolConverter}}" 
+                                Padding="0">
+                            <Viewbox Stretch="Uniform" Width="10" Height="10">
+                                <Path Stroke="White"
+                                      StrokeThickness="2"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Data="M2,2 L14,14 M2,14 L14,2" 
+                                      />
+                            </Viewbox>
+                        </Button>
+                    </Canvas>
+    
+                    <Button x:Name="SearchButton"
+                            Foreground="White"
+                            Content="Search"
+                            Command="{Binding SearchCommand}"
+                            CommandParameter="{Binding SearchString}" />
+                </StackPanel>
+                
+
+            </Grid>
+        </Grid>
+        
+        <!-- Library explorer -->
+        <ContentControl Grid.Row="1" Content="{Binding DataPresenter}">
+            <ContentControl.DataTemplates>
+                <DataTemplate DataType="vm:TracksListViewModel">
+                    <v:TracksListView />
+                </DataTemplate>
+                <DataTemplate DataType="vm:AlbumsListViewModel">
+                    <v:AlbumsListView />
+                </DataTemplate>
+                <DataTemplate DataType="vm:ArtistsListViewModel">
+                    <v:NameTagsListView />
+                </DataTemplate>  
+                <DataTemplate DataType="vm:RemixersListViewModel">
+                    <v:NameTagsListView />
+                </DataTemplate>  
+                <DataTemplate DataType="vm:ComposersListViewModel">
+                    <v:NameTagsListView />
+                </DataTemplate>  
+                <DataTemplate DataType="vm:ConductorsListViewModel">
+                    <v:NameTagsListView />
+                </DataTemplate>  
+                <DataTemplate DataType="vm:GenresListViewModel">
+                    <v:NameTagsListView />
+                </DataTemplate> 
+                <DataTemplate DataType="vm:PublishersListViewModel">
+                    <v:NameTagsListView />
+                </DataTemplate> 
+                <DataTemplate DataType="vm:AudioFormatsListViewModel">
+                    <v:NameTagsListView />
+                </DataTemplate> 
+                <DataTemplate DataType="vm:YearsListViewModel">
+                    <v:NameTagsListView />
+                </DataTemplate>
+                <DataTemplate DataType="vm:FoldersListViewModel">
+                    <v:NameTagsListView />
+                </DataTemplate>
+                <DataTemplate DataType="vm:PlaylistsListViewModel">
+                    <v:PlaylistsListView/>
+                </DataTemplate>
+            </ContentControl.DataTemplates>
+        </ContentControl>
+    </Grid>
+    
+    
+</UserControl>

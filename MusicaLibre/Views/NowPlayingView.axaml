@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:c="clr-namespace:MusicaLibre.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Views.NowPlayingView"
+             x:DataType="vm:TrackViewModel">
+    <UserControl.Resources>
+        <c:NullToBooleanConverter x:Key="NullToBoolean"/>
+    </UserControl.Resources>
+    <Border BorderBrush="White" BorderThickness="0">
+        <Grid  ColumnDefinitions="150,*">
+            <Image Height="144" Width="144" Source="{Binding Artwork}"/>
+            <StackPanel Grid.Column="1" Margin="8">
+                <TextBlock Text="{Binding Title}" 
+                           TextWrapping="Wrap"
+                           FontSize="16"
+                           FontWeight="DemiBold"/>
+                <TextBlock Text="{Binding Artists}"
+                           TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding Composers}"
+                           IsVisible="{Binding Composers, Converter={StaticResource NullToBoolean}}"/>
+                <TextBlock Text="{Binding Conductor}"
+                           IsVisible="{Binding Conductor, Converter={StaticResource NullToBoolean}}"/>
+                <TextBlock Text="{Binding Remixer}"
+                           IsVisible="{Binding Remixer, Converter={StaticResource NullToBoolean}}"/>
+                <TextBlock Text="{Binding Album_Year}"/>
+                <TextBlock Text="{Binding Publisher}" 
+                           IsVisible="{Binding Publisher, Converter={StaticResource NullToBoolean}}"/>
+                <TextBlock Text="{Binding Genres}"/>
+                <TextBlock Text="{Binding TechInfo}"/>
+                
+            </StackPanel>
+        </Grid>    
+    </Border>
+</UserControl>
