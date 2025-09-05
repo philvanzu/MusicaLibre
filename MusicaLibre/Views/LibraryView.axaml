@@ -143,6 +143,9 @@
                 <DataTemplate DataType="vm:AlbumsListViewModel">
                     <v:AlbumsListView />
                 </DataTemplate>
+                <DataTemplate DataType="vm:DiscsListViewModel">
+                    <v:AlbumsListView />
+                </DataTemplate>
                 <DataTemplate DataType="vm:ArtistsListViewModel">
                     <v:NameTagsListView />
                 </DataTemplate>  

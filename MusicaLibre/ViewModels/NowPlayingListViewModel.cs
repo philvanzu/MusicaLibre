@@ -5,6 +5,7 @@ using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DynamicData;
 using MusicaLibre.Models;
+using MusicaLibre.Services;
 
 namespace MusicaLibre.ViewModels;
 
@@ -15,18 +16,27 @@ public partial class NowPlayingListViewModel:TracksListViewModel
     [ObservableProperty] private TrackViewModel? _nextTrack;
 
     public NowPlayingListViewModel(LibraryViewModel library, List<Track> tracksPool) : base(library, tracksPool) { }
+
+    public IEnumerable<TrackViewModel> SortTracks (IEnumerable<TrackViewModel> tracks)
+    {
+        var step = Library.CurrentStep;
+        var sks = step.Type == OrderGroupingType.Track? step.SortingKeys.Cast<SortingKey<TrackSortKeys>>() :step.TracksSortingKeys;
+        var comparers = sks.Select(x => TracksListViewModel.GetComparer(x.Key, x.Asc));
+        return tracks.OrderBy(x => x, new CompositeComparer<TrackViewModel>(comparers));
+    }
     public void Replace(List<Track> replace)
     {
-        if (replace.Count > 0)
-        {
-            _tracks = replace.Select(x => new TrackViewModel(x, this)).ToList();
-            Update();
-            Tracks.First().IsPlaying = true;    
-        }
+        if (replace == null || replace.Count == 0) return;
+        var vms = replace.Select(x => new TrackViewModel(x, this));
+        _tracks = SortTracks(vms).ToList();
+        Update();
+        Tracks.First().IsPlaying = true;    
     }
     public void Insert(List<Track> insert, int position=-1)
     {
+        if (insert == null || insert.Count == 0) return;
         var vms = insert.Select(x => new TrackViewModel(x, this)).ToList();
+        vms = SortTracks(vms).ToList();
         if (position == -1) position = _playingTrackIndex+1;
         _tracks.InsertRange(position, vms);
         Update();
@@ -34,7 +44,9 @@ public partial class NowPlayingListViewModel:TracksListViewModel
 
     public void Append(List<Track> append)
     {
+        if(append == null || append.Count == 0) return;
         var vms = append.Select(x => new TrackViewModel(x, this)).ToList();
+        vms = SortTracks(vms).ToList();
         _tracks.AddRange(vms);
         Update();
     }

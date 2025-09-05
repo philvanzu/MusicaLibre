@@ -52,4 +52,8 @@ public class Folder:NameTag
 
         return Folders;
     }
+    public static Folder Null = new Folder("Null")
+    {
+        DatabaseIndex = 0
+    };
 }

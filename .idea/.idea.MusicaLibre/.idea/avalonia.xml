@@ -22,6 +22,7 @@
         <entry key="MusicaLibre/Views/OrderingEditorDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/OrderingEditorWindow.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/PlayerView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/PlaylistsListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/PlaylistsView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ProgressDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/TracksListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />

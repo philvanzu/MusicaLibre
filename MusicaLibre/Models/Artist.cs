@@ -11,6 +11,9 @@ public class Artist:NameTag
     {
         Name = name;
     }
+
+    
+
     public void DatabaseInsert(Database db)
     {
         const string sql = @"
@@ -48,5 +51,8 @@ public class Artist:NameTag
 
         return artists;
     }
-    
+    public static Artist Null = new Artist("Null")
+    {
+        DatabaseIndex = 0
+    };
 }

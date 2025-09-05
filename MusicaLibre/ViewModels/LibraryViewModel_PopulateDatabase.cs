@@ -96,6 +96,7 @@ public partial class LibraryViewModel:ViewModelBase
         TextInfo textInfo = CultureInfo.InvariantCulture.TextInfo;
         Dictionary<string, Track> tracks = new Dictionary<string, Track>();
         Dictionary<(string, string),Album> albums = new Dictionary<(string, string), Album>();
+        Dictionary<(Album, uint), Disc> discs = new Dictionary<(Album, uint), Disc>();
         Dictionary<string, Artist> artists = new Dictionary<string, Artist>();
         Dictionary<string, Genre> genres = new Dictionary<string, Genre>();
         Dictionary<string, Publisher> publishers = new Dictionary<string, Publisher>();
@@ -251,7 +252,7 @@ public partial class LibraryViewModel:ViewModelBase
 
 
                         track.TrackNumber = file.Tag.Track;
-                        track.DiskNumber = file.Tag.Disc;
+                        var discNumber = file.Tag.Disc;
                         track.Comment = file.Tag.Comment;
 
                         track.Duration = file.Properties.Duration;
@@ -391,7 +392,18 @@ public partial class LibraryViewModel:ViewModelBase
                             
                             
                             track.Album = album;    
-
+                            if(!discs.TryGetValue((album, discNumber), out var disc))
+                            {
+                                disc = new Disc(discNumber, album);
+                                discs.Add((album, discNumber), disc);
+                                try
+                                {
+                                    disc.DatabaseInsert(Database);
+                                    Debug.Assert(disc.DatabaseIndex != null, "albumDisc.DatabaseIndex != null");
+                                }
+                                catch (Exception ex){Console.WriteLine(ex);}
+                            }
+                            track.Disc = disc;
 
                             int pictureIndex = 0;
                             foreach (var picture in file.Tag.Pictures)

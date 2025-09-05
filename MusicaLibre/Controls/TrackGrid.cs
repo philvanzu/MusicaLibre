@@ -32,7 +32,7 @@ public class TrackGrid : TemplatedControl
 
     public static SolidColorBrush EvenRowBrush = new SolidColorBrush(new Color(255, 33, 33, 33));
     public static SolidColorBrush OddRowBrush = new SolidColorBrush(new Color(255, 44, 44, 44));
-    private static SolidColorBrush _headerBrush = new SolidColorBrush(new Color(255, 255, 218, 0));
+    private static SolidColorBrush _headerBrush = new SolidColorBrush(new Color(255, 222, 211, 151));
     public static SolidColorBrush SelectedBrush = new SolidColorBrush(new Color(80, 80, 255, 51));
     private static SolidColorBrush _selectionRectFillBrush = new SolidColorBrush(new Color(64, 0, 120, 215)); // translucent
     private static Pen _selectionRectPen = new Pen(Brushes.Blue, 1);
@@ -55,18 +55,20 @@ public class TrackGrid : TemplatedControl
     }
     
 
+
+    List<Border> _headerToggleBorders = new List<Border>();
+    List<Border> _headerBorders = new List<Border>();
     
-    private Grid? _headerGrid;
-    
-    private ItemsRepeater? _repeater;
     private readonly HashSet<Control> _realizedElements = new();
+    private ItemsRepeater? _repeater;
+    private Grid? _headerGrid;
     
     private Point? _pressPoint;
     private DateTime? _pressTime;
     private Point? _dragEnd;
     private bool _isSelecting;
     private Rect? _selectionRect;
-
+    
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -154,10 +156,10 @@ public class TrackGrid : TemplatedControl
             if (colIndex < columns.Count() - 1)
             {
                 // add column definition
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8,  GridUnitType.Pixel) });
                 var splitter = new GridSplitter
                 {
-                    Width = 16,
+                    Width = 6,
                     ResizeDirection = GridResizeDirection.Columns,
                     ResizeBehavior = GridResizeBehavior.PreviousAndNext,
                     Background = Brushes.Transparent,
@@ -187,22 +189,23 @@ private Control BuildCellHeader(TrackViewColumn column)
     var sortBorder = new Border
     {
         DataContext = column,
+        Height = 32,
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        BorderBrush = Brushes.DodgerBlue,
+        BorderThickness = new Thickness(1, 0, 0, 0),
         Background = Brushes.Transparent,
         Padding = new Thickness(4, 0),
         Child = new TextBlock
         {
+            HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
             FontWeight = FontWeight.Bold,
             Foreground = _headerBrush,
         }
     };
     sortBorder.Child.Bind(TextBlock.TextProperty, new Binding(nameof(TrackViewColumn.Key)));
-    sortBorder.Tapped += (s, e) =>
-    {
-        if (e.Handled) return;
-        column.IsSorting = true;
-        e.Handled = true;
-    };
+    _headerBorders.Add(sortBorder);
+    
     Grid.SetColumn(sortBorder, 0);
     grid.Children.Add(sortBorder);
 
@@ -228,13 +231,8 @@ private Control BuildCellHeader(TrackViewColumn column)
     {
         Converter = new FuncValueConverter<bool, string>(asc => asc ? "▲" : "▼")
     });
-
-    toggleBorder.Tapped += (s, e) =>
-    {
-        if (e.Handled) return;
-        column.IsAscending = !column.IsAscending;
-        e.Handled = true;
-    };
+    _headerToggleBorders.Add(toggleBorder);
+    
     Grid.SetColumn(toggleBorder, 1);
     grid.Children.Add(toggleBorder);
 
@@ -246,6 +244,7 @@ private Control BuildCellHeader(TrackViewColumn column)
     {
         grid.ColumnDefinitions.Clear();
         grid.Children.Clear();
+        
 
         if (grid.Parent is Border border)
         {
@@ -285,19 +284,8 @@ private Control BuildCellHeader(TrackViewColumn column)
 
             // add splitter (optional: skip last column)
             if (colIndex < columns.Count() - 1)
-            {
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                var splitter = new GridSplitter
-                {
-                    Width = 16,
-                    ResizeDirection = GridResizeDirection.Columns,
-                    ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                    Background = Brushes.Transparent,
-                    Cursor = new Cursor(StandardCursorType.SizeWestEast)
-                };
-                Grid.SetColumn(splitter, colIndex*2 + 1);
-                grid.Children.Add(splitter);
-            }
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8, GridUnitType.Pixel) });
+            
             colIndex++;
         }
     }
@@ -367,19 +355,36 @@ private Control BuildCellHeader(TrackViewColumn column)
                 ApplySelection(_selectionRect.Value);
                 InvalidateVisual();
             }
-            else
+            else 
             {
                 var track = TrackUnderPointer(e.GetPosition(this));
                 if (track != null)
                 {
-                    if(InputManager.CtrlPressed && track.IsSelected) track.IsSelected = false;
+                    if (InputManager.CtrlPressed && track.IsSelected) track.IsSelected = false;
                     else
                     {
-                        if(track.IsSelected && !InputManager.ShiftPressed)track.Presenter.SelectedTrack = null;
+                        if (track.IsSelected && !InputManager.ShiftPressed) track.Presenter.SelectedTrack = null;
                         track.IsSelected = true;
                     }
                 }
+                else
+                {
+                    var headercol = HeaderCellUnderPointer(e.GetPosition(this), _headerBorders);
+                    if (headercol != null && headercol.DataContext is TrackViewColumn coldc)
+                    {
+                        coldc.IsSorting = true;
+                    }
+                    else
+                    {
+                        var headerToggle = HeaderCellUnderPointer(e.GetPosition(this), _headerToggleBorders);
+                        if (headerToggle != null && headerToggle.DataContext is TrackViewColumn col)
+                        {
+                            col.IsAscending = !col.IsAscending;
+                        }        
+                    }
+                }
             }
+        
             InputManager.IsDragSelecting = false;
             _selectionRect = null;
             _pressPoint = null;
@@ -415,7 +420,25 @@ private Control BuildCellHeader(TrackViewColumn column)
         } 
         return null;
     }
+    
+    private Border? HeaderCellUnderPointer(Point point, List<Border> pool)
+    {
+        if (_headerGrid == null || Columns == null) return null;
+        foreach (var cell in pool)
+        {
+            if (cell.DataContext is TrackViewColumn col)
+            {
+                // Get bounding box of the header cell
+                var topLeft = cell.TranslatePoint(new Point(0, 0), this) ?? default;
+                var rect = new Rect(topLeft, cell.Bounds.Size);
 
+                if (rect.Contains(point))
+                    return cell;
+            }
+        }
+
+        return null;
+    }
     
     public override void Render(DrawingContext context)
     {

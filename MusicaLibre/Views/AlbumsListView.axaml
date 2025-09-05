@@ -13,8 +13,8 @@
     </UserControl.Resources>
     <ScrollViewer>
             <controls:VirtualizedItemsRepeater
-                ItemsSource="{Binding Albums}"
-                SelectedItem="{Binding SelectedAlbum}"
+                ItemsSource="{Binding Items}"
+                SelectedItem="{Binding SelectedItem}"
                 ElementWidth="160" ElementHeight="200" > 
                 <controls:VirtualizedItemsRepeater.Layout>
                     <UniformGridLayout Orientation="Horizontal" MaximumRowsOrColumns="0"/>
@@ -59,12 +59,14 @@
                                                Source="{Binding Thumbnail}" 
                                                Stretch="Uniform"/>
                                         <Canvas x:Name="PlayButtons" Width="144" Height="144">
+                                            <!--Play-->
                                             <Button  
+                                                ToolTip.Tip="Play"
                                                 Width="40" Height="40"
                                                 BorderThickness="0" CornerRadius="20"
                                                 Background="Black" Foreground="White"
                                                 Tapped="PlayButton_Click"
-                                                Canvas.Bottom="8" Canvas.Left="8">
+                                                Canvas.Bottom="4" Canvas.Left="4">
                                                 <Border Width="38" Height="38"
                                                         BorderThickness="1" CornerRadius="19"
                                                         >
@@ -82,6 +84,64 @@
                                                           Stroke="Black"
                                                           StrokeThickness="2"
                                                           Data="M 12,8 L 20,12 L 12,16 Z"
+                                                          Stretch="Uniform"
+                                                          Width="20" Height="20"/>
+                                                </Border>
+                                            </Button>
+                                            <!-- Insert -->
+                                            <Button  
+                                                ToolTip.Tip="Insert Next"
+                                                Width="40" Height="40"
+                                                BorderThickness="0" CornerRadius="20"
+                                                Background="Black" Foreground="White"
+                                                Tapped="InsertButton_Click"
+                                                Canvas.Bottom="4" Canvas.Left="48">
+                                                <Border Width="38" Height="38"
+                                                        BorderThickness="1" CornerRadius="19"
+                                                        >
+                                                    <Border.Styles>
+                                                        <Style Selector="Border">
+                                                           <Setter Property="BorderBrush" Value="Transparent"/>
+                                                           <Setter Property="Background" Value="#303030"/>
+                                                        </Style>
+                                                        <Style Selector="Border:pointerover">
+                                                            <Setter Property="BorderBrush" Value="Red"/>
+                                                            <Setter Property="Background" Value="#505050"/>
+                                                        </Style>
+                                                    </Border.Styles>
+                                                    <Path Fill="White"
+                                                          Stroke="White"
+                                                          StrokeThickness="2"
+                                                          Data="M14.5,10.5556 H10.5 M12.5,12.5 V8.50001 M18.5,5.5 H6.5 M18.5,19.5 H6.5 V15.5 H18.5 Z" 
+                                                          Stretch="Uniform"
+                                                          Width="20" Height="20"/>
+                                                </Border>
+                                            </Button>
+                                            <!-- Append -->
+                                            <Button  
+                                                ToolTip.Tip="Append"
+                                                Width="40" Height="40"
+                                                BorderThickness="0" CornerRadius="20"
+                                                Background="Black" Foreground="White"
+                                                Tapped="AppendButton_Click"
+                                                Canvas.Bottom="4" Canvas.Left="92">
+                                                <Border Width="38" Height="38"
+                                                        BorderThickness="1" CornerRadius="19"
+                                                        >
+                                                    <Border.Styles>
+                                                        <Style Selector="Border">
+                                                           <Setter Property="BorderBrush" Value="Transparent"/>
+                                                           <Setter Property="Background" Value="#303030"/>
+                                                        </Style>
+                                                        <Style Selector="Border:pointerover">
+                                                            <Setter Property="BorderBrush" Value="Red"/>
+                                                            <Setter Property="Background" Value="#505050"/>
+                                                        </Style>
+                                                    </Border.Styles>
+                                                    <Path Fill="White"
+                                                          Stroke="White"
+                                                          StrokeThickness="2"
+                                                          Data="M10.5,14.5 H14.5 M12.5,12.5 V16.5 M6.5,19.5 H18.5 M6.5,5.5 H18.5 V9.5 H6.5 Z"
                                                           Stretch="Uniform"
                                                           Width="20" Height="20"/>
                                                 </Border>

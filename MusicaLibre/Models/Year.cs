@@ -7,6 +7,8 @@ namespace MusicaLibre.Models;
 public class Year:NameTag
 {
     public uint Number{get;set;}
+    
+
     public Year(uint number)
     {
         Number = number;
@@ -49,4 +51,9 @@ public class Year:NameTag
 
         return Years;
     }
+    
+    public static Year Null =  new Year(0)
+    {
+        DatabaseIndex = 0
+    };
 }

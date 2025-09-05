@@ -143,4 +143,12 @@ public class Album
 
         return albums;
     }
+
+    public static Album Null = new Album()
+    {
+        DatabaseIndex = 0,
+        Title = "Null",
+        AlbumArtist = Artist.Null,
+        Year = Year.Null,
+    };
 }

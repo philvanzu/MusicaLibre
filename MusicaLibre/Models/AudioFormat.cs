@@ -118,6 +118,9 @@ public class AudioFormat:NameTag
         return string.Empty;
     }
 
-
+    public static AudioFormat Null = new AudioFormat("Null")
+    {
+        DatabaseIndex = 0
+    };
 }
 

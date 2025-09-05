@@ -12,7 +12,7 @@ namespace MusicaLibre.Models;
 
 public enum OrderGroupingType
 {
-    Album, Year, Artist, Genre, Publisher, Remixer, Composer, Conductor, Folder,
+    Album, Disc, Year, Artist, Genre, Publisher, Remixer, Composer, Conductor, Folder,
     [Display(Name = "Bitrate / Format")] Bitrate_Format, Playlist, Track,
 }
 
@@ -20,7 +20,7 @@ public enum TrackSortKeys
 {
     Title, Album, Artists, FilePath, Folder,
     [Display(Name = "Track Number")] TrackNumber,
-    [Display(Name = "Disc Number")] DiskNumber,
+    [Display(Name = "Disc Number")] DiscNumber,
     Year, Genre, Publisher, Remixer, Composer, Conductor,
     [Display(Name = "Date Added")]Added,
     [Display(Name = "Date Created")] Created,
@@ -166,6 +166,7 @@ public class OrderingStep
     [JsonIgnore]public SortingKey DefaultKey=>Type switch
         {
             OrderGroupingType.Album => new SortingKey<AlbumSortKeys>(AlbumSortKeys.Added, true),
+            OrderGroupingType.Disc => new SortingKey<AlbumSortKeys>(AlbumSortKeys.Added, true),
             OrderGroupingType.Artist => new SortingKey<NameSortKeys>(NameSortKeys.Name,  true),
             OrderGroupingType.Bitrate_Format => new SortingKey<NameSortKeys>(NameSortKeys.Name,  true),
             OrderGroupingType.Composer => new SortingKey<NameSortKeys>(NameSortKeys.Name,  true),
@@ -225,15 +226,12 @@ public class CustomOrdering
         };
     }
 
-    public static List<SortingKey<TrackSortKeys>> GetDefaultTrackSortingKeys()
-    {
-        return new List<SortingKey<TrackSortKeys>>()
+    public static List<SortingKey<TrackSortKeys>> GetDefaultTrackSortingKeys() => new ()
         {
             new SortingKey<TrackSortKeys>(TrackSortKeys.Album),
-            new SortingKey<TrackSortKeys>(TrackSortKeys.DiskNumber),
+            new SortingKey<TrackSortKeys>(TrackSortKeys.DiscNumber),
             new SortingKey<TrackSortKeys>(TrackSortKeys.TrackNumber),
         };
-    }
 
 }
 

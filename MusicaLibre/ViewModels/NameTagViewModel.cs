@@ -15,8 +15,8 @@ public abstract partial class NameTagViewModelBase : ViewModelBase, IVirtualizab
 {
     [ObservableProperty] protected NameTagsPresenterViewModelBase _presenter;
     [ObservableProperty] protected NameTag _model;
-    [ObservableProperty] protected List<Track> _tracks;
-    
+    public List<Track> Tracks => GetTracks();
+    public abstract List<Track> GetTracks();
     public virtual string Title => _model.Name??"";
     public virtual string Count => $"{Tracks.Count} tracks";
     public virtual string SubTitle => Count;
@@ -53,11 +53,10 @@ public abstract partial class NameTagViewModelBase : ViewModelBase, IVirtualizab
     public bool IsFirst => Presenter.GetIndex(this) == 0;
     public bool IsPrepared { get; private set; }
 
-    public NameTagViewModelBase(NameTag model, NameTagsPresenterViewModelBase presenter, List<Track> tracks)
+    public NameTagViewModelBase(NameTag model, NameTagsPresenterViewModelBase presenter)
     {
         _presenter = presenter;
         _model = model;
-        _tracks = tracks;
         
     }
     Artwork? FindArtwork()
@@ -103,12 +102,9 @@ public abstract partial class NameTagViewModelBase : ViewModelBase, IVirtualizab
         Presenter.Library.ChangeOrderingStep(Presenter);
     }
 
-    [RelayCommand]private void Play()
-    {
-        List<TrackViewModel> vms = new List<TrackViewModel>();
-        var ordered = Tracks.OrderBy(x => x.AlbumId).ThenBy(x=>x.DiskNumber).ThenBy(x => x.TrackNumber);
-        Presenter.Library.NowPlayingList.Replace(ordered.ToList());
-    }
+    [RelayCommand]private void Play()=>Presenter.Library.NowPlayingList.Replace(Tracks);
+    [RelayCommand]private void InsertNext()=>Presenter.Library.NowPlayingList.Insert(Tracks);
+    [RelayCommand]private void Append()=>Presenter.Library.NowPlayingList.Append(Tracks);
 }
 public partial class NameTagViewModel<T>:NameTagViewModelBase where T:NameTag
 {
@@ -116,11 +112,11 @@ public partial class NameTagViewModel<T>:NameTagViewModelBase where T:NameTag
     private Func<List<Track>, T , List<Track>> TracksDelegate { get; init; }
 
     public NameTagViewModel(T model, NameTagsListViewModel<T> presenter, Func<List<Track>, T, List<Track>> tracksDelegate)
-    : base(model, presenter, tracksDelegate.Invoke(presenter.TracksPool, model)
-            .OrderBy(x => x.AlbumId).ThenBy(x => x.DiskNumber).ThenBy(x => x.TrackNumber)
-            .ToList())
+    : base(model, presenter)
     {
         TracksDelegate = tracksDelegate;
     }
+    
+    public override List<Track> GetTracks() =>TracksDelegate.Invoke(Presenter.TracksPool, Model as T);
    
 }

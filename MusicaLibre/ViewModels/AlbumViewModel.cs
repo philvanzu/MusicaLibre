@@ -17,7 +17,7 @@ namespace MusicaLibre.ViewModels;
 public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
 {
     public Album Model { get; init; }
-    public string Title => Model.Title;
+    public virtual string Title => Model.Title;
     public string Artist => Model.AlbumArtist?.Name??"";
     public string Year => Model.Year?.Name ?? "";
 
@@ -27,21 +27,23 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
     public DateTime? Created => Model.Created;
     public DateTime? LastPlayed => Model.LastPlayed;
     public int RandomIndex {get;set;}
-    public List<Track> Tracks => Presenter.TracksPool.Where(x=>x.AlbumId == Model.DatabaseIndex).ToList();
-    public Bitmap? Thumbnail => Model.Cover?.Thumbnail;
+    public virtual List<Track> Tracks => Presenter.TracksPool.Where(x=>x.AlbumId == Model.DatabaseIndex).ToList();
+
+    public virtual Artwork? Artwork => Model.Cover;
+    public Bitmap? Thumbnail => Artwork?.Thumbnail;
 
     [ObservableProperty] bool _isSelected;
 
     partial void OnIsSelectedChanged(bool oldValue, bool newValue)
     {
-        if (newValue && Presenter.SelectedAlbum != this )
+        if (newValue && Presenter.SelectedItem != this )
         {
-            Presenter.SelectedAlbum = this;
+            Presenter.SelectedItem = this;
             Console.WriteLine($"{Title} is selected");
         }
-        else if (oldValue && Presenter.SelectedAlbum == this)
+        else if (oldValue && Presenter.SelectedItem == this)
         {
-            Presenter.SelectedAlbum = null;
+            Presenter.SelectedItem = null;
             Console.WriteLine($"{Title} is unselected");
         }
     }
@@ -78,13 +80,9 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
 
     
 
-    [RelayCommand]
-    void Play()
-    {
-        List<TrackViewModel> vms = new List<TrackViewModel>();
-        var ordered = Tracks.OrderBy(x => x.DiskNumber).ThenBy(x => x.TrackNumber);
-        Presenter.Library.NowPlayingList.Replace(ordered.ToList());
-    }
+    [RelayCommand] void Play()=>Presenter.Library.NowPlayingList.Replace(Tracks);
+    [RelayCommand] void InsertNext()=>Presenter.Library.NowPlayingList.Insert(Tracks);
+    [RelayCommand] void Append()=>Presenter.Library.NowPlayingList.Append(Tracks);
     [RelayCommand] void OpenInExplorer() { }
 
     [RelayCommand] void Delete(){}
@@ -97,4 +95,20 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
 
     
 
+}
+
+public partial class DiscViewModel:AlbumViewModel{
+    
+    public Disc Disc { get; set; }
+    public override string Title => string.IsNullOrEmpty(Disc.Name)? base.Title:Disc.Name;
+    public override Artwork? Artwork => Disc.Artwork ?? base.Artwork;
+    
+    public override List<Track> Tracks => 
+        (Presenter as DiscsListViewModel)?.TracksPool
+        .Where(x => x.DiscId == Disc.DatabaseIndex).ToList()
+        ??new List<Track>();
+    public DiscViewModel(DiscsListViewModel presenter, Disc model) : base(presenter, model.Album)
+    {
+        Disc = model;
+    }
 }

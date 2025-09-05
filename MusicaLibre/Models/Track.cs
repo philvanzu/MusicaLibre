@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Avalonia.Media.Imaging;
+using DynamicData.Binding;
 using MusicaLibre.Services;
 
 namespace MusicaLibre.Models;
@@ -32,7 +33,8 @@ public class Track
     public Year? Year { get; set; }
     public long? YearId { get; set; }
     public uint? TrackNumber { get; set; }
-    public uint? DiskNumber { get; set; }
+    public Disc? Disc { get; set; }
+    public long? DiscId { get; set; }
     public List<Genre> Genres { get; set; } = new();
     public Publisher? Publisher { get; set; }
     public long? PublisherId { get; set; }
@@ -67,10 +69,10 @@ public class Track
     {
 
         const string sql = @"
-        INSERT INTO Tracks (FilePath, FileName, FolderId, FileExtension, Title, YearId, TrackNumber, DiscNumber, Duration, 
+        INSERT INTO Tracks (FilePath, FileName, FolderId, FileExtension, Title, YearId, TrackNumber, DiscId, Duration, 
                             Codec, Bitrate, AudioFormatId, SampleRate, Added, Modified, Created, LastPlayed, AlbumId, 
                             PublisherId, ConductorId, RemixerId, Comments, Rating)
-        VALUES ($filepath, $filename, $folderpath, $extension, $title, $year, $tracknumber, $discnumber, $duration, 
+        VALUES ($filepath, $filename, $folderpath, $extension, $title, $year, $tracknumber, $discid, $duration, 
                 $codec, $bitrate, $format, $samplerate, $added, $modified, $created, $lastplayed, $albumid, 
                 $publisherid, $conductorid, $remixerid, $comments, $rating);
         SELECT last_insert_rowid();";
@@ -84,7 +86,7 @@ public class Track
             ["$title"] = Title,
             ["$year"] = Year?.DatabaseIndex,
             ["$tracknumber"]=TrackNumber,
-            ["$discnumber"] = DiskNumber,
+            ["$discid"] = Disc?.DatabaseIndex,
             ["$duration"] = Duration.HasValue? TimeUtils.ToMilliseconds(Duration.Value):null,
             ["$codec"] = Codec,
             ["$bitrate"] = BitrateKbps,
@@ -136,7 +138,7 @@ public class Track
                 Title = Database.GetString(row, "Title"),
                 YearId = Database.GetValue<long>(row, "YearId"),
                 TrackNumber = Database.GetValue<uint>(row, "TrackNumber"),
-                DiskNumber = Database.GetValue<uint>(row, "DiscNumber"),
+                DiscId = Database.GetValue<long>(row, "DiscId"),
                 Duration = duration !=null ? TimeUtils.FromMilliseconds(duration.Value):null,
                 BitrateKbps = Database.GetValue<int>(row, "Bitrate"),
                 AudioFormatId =  Database.GetValue<long>(row, "AudioFormatId"), 
@@ -154,4 +156,15 @@ public class Track
 
         return tracks;
     }
+    /*
+    public static Track Null = new Track()
+    {
+        Title = "Null",
+        FilePath = "Null",
+        FileName = "Null",
+        Folder = Folder.Null,
+        Year = Year.Null,
+        Album = Album.Null,
+    };
+    */
 }

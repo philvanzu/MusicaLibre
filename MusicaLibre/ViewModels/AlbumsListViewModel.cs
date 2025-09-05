@@ -13,38 +13,38 @@ namespace MusicaLibre.ViewModels;
 public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualizableItems
 {
 
-    private List<AlbumViewModel> _albums = new();
-    private ObservableCollection<AlbumViewModel> _albumsMutable = new();
-    public ReadOnlyObservableCollection<AlbumViewModel>? Albums { get; set; }
+    protected List<AlbumViewModel> _items = new();
+    protected ObservableCollection<AlbumViewModel> _itemsMutable = new();
+    public ReadOnlyObservableCollection<AlbumViewModel>? Items { get; set; }
     
-    [ObservableProperty] private AlbumViewModel? _selectedAlbum;
-    partial void OnSelectedAlbumChanged(AlbumViewModel? value)
+    [ObservableProperty] private AlbumViewModel? _selectedItem;
+    partial void OnSelectedItemChanged(AlbumViewModel? value)
     {
         if (!InputManager.CtrlPressed)
         {
-            foreach (var album in _albums)
+            foreach (var item in _items)
             {
-                if(album != value && album.IsSelected)
-                    album.IsSelected = false;
+                if(item != value && item.IsSelected)
+                    item.IsSelected = false;
             }
         } 
         
-        OnPropertyChanged(nameof(SelectedAlbumTracks));
-        SelectedAlbums = _albums.Where(x => x.IsSelected).ToList();
+        OnPropertyChanged(nameof(SelectedItemTracks));
+        SelectedItems = _items.Where(x => x.IsSelected).ToList();
         
         
         var selectedTracks = new List<Track>();
-        foreach(var album in SelectedAlbums)
+        foreach(var album in SelectedItems)
             selectedTracks.AddRange(album.Tracks);
         
         SelectedTracks = selectedTracks;
 
     }
     
-    [ObservableProperty] private List<AlbumViewModel>? _selectedAlbums;
+    [ObservableProperty] protected List<AlbumViewModel>? _selectedItems;
     
 
-    public List<Track>? SelectedAlbumTracks => SelectedAlbum?.Tracks;
+    public List<Track>? SelectedItemTracks => SelectedItem?.Tracks;
     
     public event EventHandler<SelectedItemChangedEventArgs>? SelectionChanged;
     public event EventHandler? SortOrderChanged;
@@ -52,13 +52,13 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
     public AlbumsListViewModel(LibraryViewModel library, List<Track> tracksPool)
         :base(library, tracksPool)
     {
-        UpdateAlbumsCollection();
-        Albums = new (_albumsMutable);
+        UpdateItemsCollection();
+        Items = new (_itemsMutable);
     }
     
-    void UpdateAlbumsCollection()
+    protected virtual void UpdateItemsCollection()
     {
-        _albums.Clear();
+        _items.Clear();
 
         
         var albumIds = TracksPool.Select(x => x.AlbumId).Where(albumId => albumId.HasValue).Distinct().ToList();
@@ -66,11 +66,11 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
         var albumsPool = Library.Albums.Values.AsEnumerable();
         if (albumIds.Count > 0) albumsPool = albumsPool.Where(x => albumIds.Contains(x.DatabaseIndex));
         foreach (var album in albumsPool)
-            _albums.Add(new AlbumViewModel(this, album));
+            _items.Add(new AlbumViewModel(this, album));
         
         Sort();
     }
-    private IComparer<AlbumViewModel> GetComparer(AlbumSortKeys sort, bool ascending)
+    protected IComparer<AlbumViewModel> GetComparer(AlbumSortKeys sort, bool ascending)
     {
         return sort switch
         {
@@ -112,10 +112,10 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
 
     public void ShufflePages()
     {
-        foreach (var album in _albums)
-            album.RandomIndex = CryptoRandom.NextInt();
+        foreach (var item in _items)
+            item.RandomIndex = CryptoRandom.NextInt();
     }
-    public void Sort()
+    public virtual void Sort()
     {
         if(Library.CurrentStep.SortingKeys.Select(x=>  (x is SortingKey<AlbumSortKeys> sk) && sk.Key == AlbumSortKeys.Random).ToList().Count > 0)
             ShufflePages();
@@ -125,41 +125,64 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
             .ToList();
 
         Ascending = Library.CurrentStep.SortingKeys.First().Asc;
-        var sorted = _albums.OrderBy(x => x, new CompositeComparer<AlbumViewModel>(comparers));
+        var sorted = _items.OrderBy(x => x, new CompositeComparer<AlbumViewModel>(comparers));
 
-        _albumsMutable.Clear();
-        _albumsMutable.AddRange(sorted);
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(sorted);
 
-        OnPropertyChanged(nameof(Albums));
+        OnPropertyChanged(nameof(Items));
         //InvokeSortOrderChanged();
     }
 
     public override void Reverse()
     {
-        var reversed =_albumsMutable.Reverse().ToList();
-        _albumsMutable.Clear();
-        _albumsMutable.AddRange(reversed);
+        var reversed =_itemsMutable.Reverse().ToList();
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(reversed);
         Ascending = !Ascending;
     }
 
     public int GetSelectedIndex()
     {
-        if(Albums == null || SelectedAlbum == null) return -1;
-        return Albums.IndexOf(SelectedAlbum);
+        if(Items == null || SelectedItem == null) return -1;
+        return Items.IndexOf(SelectedItem);
     }
-    public int GetItemIndex(AlbumViewModel album)=>Albums?.IndexOf(album)??-1;
+    public int GetItemIndex(AlbumViewModel album)=>Items?.IndexOf(album)??-1;
 
     public override NavCapsuleViewModel? GetCapsule()
     {
-        if(SelectedAlbum != null)
+        if(SelectedItem != null)
         {
             return new NavCapsuleViewModel()
             {
-                Title = SelectedAlbum.Title,
-                SubTitle = SelectedAlbum.Artist,
-                Artwork = SelectedAlbum.Model.Cover,
+                Title = SelectedItem.Title,
+                SubTitle = SelectedItem.Artist,
+                Artwork = SelectedItem.Artwork,
             };
         }
         return null;
     }
+}
+
+public partial class DiscsListViewModel : AlbumsListViewModel
+{
+    public DiscsListViewModel(LibraryViewModel library, List<Track> tracksPool) : base(library, tracksPool)
+    {
+    }
+
+    protected override void UpdateItemsCollection()
+    {
+        _items.Clear();
+
+        
+        var discIds = TracksPool.Select(x => x.DiscId).Where(DiscId => DiscId.HasValue).Distinct().ToList();
+
+        var discsPool = Library.Discs.Values.AsEnumerable();
+        if (discIds.Count > 0) discsPool = discsPool.Where(x => discIds.Contains(x.DatabaseIndex));
+        foreach (var disc in discsPool)
+            _items.Add(new DiscViewModel(this, disc));
+        
+        Sort();
+    }
+
 }

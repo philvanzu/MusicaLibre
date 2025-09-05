@@ -127,8 +127,9 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     }
 
 
-    [RelayCommand] void DoubleTapped()
-    {
-        Presenter.Library.NowPlayingList.Replace(Presenter.SelectedTracks);
-    }
+    [RelayCommand] void DoubleTapped() => Presenter.Library.NowPlayingList.Replace(Presenter.SelectedTracks);
+    [RelayCommand] void Append() => Presenter.Library.NowPlayingList.Append(Presenter.SelectedTracks);
+    [RelayCommand] void InsertNext()=> Presenter.Library.NowPlayingList.Insert(Presenter.SelectedTracks);
+    [RelayCommand] void EditTags(){}
+    [RelayCommand] void OpenInExplorer(){}
 }

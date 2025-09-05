@@ -47,4 +47,9 @@ public class Publisher:NameTag
 
         return publishers;
     }
+
+    public static Publisher Null = new Publisher("Null")
+    {
+        DatabaseIndex = 0
+    };
 }

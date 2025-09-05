@@ -52,4 +52,9 @@ public class Genre:NameTag
 
         return genres;
     }
+    
+    public static Genre Null = new Genre("Null")
+    {
+        DatabaseIndex = 0
+    };
 }

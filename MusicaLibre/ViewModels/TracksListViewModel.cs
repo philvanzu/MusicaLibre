@@ -67,7 +67,7 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
         Tracks = new ReadOnlyObservableCollection<TrackViewModel>(_tracksMutable);
         _columns = new List<TrackViewColumn>() 
         {
-            new("Disk",      TrackSortKeys.DiskNumber,  t => t.Model.DiskNumber.ToString()??"", this, true, true),
+            new("Disc",      TrackSortKeys.DiscNumber,  t => t.Model.Disc?.Number.ToString()??"", this, true, true),
             new("Track",     TrackSortKeys.TrackNumber, t => t.Model.TrackNumber.ToString() ?? "", this, true, true),
             new("Title",     TrackSortKeys.Title,       t => t.Title ?? "", this),
             new("Album",     TrackSortKeys.Album,       t => t.Album ?? "", this),
@@ -98,7 +98,7 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
         _tracks = TracksPool.Select(x => new TrackViewModel(x, this)).ToList();
         Sort();
     }
-    private IComparer<TrackViewModel> GetComparer(TrackSortKeys sort, bool ascending)
+    public static IComparer<TrackViewModel> GetComparer(TrackSortKeys sort, bool ascending)
     {
         return sort switch
         {
@@ -123,9 +123,9 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
             TrackSortKeys.TrackNumber=>ascending
                 ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.TrackNumber??0)
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.TrackNumber??0),
-            TrackSortKeys.DiskNumber=>ascending
-                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.DiskNumber??0)
-                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.DiskNumber??0),
+            TrackSortKeys.DiscNumber=>ascending
+                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.Disc?.Number??0)
+                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.Disc?.Number??0),
             TrackSortKeys.Remixer => ascending
                 ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Remixer??"")
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.Remixer??""),

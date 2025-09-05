@@ -471,7 +471,7 @@ CREATE TABLE IF NOT EXISTS Tracks (
     Title TEXT NOT NULL,
     YearId INTEGER,
     TrackNumber INTEGER,
-    DiscNumber INTEGER,
+    DiscId INTEGER,
     Duration FLOAT, -- seconds
     Bitrate INTEGER,
     Codec TEXT,
@@ -495,7 +495,8 @@ CREATE TABLE IF NOT EXISTS Tracks (
     FOREIGN KEY (RemixerId) REFERENCES Artists(Id) ON DELETE SET NULL,
     FOREIGN KEY (AudioFormatId) REFERENCES AudioFormats(Id) ON DELETE SET NULL,
     FOREIGN KEY (YearId) REFERENCES Years(Id) ON DELETE SET NULL,
-    FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE SET NULL
+    FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE SET NULL,
+    FOREIGN KEY (DiscId) REFERENCES Discs(Id) ON DELETE SET NULL
 );
 
 -- =========================
@@ -516,6 +517,18 @@ CREATE TABLE IF NOT EXISTS Albums (
     FOREIGN KEY (CoverId) REFERENCES Artworks(Id) ON DELETE SET NULL,
     FOREIGN KEY (YearId) REFERENCES Years(Id) ON DELETE SET NULL,
     FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE SET NULL
+);
+-- =========================
+-- Discs
+-- =========================
+CREATE TABLE IF NOT EXISTS Discs (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    AlbumId INTEGER NOT NULL,
+    Number INTEGER NOT NULL,
+    Name TEXT,
+    ArtworkId INTEGER,
+    FOREIGN KEY (AlbumId) REFERENCES Albums(Id) ON DELETE SET NULL,
+    FOREIGN KEY (ArtworkId) REFERENCES Artworks(Id) ON DELETE SET NULL
 );
 
 -- =========================

@@ -42,7 +42,23 @@ public partial class AlbumsListView : UserControl
         // Prevent parent handlers (like Border.Tapped) from firing
         e.Handled = true;
     }
+    private void InsertButton_Click(object? sender, TappedEventArgs e)
+    {
+        if (sender is Button button && button.DataContext is AlbumViewModel vm)
+        {
+            vm.InsertNextCommand.Execute(null);
+        }
+        e.Handled = true;
+    }
 
+    private void AppendButton_Click(object? sender, TappedEventArgs e)
+    {
+        if (sender is Button button && button.DataContext is AlbumViewModel vm)
+        {
+            vm.AppendCommand.Execute(null);
+        }
+        e.Handled = true;
+    }
     private void AlbumItemDoubleTapped(object? sender, TappedEventArgs e)
     {
         if (e.Handled) return;

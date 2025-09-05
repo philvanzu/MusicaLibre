@@ -44,4 +44,21 @@ public partial class NameTagsListView : UserControl
         }
         e.Handled = true;
     }
+    private void InsertButton_Click(object? sender, TappedEventArgs e)
+    {
+        if (sender is Button button && button.DataContext is NameTagViewModelBase vm)
+        {
+            vm.InsertNextCommand.Execute(null);
+        }
+        e.Handled = true;
+    }
+
+    private void AppendButton_Click(object? sender, TappedEventArgs e)
+    {
+        if (sender is Button button && button.DataContext is NameTagViewModelBase vm)
+        {
+            vm.AppendCommand.Execute(null);
+        }
+        e.Handled = true;
+    }
 }

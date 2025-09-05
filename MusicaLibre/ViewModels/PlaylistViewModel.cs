@@ -91,11 +91,7 @@ public partial class PlaylistViewModel:ViewModelBase, IVirtualizableItem
 
     [RelayCommand]void DoubleTapped()=>Presenter.Library.ChangeOrderingStep(Presenter);
 
-    [RelayCommand]
-    void Play()
-    {
-        List<TrackViewModel> vms = new List<TrackViewModel>();
-        
-        Presenter.Library.NowPlayingList.Replace(Tracks);
-    }
+    [RelayCommand] void Play()=>Presenter.Library.NowPlayingList.Replace(Tracks);
+    [RelayCommand] void InsertNext()=>Presenter.Library.NowPlayingList.Insert(Tracks);
+    [RelayCommand] void Append()=>Presenter.Library.NowPlayingList.Append(Tracks);
 }
