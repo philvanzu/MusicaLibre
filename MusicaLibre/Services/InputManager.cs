@@ -34,7 +34,17 @@ public class InputManager
         */
         window.KeyDown += OnKeyDown;
         window.KeyUp += OnKeyUp;
-        
+        window.Closing += OnAttachedWindowClosing;
+    }
+
+    private void OnAttachedWindowClosing(object? sender, WindowClosingEventArgs e)
+    {
+        if (sender is Window window)
+        {
+            window.KeyDown -= OnKeyDown;
+            window.KeyUp -= OnKeyUp;
+            window.Closing -= OnAttachedWindowClosing;
+        }
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)

@@ -168,7 +168,7 @@ public partial class LibraryViewModel:ViewModelBase
                 {
                     try
                     {
-                        folder.DatabaseInsert(Database);
+                        folder.DbInsert(Database);
                         Debug.Assert(folder.DatabaseIndex != null);
                     }
                     catch (Exception ex)
@@ -252,7 +252,7 @@ public partial class LibraryViewModel:ViewModelBase
 
 
                         track.TrackNumber = file.Tag.Track;
-                        var discNumber = file.Tag.Disc;
+                        track.DiscNumber = file.Tag.Disc;
                         track.Comment = file.Tag.Comment;
 
                         track.Duration = file.Properties.Duration;
@@ -338,7 +338,7 @@ public partial class LibraryViewModel:ViewModelBase
                                 try
                                 {
                                     artist = new Artist(performer);
-                                    artist.DatabaseInsert(Database);
+                                    artist.DbInsert(Database);
                                     Debug.Assert(artist.DatabaseIndex != null, "artist.DatabaseIndex != null");
                                     artists.Add(performer, artist);    
                                 }
@@ -381,7 +381,7 @@ public partial class LibraryViewModel:ViewModelBase
                                 albums.Add((file.Tag.Album, albumPerformer), album);
                                 try
                                 {
-                                    album.DatabaseInsert(Database);
+                                    album.DbInsert(Database);
                                     Debug.Assert(album.DatabaseIndex != null, "album.DatabaseIndex != null");
                                 }
                                 catch (Exception ex)
@@ -392,18 +392,17 @@ public partial class LibraryViewModel:ViewModelBase
                             
                             
                             track.Album = album;    
-                            if(!discs.TryGetValue((album, discNumber), out var disc))
+                            if(!discs.TryGetValue((album, track.DiscNumber), out var disc))
                             {
-                                disc = new Disc(discNumber, album);
-                                discs.Add((album, discNumber), disc);
+                                disc = new Disc(track.DiscNumber, album);
+                                discs.Add((album, track.DiscNumber), disc);
                                 try
                                 {
-                                    disc.DatabaseInsert(Database);
+                                    disc.DbInsert(Database);
                                     Debug.Assert(disc.DatabaseIndex != null, "albumDisc.DatabaseIndex != null");
                                 }
                                 catch (Exception ex){Console.WriteLine(ex);}
                             }
-                            track.Disc = disc;
 
                             int pictureIndex = 0;
                             foreach (var picture in file.Tag.Pictures)
@@ -487,7 +486,7 @@ public partial class LibraryViewModel:ViewModelBase
                                 try
                                 {
                                     genre = new Genre(gclean);
-                                    genre.DatabaseInsert(Database);
+                                    genre.DbInsert(Database);
                                     Debug.Assert(genre.DatabaseIndex != null, "genre.DatabaseIndex != null");
                                     genres.Add(gclean, genre);
                                 }
@@ -519,7 +518,7 @@ public partial class LibraryViewModel:ViewModelBase
                         try
                         {
                             
-                            track.DatabaseInsert(Database);
+                            track.DbInsert(Database);
                             Debug.Assert(track.DatabaseIndex != null, "track.DatabaseIndex != null");
                         }
                         catch (Exception ex)
@@ -717,7 +716,7 @@ public partial class LibraryViewModel:ViewModelBase
 
                     try
                     {
-                        album.DatabaseUpdate(Database);
+                        album.DbUpdate(Database);
                     }
                     catch (Exception ex)
                     {

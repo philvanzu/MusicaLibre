@@ -1,0 +1,226 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+        xmlns:conv="clr-namespace:MusicaLibre.Converters"
+        xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+        xmlns:v="clr-namespace:MusicaLibre.Views"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MusicaLibre.Views.TagsEditorDialog"
+        Title="Edit Selection"
+        Width="1800" Height="950"
+        WindowStartupLocation="CenterOwner"
+        x:DataType="vm:TagsEditorViewModel">
+    
+    <Window.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:InverseBooleanConverter x:Key="InverseBoolean"/>
+        <conv:BoolToUpdateTextConverter x:Key="MultipleUpdateWarning"></conv:BoolToUpdateTextConverter>
+    </Window.Resources>
+    
+    <TabControl>
+        <TabItem Header="Tracks">
+            <Grid ColumnDefinitions="600, 6, *">
+                <!-- Tracks list -->
+                <Border BorderBrush="White" BorderThickness="1">
+                    <Grid ColumnDefinitions="*">
+                        <ctrl:TrackGrid 
+                            ItemsSource="{Binding Tracks}"
+                            Columns="{Binding Columns}"
+                            SelectedItem="{Binding SelectedTrack}" >
+                            <ctrl:TrackGrid.Template>
+                                <ControlTemplate>
+                                    <ScrollViewer >
+                                          <!--repeater-->
+                                          <ItemsRepeater ItemsSource="{TemplateBinding ItemsSource}"  x:Name="PART_Repeater">
+                                              <ItemsRepeater.Layout>
+                                                  <StackLayout Orientation="Vertical"/>
+                                              </ItemsRepeater.Layout>
+
+                                              <ItemsRepeater.ItemTemplate>
+                                                <DataTemplate DataType="vm:TrackViewModel">
+                                                  <!-- row border-->
+                                                  <Border Height="24" Margin="0 " Padding="0 0 16 0"
+                                                          BorderBrush="DodgerBlue"  x:Name="PART_RowBorder"
+                                                          Tag="{Binding IsSelected}"
+                                                          PropertyChanged="TrackItemPropertyChanged">
+                                                    <!-- row grid -->
+                                                    <Grid VerticalAlignment="Center" x:Name="PART_RowGrid" Margin="10 0 0 0" />
+                                                  </Border>
+                                                </DataTemplate>
+                                              </ItemsRepeater.ItemTemplate>
+                                          </ItemsRepeater>
+                                    </ScrollViewer>
+                                </ControlTemplate>
+                            </ctrl:TrackGrid.Template>
+                        </ctrl:TrackGrid>
+                    </Grid>
+                </Border>
+                <!--GridSplitter-->
+                <GridSplitter Grid.Column="1" Width="6" Background="Transparent"/>
+                <!-- Tags -->
+                <Border Grid.Column="2"  BorderBrush="White" BorderThickness="1">
+                    <Grid>
+        <!--
+                       immutable tab: path, codec, duration, bitrate, format, sample rate, channels
+                       mutable tags :
+                            multi-editable: title, album, discNumber, artists, conductor, remixer, composers, year, genres, publisher, comments
+                                            Added, Created, Modified, Last Played  
+                                            Artwork management
+                                            
+                            uni-editable: TrackNumber
+                            album tab shows up if all selected tracks belong to the same album.
+                            Should we do ID3vx editing in separate tabs ?
+                       
+        -->
+
+                               <ScrollViewer>
+                                   <StackPanel>
+                                       <TextBlock  FontWeight="Bold" FontSize="16" Margin="16">File Info</TextBlock>
+                                       <Grid ColumnDefinitions="Auto, 32, *" RowDefinitions="
+                                       Auto, Auto, Auto, Auto, Auto,
+                                       Auto, Auto, Auto, Auto
+                                       " >
+                                           <!--File info-->
+                                           <TextBlock Grid.Row="0" Grid.Column="0"
+                                                      Margin="0 12" VerticalAlignment="Top"
+                                                      Text="Path"/>
+                                           <TextBlock Grid.Row="0" Grid.Column="2" 
+                                                      Text="{Binding FilePath}"
+                                                      TextWrapping="Wrap"/>
+                                           
+                                           <TextBlock Grid.Row="1" Grid.Column="0">Duration</TextBlock>
+                                           <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Duration}"/>
+                                           
+                                           <TextBlock Grid.Row="2" Grid.Column="0">Codec</TextBlock>
+                                           <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Codec}"/>
+                                           
+                                           <TextBlock Grid.Row="3" Grid.Column="0">Sample Rate</TextBlock>
+                                           <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding SampleRate}"/>
+                                           
+                                           <TextBlock Grid.Row="4" Grid.Column="0">Channels</TextBlock>
+                                           <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Channels}"
+                                                      Margin="0 0 0 16"/>
+                                           
+                                           <!-- Time Stamps-->
+                                           <TextBlock Grid.Row="5" Grid.Column="0">Date Modified</TextBlock>
+                                           <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding ModifiedBinding}"/>
+                                           
+                                           <TextBlock Grid.Row="6" Grid.Column="0">Date Created</TextBlock>
+                                           <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding CreatedBinding}"/>
+                                           
+
+                                           
+                                       </Grid>
+                                       <Separator Height="1"/>
+                                       <TextBlock FontWeight="Bold" FontSize="16" Margin="16">MusicaLibre metadata</TextBlock>
+                                       <Grid ColumnDefinitions="Auto, 32, *" RowDefinitions="Auto, Auto, Auto">
+                                           
+                                           <TextBlock Grid.Row="0" Grid.Column="0">Last Played</TextBlock>
+                                           <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
+                                               <TextBox Text="{Binding PlayedBinding}"/>   
+                                               <Button Content="From Modified"/>
+                                               <Button Content="From Created"/>
+                                               <Button Content="Now"/>
+                                           </StackPanel>
+                                           <TextBlock Grid.Row="1" Grid.Column="0">Date Added</TextBlock>
+                                           <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Margin="0 8">
+                                               <TextBox Text="{Binding AddedBinding}"/>
+                                               <Button Content="From Modified"/>
+                                               <Button Content="From Created"/>
+                                               <Button Content="Now"/>
+                                           </StackPanel>
+                                           
+                                           <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Margin="0 0 0 64" 
+                                                      
+                                                      Text="Rating"/>
+                                           <Slider Grid.Row="2" Grid.Column="2"
+                                                   IsVisible="{Binding IsMultiple, Converter={StaticResource InverseBoolean}}"
+                                                   Minimum="0" Maximum="1"
+                                                   Value="{Binding RatingBinding}"/>
+                                           <TextBlock Grid.Row="2" Grid.Column="2"
+                                                    IsVisible="{Binding IsMultiple}"
+                                                    Text="Multiple Values"/>
+                                       </Grid>
+                                       
+                                       <Separator Height="1"/>
+                                       <TextBlock FontWeight="Bold" FontSize="16" Margin="16">Standard Tags</TextBlock>
+                                       <Grid ColumnDefinitions="Auto, 32, *, 32, 200" 
+                                             RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto">
+                                           <!--Disc-->
+                                           <TextBlock Grid.Row="0" Grid.Column="0">Disc Number</TextBlock>
+                                           <TextBox Grid.Row="0" Grid.Column="2"  Text="{Binding DiscBinding}"/>   
+                                           <Button Grid.Row="0" Grid.Column="4"
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"
+                                                   Command="{Binding UpdateDiscNumberCommand}" />
+                                           <!--Track-->
+                                           <TextBlock Grid.Row="1" Grid.Column="0">Track Number</TextBlock>
+                                           <TextBox  Grid.Row="1" Grid.Column="2" Text="{Binding TrackNumberBinding}"/>
+                                           <Button Grid.Row="1" Grid.Column="4" 
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"
+                                                   Command="{Binding UpdateTrackNumberCommand}"/>
+                                           <!--Title-->
+                                           <TextBlock Grid.Row="2" Grid.Column="0" >Title</TextBlock>
+                                           <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding TitleBinding}"/>
+                                           <Button Grid.Row="2" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <!--Album-->
+                                           <TextBlock Grid.Row="3" Grid.Column="0" >Album</TextBlock>
+                                           <ctrl:TagBox Grid.Row="3" Grid.Column="2" IsMultiValue="False" 
+                                                        Text="{Binding AlbumBinding}"
+                                                        Options="{Binding AlbumOptions}"
+                                                        EnterPressedCommand="{Binding AlbumUpdatedCommand}" />
+                                           <Button Grid.Row="3" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <!--Publisher-->
+                                           <TextBlock Grid.Row="4" Grid.Column="0" >Publisher</TextBlock>
+                                           <TextBox  Grid.Row="4" Grid.Column="2"  Text="{Binding PublisherBinding}"/>
+                                           <Button Grid.Row="4" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <!--Year-->
+                                           <TextBlock Grid.Row="5" Grid.Column="0" >Year</TextBlock>
+                                           <TextBox  Grid.Row="5" Grid.Column="2" Text="{Binding YearBinding}"/>
+                                           <Button Grid.Row="5" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <!--Artists-->
+                                           <TextBlock Grid.Row="6" Grid.Column="0" >Artists</TextBlock>
+                                           <TextBox  Grid.Row="6" Grid.Column="2" Text="{Binding ArtistsBinding}"/>
+                                           <Button Grid.Row="6" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <!--Genres-->
+                                           <TextBlock Grid.Row="7" Grid.Column="0" >Genres</TextBlock>
+                                           <ctrl:TagBox   Grid.Row="7" Grid.Column="2" 
+                                                          Text="{Binding GenresBinding}"
+                                                          Options="{Binding GenreOptions}"
+                                                          IsMultiValue="True"
+                                                          EnterPressedCommand="{Binding GenreUpdatedCommand}" />
+                                           <Button Grid.Row="7" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <!--Composers-->
+                                           <TextBlock Grid.Row="8" Grid.Column="0" >Composers</TextBlock>
+                                           <TextBox  Grid.Row="8" Grid.Column="2" Text="{Binding ComposersBinding}"/>
+                                           <Button Grid.Row="8" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <!--Remixer-->
+                                           <TextBlock Grid.Row="9" Grid.Column="0" >Remixer</TextBlock>
+                                           <TextBox  Grid.Row="9" Grid.Column="2" Text="{Binding RemixerBinding}"/>
+                                           <Button Grid.Row="9" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <!--Conductor-->
+                                           <TextBlock Grid.Row="10" Grid.Column="0" >Conductor</TextBlock>
+                                           <TextBox  Grid.Row="10" Grid.Column="2" Text="{Binding ConductorBinding}"/>
+                                           <Button Grid.Row="10" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                       </Grid>
+                                   </StackPanel>    
+                               </ScrollViewer>
+                               
+                               
+                           
+                    </Grid>
+                </Border>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Albums">
+            <v:AlbumsEditorView DataContext="{Binding AlbumsEditor}"/>
+        </TabItem>
+        <TabItem Header="Artists"></TabItem>
+        <TabItem Header="Genres">
+           <v:GenresEditorView DataContext="{Binding GenresEditor}"/> 
+        </TabItem>
+        <TabItem Header="Publishers"></TabItem>
+        <TabItem Header="Artworks"></TabItem>
+    </TabControl>
+</Window>

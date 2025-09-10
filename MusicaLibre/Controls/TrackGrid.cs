@@ -68,7 +68,12 @@ public class TrackGrid : TemplatedControl
     private Point? _dragEnd;
     private bool _isSelecting;
     private Rect? _selectionRect;
-    
+
+
+    public TrackGrid()
+    {
+        Focusable = true;
+    }
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -86,6 +91,7 @@ public class TrackGrid : TemplatedControl
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
+        Focus();
         base.OnApplyTemplate(e);
         _repeater = e.NameScope.Find<ItemsRepeater>("PART_Repeater");
         
@@ -128,6 +134,7 @@ public class TrackGrid : TemplatedControl
             _realizedElements.Remove(c);
     }
     
+    #region Header
     private void BuildHeader(Grid grid, List<TrackViewColumn> columns)
     {
         grid.ColumnDefinitions.Clear();
@@ -238,8 +245,9 @@ private Control BuildCellHeader(TrackViewColumn column)
 
     return grid;
 }
+#endregion
 
-
+#region Rows
     public void BuildRow(Grid grid, List<TrackViewColumn> columns, TrackViewModel track)
     {
         grid.ColumnDefinitions.Clear();
@@ -265,18 +273,30 @@ private Control BuildCellHeader(TrackViewColumn column)
                 SharedSizeGroup = column.Key
             });
 
+            
+            
+            var txt = new TextBlock
+            {
+                Text = column.GetRowText(track),
+                FontWeight = column.Key == "Title" ? FontWeight.Bold : FontWeight.Normal,
+                FontSize = column.Key == "Title" ? 16 : 14,
+                HorizontalAlignment = column.IsCentered ? HorizontalAlignment.Center : HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+
+            if (column.ToolTipGetter != null)
+            {
+                var tooltip = column.ToolTipGetter.Invoke(track);
+                if(!string.IsNullOrEmpty(tooltip))
+                    ToolTip.SetTip(txt, tooltip);    
+            }
+            
+            
             var cellBorder = new Border
             {
                 //Background = track.IsSelected? _selectedBrush :evenRow ? _evenCellBrush : _oddCellBrush,
                 Padding = new Thickness(4, 0),
-                Child = new TextBlock
-                {
-                    Text = column.GetRowText(track),
-                    FontWeight = column.Key == "Title" ? FontWeight.Bold : FontWeight.Normal,
-                    FontSize = column.Key == "Title" ? 16 : 14,
-                    HorizontalAlignment = column.IsCentered ? HorizontalAlignment.Center : HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Center,
-                }
+                Child = txt
             };
 
             Grid.SetColumn(cellBorder, colIndex * 2);
@@ -289,7 +309,7 @@ private Control BuildCellHeader(TrackViewColumn column)
             colIndex++;
         }
     }
-   
+  #endregion 
   
     // === DRAG SELECTION HANDLERS ===
     
@@ -451,4 +471,17 @@ private Control BuildCellHeader(TrackViewColumn column)
         base.Render(context);
     }
 
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.Key == Key.A && e.KeyModifiers == KeyModifiers.Control && ItemsSource != null)
+        {
+            foreach (var item in ItemsSource)
+            {
+                if (item is TrackViewModel vm)
+                    vm.IsSelected = true;
+            }
+            e.Handled = true;
+        }
+    }
 }

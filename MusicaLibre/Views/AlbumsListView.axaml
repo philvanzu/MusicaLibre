@@ -46,6 +46,7 @@
                                 <ContextMenu>
                                     <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"/>
                                     <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+                                    <MenuItem Header="Edit Tags" Command="{Binding EditTagsCommand}" />
                                 </ContextMenu>
                             </Border.ContextMenu>
 

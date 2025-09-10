@@ -50,6 +50,6 @@ public class Publisher:NameTag
 
     public static Publisher Null = new Publisher("Null")
     {
-        DatabaseIndex = 0
+        DatabaseIndex = null
     };
 }

@@ -20,8 +20,8 @@
                            FontWeight="DemiBold"/>
                 <TextBlock Text="{Binding Artists}"
                            TextWrapping="Wrap"/>
-                <TextBlock Text="{Binding Composers}"
-                           IsVisible="{Binding Composers, Converter={StaticResource NullToBoolean}}"/>
+                <TextBlock Text="{Binding ComposersText}"
+                           IsVisible="{Binding ComposersText, Converter={StaticResource NullToBoolean}}"/>
                 <TextBlock Text="{Binding Conductor}"
                            IsVisible="{Binding Conductor, Converter={StaticResource NullToBoolean}}"/>
                 <TextBlock Text="{Binding Remixer}"

@@ -40,7 +40,7 @@ public partial class LibraryViewModel : ViewModelBase
 
     public Dictionary<long, Track> Tracks { get; set; } = new();
     public Dictionary<long, Album> Albums { get; set; } = new();
-    public Dictionary<long, Disc> Discs { get; set; } = new();
+    public Dictionary<(uint, long), Disc> Discs { get; set; } = new();
     public Dictionary<long, Artist> Artists { get; set; } = new();
     public Dictionary<long, Genre> Genres { get; set; } = new();
     public Dictionary<long, Publisher> Publishers { get; set; } = new();
@@ -158,7 +158,7 @@ public partial class LibraryViewModel : ViewModelBase
             Albums = Album.FromDatabase(Database);
             Albums.Add(0, Album.Null);
             Discs = Disc.FromDatabase(Database);
-            Discs.Add(0, Disc.Null);
+            Discs.Add((0,0), Disc.Null);
             Playlists = Playlist.FromDatabase(Database);
             Years = Year.FromDatabase(Database);
             Years.Add(0, Year.Null);
@@ -170,9 +170,6 @@ public partial class LibraryViewModel : ViewModelBase
             {
                 if(track.AlbumId != null) track.Album = Albums[track.AlbumId.Value];
                 else track.Album = Albums[0];
-                
-                if(track.DiscId != null) track.Disc = Discs[track.DiscId.Value];
-                else track.Disc = Discs[0];
                 
                 if(track.PublisherId != null) track.Publisher = Publishers[track.PublisherId.Value];
                 else track.Publisher = Publishers[0];
@@ -407,6 +404,16 @@ public partial class LibraryViewModel : ViewModelBase
     void ClearSearch()
     {
         SearchString = string.Empty;
+    }
+
+    public async Task EditTracks(List<Track>? tracks)
+    {
+        if(tracks == null || tracks.Count == 0) return;
+        var dialog = new TagsEditorDialog();
+        var vm = new TagsEditorViewModel(this, tracks, dialog);
+        InputManager.Instance.Attach(dialog);
+        dialog.DataContext = vm;
+        await dialog.ShowDialog(MainWindowViewModel.MainWindow);
     }
 }
 

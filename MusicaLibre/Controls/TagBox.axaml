@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Controls.TagBox" 
+             x:Name="ThisControl">
+    
+    <ContentControl DataContext="{Binding #ThisControl}">
+        <Grid ColumnDefinitions="*, Auto" >
+            <TextBox x:Name="PART_Textbox" Text="{Binding Text, Mode=TwoWay}" />
+            <Button Grid.Column="1" x:Name="PART_Toggle" Content="⌄" 
+                          IsEnabled="{Binding PopupEnabled}"
+                          Click="TogglePopup"/>
+
+            <!-- Floating Popup for dropdown content -->
+            <Popup x:Name="PART_Popup" Width="400"
+                   IsOpen="{Binding PopupIsOpen}"
+                   PlacementTarget="{Binding #PART_Textbox}"
+                   Placement='BottomEdgeAlignedLeft'
+                   IsLightDismissEnabled="True">
+                <ContentControl>
+                    <ContentControl.Content>
+                        <Border Background="Black"
+                                BorderBrush="White"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="4">
+
+                            <ListBox
+                                x:Name="PART_Listbox"
+                                DataContext="{Binding .}"
+                                ItemsSource="{Binding Options}"
+                                MaxHeight="300">
+                                <!--SelectionChanged="OnGenreSelected">-->
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding .}"
+                                                   ToolTip.Tip = "{Binding .}"
+                                                   Height="24" Margin="4 0" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </ContentControl.Content>
+                </ContentControl>
+            </Popup>    
+        </Grid>
+    </ContentControl>
+    
+    
+</UserControl>

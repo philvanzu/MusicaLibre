@@ -1,33 +1,49 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MusicaLibre.Services;
 
 namespace MusicaLibre.Models;
 
 public class Artist:NameTag
 {
+    const string insertSql = @"
+        INSERT INTO Artists (Name)
+        VALUES ($name);
+        SELECT last_insert_rowid();";
+
+    private const string updateSql = @"
+        UPDATE Artists SET Name = $name, ArtworkId = $artworkId
+        WHERE Id = $id;";
+    
+    private const string deleteSql=@"
+        DELETE FROM Artists WHERE Id = $id;";
+    
+    private Dictionary<string, object?> Parameters => new()
+    {
+        ["$name"] = Name,
+        ["$artworkId"] = Artwork?.DatabaseIndex,
+        ["$id"] = DatabaseIndex,
+    };
     public Artist(string name)
     {
         Name = name;
     }
 
-    
-
-    public void DatabaseInsert(Database db)
+    public void DbInsert(Database db)
     {
-        const string sql = @"
-        INSERT INTO Artists (Name)
-        VALUES ($name);
-        SELECT last_insert_rowid();";
-
-        var id = db.ExecuteScalar(sql, new()
-        {
-            ["$name"] = Name,
-        });
-
+        var id = db.ExecuteScalar(insertSql, Parameters);
         DatabaseIndex =  Convert.ToInt64(id);
     }
+    public async Task DbInsertAsync(Database db, Action<long>? callback=null)
+    {
+        var id = await db.ExecuteScalarAsync(updateSql, Parameters);
+        DatabaseIndex =  Convert.ToInt64(id);
+        callback?.Invoke(DatabaseIndex.Value);
+    }
+    public async Task DbUpdateAsync(Database db)=>await db.ExecuteNonQueryAsync(updateSql, Parameters);
+    public async Task DbDeleteAsync(Database db) => await db.ExecuteNonQueryAsync(deleteSql, Parameters);
     
     public static Dictionary<long, Artist> FromDatabase(Database db, int[]? indexes=null)
     {
@@ -51,8 +67,9 @@ public class Artist:NameTag
 
         return artists;
     }
+    
     public static Artist Null = new Artist("Null")
     {
-        DatabaseIndex = 0
+        DatabaseIndex = null
     };
 }

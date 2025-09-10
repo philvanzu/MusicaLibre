@@ -100,6 +100,7 @@ public class Database
                         }
                         catch (Exception ex)
                         {
+                            Console.WriteLine(ex.Message);
                             work.Tcs.TrySetException(ex);
                         }
                     }
@@ -115,7 +116,11 @@ public class Database
                             object? result = _ExecuteScalar(workS.Sql, workS.Params);
                             workS.Tcs.TrySetResult(result);
                         }
-                        catch (Exception ex) { workS.Tcs.TrySetException(ex); }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            workS.Tcs.TrySetException(ex);
+                        }
                     }
                 }
 
@@ -129,7 +134,11 @@ public class Database
                             var rows = _ExecuteReader(workR.Sql, workR.Params);
                             workR.Tcs.TrySetResult(rows);
                         }
-                        catch (Exception ex) {workR.Tcs.TrySetException(ex); }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            workR.Tcs.TrySetException(ex);
+                        }
                     }    
                 }
             }
@@ -268,6 +277,7 @@ public class Database
         _nonQueryQueue.Enqueue(request);
         _signal.Release(); // notify worker
         int result = await tcs.Task;
+        
         return result;
     }
     private int _ExecuteNonQuery(string sql, Dictionary<string, object?>? parameters = null) =>
@@ -471,11 +481,12 @@ CREATE TABLE IF NOT EXISTS Tracks (
     Title TEXT NOT NULL,
     YearId INTEGER,
     TrackNumber INTEGER,
-    DiscId INTEGER,
+    DiscNumber INTEGER,
     Duration FLOAT, -- seconds
     Bitrate INTEGER,
     Codec TEXT,
     SampleRate INTEGER,
+    Channels INTEGER,
     Added INTEGER, -- Unix timestamp
     Modified INTEGER, -- Unix timestamp
     Created INTEGER, -- Unix timestamp
@@ -495,8 +506,7 @@ CREATE TABLE IF NOT EXISTS Tracks (
     FOREIGN KEY (RemixerId) REFERENCES Artists(Id) ON DELETE SET NULL,
     FOREIGN KEY (AudioFormatId) REFERENCES AudioFormats(Id) ON DELETE SET NULL,
     FOREIGN KEY (YearId) REFERENCES Years(Id) ON DELETE SET NULL,
-    FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE SET NULL,
-    FOREIGN KEY (DiscId) REFERENCES Discs(Id) ON DELETE SET NULL
+    FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE SET NULL
 );
 
 -- =========================

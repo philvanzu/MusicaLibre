@@ -1,30 +1,56 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MusicaLibre.Services;
 namespace MusicaLibre.Models;
 
 public class Genre:NameTag
 {
+    const string insertSql = @"
+        INSERT INTO Genres (Name)
+        VALUES ($name);
+        SELECT last_insert_rowid();";
+    
+    const string updateSql =  @"
+        UPDATE Genres SET 
+            Name = $name 
+            ArtworkId = $artworkId
+        WHERE Id = $id;";
+
+    const string removeSql = @"
+        DELETE FROM Genres
+        WHERE Id = $id;";
+    
     public Genre(string name)
     {
         Name = name;
     }
-    
-    public void DatabaseInsert(Database db)
+
+
+    private Dictionary<string, object?> GetInsertParameters()=>new() { ["$name"] = Name, };
+    public async Task DbInsertAsync(Database db, Action<long>? callback=null)
     {
-        const string sql = @"
-        INSERT INTO Genres (Name)
-        VALUES ($name);
-        SELECT last_insert_rowid();";
-
-        var id = db.ExecuteScalar(sql, new()
-        {
-            ["$name"] = Name,
-        });
-
+        var id = await db.ExecuteScalarAsync(insertSql, GetInsertParameters());
+        var index = Convert.ToInt64(id);
+        DatabaseIndex = index;
+        callback?.Invoke(index);
+    }
+    public void DbInsert(Database db)
+    {
+        var id = db.ExecuteScalar(insertSql, GetInsertParameters());
         DatabaseIndex =  Convert.ToInt64(id);
     }
+
+    public Dictionary<string, object?> GetUpdateParameters() => new() {
+        ["$name"] = Name,
+        ["artworkId"] = Artwork?.DatabaseIndex != null ? Artwork.DatabaseIndex.Value : null, 
+        ["id"] = DatabaseIndex, };
+    public void DbUpdate(Database db)=> db.ExecuteNonQuery(updateSql, GetUpdateParameters());
+    public async Task DbUpdateAsync(Database db)=>await db.ExecuteNonQueryAsync(updateSql, GetUpdateParameters());
+    public Dictionary<string, object?> GetRemoveParameters() => new() {["$id"] = DatabaseIndex, };
+    public void DbRemove(Database db)=>db.ExecuteNonQuery(removeSql, GetRemoveParameters());
+    public async Task DbRemoveAsync(Database db)=>await db.ExecuteNonQueryAsync(removeSql, GetRemoveParameters());
     
     public static Dictionary<long, Genre> FromDatabase(Database db, int[]? indexes = null)
     {
@@ -52,9 +78,11 @@ public class Genre:NameTag
 
         return genres;
     }
+
+
     
     public static Genre Null = new Genre("Null")
     {
-        DatabaseIndex = 0
+        DatabaseIndex = null
     };
 }

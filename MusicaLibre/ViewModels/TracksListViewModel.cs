@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.Common;
 using System.Linq;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -19,7 +20,8 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
     public ReadOnlyObservableCollection<TrackViewModel> Tracks { get; init; }
 
     TrackViewModel? _shiftSelectionAnchor;
-    [ObservableProperty] private TrackViewModel? _selectedTrack;
+    [ObservableProperty] protected List<TrackViewModel> _selectedVms;
+    [ObservableProperty] protected TrackViewModel? _selectedTrack;
     partial void OnSelectedTrackChanged(TrackViewModel? value)
     {
         if (!InputManager.CtrlPressed && !InputManager.IsDragSelecting && !InputManager.ShiftPressed)
@@ -42,12 +44,15 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
         if(!InputManager.ShiftPressed) 
             _shiftSelectionAnchor = value;
         
-        SelectedTracks = Tracks.Where(x => x.IsSelected)
-            .Select(x=>x.Model).ToList();
+        SelectedVms = Tracks.Where(x => x.IsSelected).ToList();
+        SelectedTracks = SelectedVms.Select(x=>x.Model).ToList();
+        
+        SelectedTrackChanged();
     }
-
-    [ObservableProperty]private List<TrackViewColumn> _columns;
-    [ObservableProperty] private TrackViewColumn? _sortingColumn;
+    protected virtual void SelectedTrackChanged(){}
+    
+    [ObservableProperty]protected List<TrackViewColumn> _columns;
+    [ObservableProperty] protected TrackViewColumn? _sortingColumn;
     partial void OnSortingColumnChanged(TrackViewColumn? oldValue, TrackViewColumn? newValue)
     {
         if(oldValue != null) oldValue.IsSorting = false;
@@ -62,12 +67,13 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
     public event EventHandler? SortOrderChanged;
     public event EventHandler<int>? ScrollToIndexRequested;
     
-    public TracksListViewModel(LibraryViewModel library, List<Track> tracksPool) : base(library, tracksPool)
+    public TracksListViewModel(LibraryViewModel library, List<Track> tracksPool, List<TrackViewColumn>? columns=null) : base(library, tracksPool)
     {
         Tracks = new ReadOnlyObservableCollection<TrackViewModel>(_tracksMutable);
-        _columns = new List<TrackViewColumn>() 
+
+        _columns = columns != null ? columns : new List<TrackViewColumn>() 
         {
-            new("Disc",      TrackSortKeys.DiscNumber,  t => t.Model.Disc?.Number.ToString()??"", this, true, true),
+            new("Disc",      TrackSortKeys.DiscNumber,  t => t.Model.DiscNumber.ToString()??"", this, true, true),
             new("Track",     TrackSortKeys.TrackNumber, t => t.Model.TrackNumber.ToString() ?? "", this, true, true),
             new("Title",     TrackSortKeys.Title,       t => t.Title ?? "", this),
             new("Album",     TrackSortKeys.Album,       t => t.Album ?? "", this),
@@ -82,7 +88,7 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
             new("Played",    TrackSortKeys.Played,      t => t.Played.ToString(), this),
             new("Comment",   TrackSortKeys.Comment,     t => t.Model.Comment ?? "", this),
             new("Remixer",   TrackSortKeys.Remixer,     t => t.Remixer ?? "", this, false),
-            new("Composer",  TrackSortKeys.Composer,    t => t.Composers ?? "", this, false),
+            new("Composer",  TrackSortKeys.Composer,    t => t.ComposersText ?? "", this, false),
             new("Conductor", TrackSortKeys.Conductor,   t => t.Conductor ?? "", this, false),
             new("Path",      TrackSortKeys.FilePath,    t => t.Model.FilePath ?? "", this, false),
             new("Format",    TrackSortKeys.Codec,       t => t.Model.AudioFormat?.Name ?? "", this, false),
@@ -121,17 +127,17 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
                 ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.Folder?.Name??"")
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.Folder?.Name??""),
             TrackSortKeys.TrackNumber=>ascending
-                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.TrackNumber??0)
-                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.TrackNumber??0),
+                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.TrackNumber)
+                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.TrackNumber),
             TrackSortKeys.DiscNumber=>ascending
-                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.Disc?.Number??0)
-                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.Disc?.Number??0),
+                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.DiscNumber)
+                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.DiscNumber),
             TrackSortKeys.Remixer => ascending
                 ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Remixer??"")
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.Remixer??""),
             TrackSortKeys.Composer => ascending
-                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Composers??"")
-                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Composers??""),
+                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.ComposersText??"")
+                : SortExpressionComparer<TrackViewModel>.Descending(x => x.ComposersText??""),
             TrackSortKeys.Conductor => ascending
                 ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Conductor??"")
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.Conductor??""),
@@ -179,7 +185,7 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.PlaylistPosition),
             TrackSortKeys.Random => 
                 SortExpressionComparer<TrackViewModel>.Ascending(x => x.RandomIndex),
-            _ => SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.DatabaseIndex??0)
+            _ => SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.DatabaseIndex)
         };
     }
 
@@ -192,9 +198,12 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
     {
         if(Library.CurrentStep.SortingKeys.Select(x=>  (x is SortingKey<TrackSortKeys> sk) && sk.Key == TrackSortKeys.Random).Any())
             ShufflePages();
-        
-        var comparers = Library.CurrentStep.SortingKeys
-            .Select(key => GetComparer((key as SortingKey<TrackSortKeys>).Key, key.Asc))
+
+        var skeys = Library.CurrentStep.Type == OrderGroupingType.Track
+            ? Library.CurrentStep.SortingKeys.Cast<SortingKey<TrackSortKeys>>()
+            : Library.CurrentStep.TracksSortingKeys;
+        var comparers = skeys
+            .Select(key => GetComparer(key.Key, key.Asc))
             .ToList();
 
         Ascending = Library.CurrentStep.SortingKeys.First().Asc;

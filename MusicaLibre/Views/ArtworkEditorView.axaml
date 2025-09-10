@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:conv="clr-namespace:MusicaLibre.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Views.ArtworkEditorView"
+             x:DataType="vm:ArtworkEditorViewModel">
+    <UserControl.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:NullToInverseBooleanConverter x:Key="InverseNullToBoolean"/>
+    </UserControl.Resources>
+    <Grid >
+        <Border >
+            <Grid RowDefinitions="200, Auto">
+                <Image Width="200" Height="200" Source="{Binding Thumbnail}"/>
+                <Button Grid.Row="1" Content="{Binding UpdateCommand}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

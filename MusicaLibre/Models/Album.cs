@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using MusicaLibre.Services;
+using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.Models;
 
 public class Album
 {
     public long? DatabaseIndex { get; set; }
-    public string Title { get; init; }
+    public string Title { get; set; }
     public Artist AlbumArtist { get; set; }
     public long? ArtistId { get; set; }
     public Artwork? Cover { get; set; }
@@ -55,32 +57,12 @@ public class Album
         }
         return false;
     }
-
-    public void DatabaseInsert(Database db)
-    {
-        const string sql = @"
+    
+    const string insertSql = @"
             INSERT INTO Albums (Title, YearId, FolderId, AlbumArtist, CoverId, Modified, Created, LastPlayed, Added)
             VALUES ($title, $year, $rootfolder, $albumartist, $cover, $modified, $created, $lastplayed, $added);
             SELECT last_insert_rowid();";
-
-        var id = db.ExecuteScalar(sql, new()
-        {
-            ["$title"] = Title,
-            ["$year"] = Year?.DatabaseIndex,
-            ["$rootfolder"] = Folder?.DatabaseIndex,
-            ["$albumartist"] = AlbumArtist?.DatabaseIndex,
-            ["$cover"] = Cover?.DatabaseIndex,
-            ["$modified"] = Modified.HasValue? TimeUtils.ToUnixTime(Modified!.Value):null,
-            ["$created"] = Created.HasValue?TimeUtils.ToUnixTime(Created!.Value):null,
-            ["$lastplayed"] = LastPlayed.HasValue?TimeUtils.ToUnixTime(LastPlayed!.Value):null,
-            ["$added"] = Added.HasValue?TimeUtils.ToUnixTime(Added!.Value):null,
-        });
-
-        DatabaseIndex =  Convert.ToInt64(id);
-    }
-    public void DatabaseUpdate(Database db)
-    {
-        const string sql = @"
+    const string updateSql = @"
         UPDATE Albums SET 
             Title = $title, 
             YearId = $year, 
@@ -92,22 +74,49 @@ public class Album
             LastPlayed = $lastplayed, 
             Added = $added
         WHERE Id=$id;";
+    const string deleteSql = @"DELETE FROM Albums WHERE Id=$id;";
 
-        db.ExecuteNonQuery(sql, new()
-        {
-            ["$id"] = DatabaseIndex,
-            ["$title"] = Title,
-            ["$year"] = Year?.DatabaseIndex,
-            ["$rootfolder"] = Folder.DatabaseIndex,
-            ["$albumartist"] = AlbumArtist.DatabaseIndex,
-            ["$cover"] = Cover?.DatabaseIndex,
-            ["$modified"] = Modified.HasValue? TimeUtils.ToUnixTime(Modified!.Value):null,
-            ["$created"] = Created.HasValue?TimeUtils.ToUnixTime(Created!.Value):null,
-            ["$lastplayed"] = LastPlayed.HasValue?TimeUtils.ToUnixTime(LastPlayed!.Value):null,
-            ["$added"] = Added.HasValue?TimeUtils.ToUnixTime(Added!.Value):null,
-        });
+    public Dictionary<string, object?> Parameters => new()
+    {
+        ["$id"] = DatabaseIndex,
+        ["$title"] = Title,
+        ["$year"] = Year?.DatabaseIndex,
+        ["$rootfolder"] = Folder?.DatabaseIndex,
+        ["$albumartist"] = AlbumArtist?.DatabaseIndex,
+        ["$cover"] = Cover?.DatabaseIndex,
+        ["$modified"] = Modified.HasValue ? TimeUtils.ToUnixTime(Modified!.Value) : null,
+        ["$created"] = Created.HasValue ? TimeUtils.ToUnixTime(Created!.Value) : null,
+        ["$lastplayed"] = LastPlayed.HasValue ? TimeUtils.ToUnixTime(LastPlayed!.Value) : null,
+        ["$added"] = Added.HasValue ? TimeUtils.ToUnixTime(Added!.Value) : null,
+    };
+    public void DbInsert(Database db)
+    {
+        var id = db.ExecuteScalar(insertSql, Parameters);
+        DatabaseIndex =  Convert.ToInt64(id);
     }
-    
+
+    public async Task DbInsertAsync(Database db, Action<long> callback)
+    {
+        try
+        {
+            var id = await db.ExecuteScalarAsync(insertSql, Parameters);
+            DatabaseIndex =  Convert.ToInt64(id);
+            callback(Convert.ToInt64(id));    
+        }
+        catch (Exception ex){Console.WriteLine(ex);}
+    }
+    public void DbUpdate(Database db)=>db.ExecuteNonQuery(updateSql, Parameters);
+    public async Task DbUpdateAsync(Database db)
+    {
+        try { await db.ExecuteNonQueryAsync(updateSql, Parameters); }
+        catch (Exception ex) {Console.WriteLine(ex);}
+    }
+    public void DbDelete(Database db)=>db.ExecuteNonQuery(deleteSql, Parameters);
+    public async Task DbDeleteAsync(Database db)
+    {
+        try { await db.ExecuteNonQueryAsync(deleteSql, Parameters); }
+        catch (Exception ex) {Console.WriteLine(ex);}
+    }
     public static Dictionary<long, Album> FromDatabase(Database db, int[]? indexes=null)
     {
         string filter = String.Empty;
@@ -144,6 +153,27 @@ public class Album
         return albums;
     }
 
+    public async Task ComputeRootFolder(LibraryViewModel library, List<Track> tracks)
+    {
+        var folders = tracks.Select(x => x.Folder.Name).Distinct().ToList();
+        var rootFolder = (folders.Count > 1) ? PathUtils.GetCommonRoot(folders) : folders.FirstOrDefault();
+        if (rootFolder is null  || !PathUtils.IsDescendantPath(library.Path, rootFolder))
+            rootFolder = folders.FirstOrDefault();
+        
+        if (string.IsNullOrEmpty(rootFolder))
+            throw new Exception("Root folder not found");
+        
+        var rootf = library.Folders.Values.FirstOrDefault(x => x.Name == rootFolder);
+        if (rootf is null)
+        {
+            rootf = new Folder(rootFolder);
+            await rootf.DbInsertAsync(library.Database);
+            library.Folders.Add(rootf.DatabaseIndex.Value, rootf);
+        }
+        Folder = rootf;
+        await DbUpdateAsync(library.Database);
+    }
+
     public static Album Null = new Album()
     {
         DatabaseIndex = 0,
@@ -151,4 +181,6 @@ public class Album
         AlbumArtist = Artist.Null,
         Year = Year.Null,
     };
+    
+
 }

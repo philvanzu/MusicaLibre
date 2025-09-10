@@ -4,12 +4,17 @@
     <option name="projectPerEditor">
       <map>
         <entry key="MusicaLibre/App.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Controls/TagBox.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Styles/Buttons.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Themes/Generic.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/AlbumsEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/AlbumsListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/AlbumsPresenterView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/AlbumsView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ArtistsView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/ArtworkEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/ArtworkPickerWindow.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/GenresEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/LibraryView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/MainView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/MainWindow.axaml" value="MusicaLibre/MusicaLibre.csproj" />
@@ -25,6 +30,7 @@
         <entry key="MusicaLibre/Views/PlaylistsListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/PlaylistsView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ProgressDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/TagsEditorDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/TracksListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/YearPresenterView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
       </map>

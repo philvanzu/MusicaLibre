@@ -175,12 +175,12 @@ public partial class DiscsListViewModel : AlbumsListViewModel
         _items.Clear();
 
         
-        var discIds = TracksPool.Select(x => x.DiscId).Where(DiscId => DiscId.HasValue).Distinct().ToList();
+        var discIds = TracksPool.Select(x => (x.DiscNumber, x.AlbumId)).Distinct().ToList();
 
         var discsPool = Library.Discs.Values.AsEnumerable();
-        if (discIds.Count > 0) discsPool = discsPool.Where(x => discIds.Contains(x.DatabaseIndex));
+        if (discIds.Count > 0) discsPool = discsPool.Where(x => discIds.Contains((x.Number, x.AlbumId)));
         foreach (var disc in discsPool)
-            _items.Add(new DiscViewModel(this, disc));
+            _items.Add(new AlbumDiscViewModel(this, disc));
         
         Sort();
     }

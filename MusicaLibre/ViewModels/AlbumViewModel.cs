@@ -88,6 +88,16 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
     [RelayCommand] void Delete(){}
 
     [RelayCommand]
+    void EditTags()
+    {
+        if (Presenter.SelectedTracks != null && Presenter.SelectedTracks.Count > 0)
+            _ = Presenter.Library.EditTracks(Presenter.SelectedTracks);
+        else
+            _ = Presenter.Library.EditTracks(Tracks);
+
+    }
+
+    [RelayCommand]
     void DoubleTapped()
     {
         Presenter.Library.ChangeOrderingStep(Presenter);
@@ -97,7 +107,7 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
 
 }
 
-public partial class DiscViewModel:AlbumViewModel{
+public partial class AlbumDiscViewModel:AlbumViewModel{
     
     public Disc Disc { get; set; }
     public override string Title => string.IsNullOrEmpty(Disc.Name)? base.Title:Disc.Name;
@@ -105,9 +115,9 @@ public partial class DiscViewModel:AlbumViewModel{
     
     public override List<Track> Tracks => 
         (Presenter as DiscsListViewModel)?.TracksPool
-        .Where(x => x.DiscId == Disc.DatabaseIndex).ToList()
+        .Where(x => x.DiscNumber == Disc.Number && x.AlbumId == Disc.AlbumId).ToList()
         ??new List<Track>();
-    public DiscViewModel(DiscsListViewModel presenter, Disc model) : base(presenter, model.Album)
+    public AlbumDiscViewModel(DiscsListViewModel presenter, Disc model) : base(presenter, model.Album)
     {
         Disc = model;
     }

@@ -30,7 +30,7 @@ public partial class TrackViewColumn:ViewModelBase
     public double Width { get; set; } = double.NaN; // Auto by default
     public TrackSortKeys SortKey { get; init; }
     public Func<TrackViewModel, string> RowGetter { get; init; }
-
+    public Func<TrackViewModel, string> ToolTipGetter { get; set; }
     public TrackViewColumn(string key, TrackSortKeys sortKey, Func<TrackViewModel, string> rowGetter,  
         TracksListViewModel presenter, bool isVisible=true, bool isCentered=false)
     {
@@ -43,7 +43,6 @@ public partial class TrackViewColumn:ViewModelBase
     }
     
     public string GetRowText(TrackViewModel row) => RowGetter.Invoke(row);
-
 
 
 }

@@ -128,28 +128,30 @@ public class Artwork:IDisposable
     public override int GetHashCode() =>
         StringComparer.Ordinal.GetHashCode(Hash); // deterministic across runtimes
 
-    public void DataBaseInsert(Database db)
-    {
-        const string sql = @"
+    const string insertSql = @"
         INSERT INTO Artworks (Hash, Width, Height, Thumbnail, MimeType, SourcePath, FolderId, SourceType, Role, EmbedIdx, BookletPage)
         VALUES ($hash, $width, $height, $thumb, $mime, $sourcePath, $sourceFolder, $sourceType, $role, $embedIdx,  $bookletPage);
         SELECT last_insert_rowid();";
 
-        var id = db.ExecuteScalar(sql, new()
-        {
-            ["$hash"] = Hash,
-            ["$width"] = Width,
-            ["$height"] = Height,
-            ["$thumb"] = ThumbnailData,
-            ["$mime"] = (object?)MimeType ?? DBNull.Value,
-            ["$sourcePath"] = (object?)SourcePath ?? DBNull.Value,
-            ["$sourceFolder"] = Folder?.DatabaseIndex,
-            ["$sourceType"] = SourceType,
-            ["$role"] = Role,
-            ["$embedIdx"] = EmbedIdx,
-            ["$bookletPage"] = BookletPage,
-        });
-
+    private Dictionary<string, object?> Parameters => new()
+    {
+        ["$id"] = DatabaseIndex,
+        ["$hash"] = Hash,
+        ["$width"] = Width,
+        ["$height"] = Height,
+        ["$thumb"] = ThumbnailData,
+        ["$mime"] = (object?)MimeType ?? DBNull.Value,
+        ["$sourcePath"] = (object?)SourcePath ?? DBNull.Value,
+        ["$sourceFolder"] = Folder?.DatabaseIndex,
+        ["$sourceType"] = SourceType,
+        ["$role"] = Role,
+        ["$embedIdx"] = EmbedIdx,
+        ["$bookletPage"] = BookletPage,
+    };
+    
+    public void DataBaseInsert(Database db)
+    {
+        var id = db.ExecuteScalar(insertSql, Parameters );
         DatabaseIndex =  Convert.ToInt64(id);
     }
     

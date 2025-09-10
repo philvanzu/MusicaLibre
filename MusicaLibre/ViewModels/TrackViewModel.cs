@@ -24,15 +24,9 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     public string? Album_Year => $"{Album} - {Year}";
     public string Artists => string.Join(", ", Model.Artists.Select((x) => x.Name));
     public int RandomIndex {get; set;}
-    public string? Composers
-    {
-        get
-        {
-            var composers = string.Join(", ", Model.Composers.Select((x) => x.Name));
-            if (string.IsNullOrWhiteSpace(composers)) return null;
-            return $"Composers: {composers}";
-        }
-    } 
+    public string? ComposersText=> string.IsNullOrWhiteSpace(Composers)?  null: $"Composers: {Composers}";
+    public string Composers=>string.Join(", ", Model.Composers.Select((x) => x.Name));
+    
     public string? Remixer => Model.Remixer!= null ? $"Remixer:{Model.Remixer?.Name}":null;
     public string? Conductor => Model.Conductor!= null? $"Conductor: {Model.Conductor?.Name}":null;
     public string Genres => string.Join(", ", Model.Genres.Select((x) => x.Name));
@@ -130,6 +124,6 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     [RelayCommand] void DoubleTapped() => Presenter.Library.NowPlayingList.Replace(Presenter.SelectedTracks);
     [RelayCommand] void Append() => Presenter.Library.NowPlayingList.Append(Presenter.SelectedTracks);
     [RelayCommand] void InsertNext()=> Presenter.Library.NowPlayingList.Insert(Presenter.SelectedTracks);
-    [RelayCommand] void EditTags(){}
+    [RelayCommand] void EditTags()=>Presenter.Library.EditTracks(Presenter.SelectedTracks);
     [RelayCommand] void OpenInExplorer(){}
 }

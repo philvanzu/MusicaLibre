@@ -6,7 +6,7 @@
         xmlns:conv="clr-namespace:MusicaLibre.Converters"
         mc:Ignorable="d"
         x:Class="MusicaLibre.Views.OrderingEditorDialog"
-        Title="OrderingEditorWindow"
+        Title="Custom Tracks Ordering Editor"
         Width="1200" Height="800"
         x:DataType="vm:OrderingEditorViewModel"
         WindowStartupLocation="CenterOwner">

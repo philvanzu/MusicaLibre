@@ -120,7 +120,7 @@ public class AudioFormat:NameTag
 
     public static AudioFormat Null = new AudioFormat("Null")
     {
-        DatabaseIndex = 0
+        DatabaseIndex = null
     };
 }
 

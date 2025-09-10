@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
+using MusicaLibre.Models;
 
 namespace MusicaLibre.Services;
 
@@ -185,7 +190,7 @@ public static class EnumUtils
 public static class TimeUtils
 {
     public static long ToUnixTime(DateTime dt) =>
-        new DateTimeOffset(dt.ToUniversalTime()).ToUnixTimeSeconds();
+        ((DateTimeOffset)dt.ToUniversalTime()).ToUnixTimeSeconds();
 
     public static DateTime FromUnixTime(long ts) =>
         DateTimeOffset.FromUnixTimeSeconds(ts).UtcDateTime;
@@ -196,7 +201,7 @@ public static class TimeUtils
     public static string FormatDuration(TimeSpan duration)
     {
         if (duration.TotalHours >= 1)
-            return duration.ToString(@"h\:mm\:ss");   // 1:23:45
+            return duration.ToString(@"hh\:mm\:ss");   // 1:23:45
         else
             return duration.ToString(@"m\:ss");       // 4:05
     }
@@ -205,13 +210,44 @@ public static class TimeUtils
     {
         return dt?.ToString("yy-MM-dd") ?? string.Empty;
     }
+    public static DateTime? FromDateString(string? s)
+    {
+        if (DateTime.TryParseExact(
+                s,
+                "yyyy-MM-dd",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var parsed))
+            return parsed;
+        
+        return null;
+    }
+    public static string FormatDateTime(DateTime? dt)
+    {
+        return dt?.ToString("yyyy-MM-dd HH:mm:ss") ?? string.Empty;
+    }
+
+    public static DateTime? FromDateTimeString(string? s)
+    {
+        if (DateTime.TryParseExact(
+                s,
+                "yyyy-MM-dd HH:mm:ss",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var parsed))
+            return parsed;
+        
+        return null;
+    }
 }
 
 public static class UnicodeUtils
 {
     
-    public static string asc = "⌃"; //⮝ ⮟ ‹›⥊ ⥋ ⥌ ⥍ , ⥎ ↑↓  
+    public static string asc = "⌃"; //⮝ ⮟ ‹›⥊ ⥋ ⥌⥎⥍ , ⥎ ↑↓  
     public static string desc = "⌄";
     public static string hamburger = "☰";
     public static string play = "▶";
 }
+
+
