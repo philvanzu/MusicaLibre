@@ -248,7 +248,7 @@ public class YearsListViewModel(LibraryViewModel library, List<Track> tracksPool
         (t, a) => t.Where(x => x.Year == a).ToList(),
         t =>
         {
-            var ids = t.Select(track => track.YearId).Where(id => id.HasValue).Distinct().ToList();
+            var ids = t.Select(track => track.YearId).Distinct().ToList();
             return  library.Years.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 

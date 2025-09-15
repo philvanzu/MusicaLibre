@@ -109,7 +109,7 @@ public partial class LibraryViewModel
             await ParseLibraryRecursiveAsync(path, progress, throttler,
                 (audioFile) =>
                 {
-                    //Console.WriteLine($"Adding audio file : {audioFile.FullName}");
+                    //Audio Files
                     tracks.Add(audioFile.FullName, new Track()
                     {
                         FilePath = audioFile.FullName,
@@ -131,7 +131,7 @@ public partial class LibraryViewModel
                 },
                 (imageFile) =>
                 {
-                    //Console.WriteLine($"Adding image file : {imageFile.FullName}");
+                    //Image Files
                     var artwork = new Artwork(Database)
                     {
                         SourcePath = imageFile.FullName,
@@ -146,7 +146,7 @@ public partial class LibraryViewModel
                 },
                 (playlistFile) =>
                 {
-                    //Console.WriteLine($"Adding playlist file : {playlistFile.FullName}");
+                    //Playlists Files
                     var playlist = new Playlist()
                     {
                         FilePath = playlistFile.FullName,
@@ -159,9 +159,11 @@ public partial class LibraryViewModel
                 },
                 (folderpath) =>
                 {
+                    //Folders
                     folders.Add(folderpath, new Folder(folderpath));
                 });
 
+            //Processing Folders
             Console.WriteLine("Processing Library data");
             Database.Open();
             Database.BeginTransaction();
@@ -188,6 +190,7 @@ public partial class LibraryViewModel
                 Database.Rollback();
             }
             
+            //Processing Image Files
             Database.BeginTransaction();
             try
             {
@@ -205,7 +208,7 @@ public partial class LibraryViewModel
                     if (string.IsNullOrEmpty(artwork.Hash) ) continue;
                     if (!artworks.ContainsKey(artwork.Hash))
                     {
-                        FindArtworkRole(artwork);
+                        artwork.FindRole();
                         try
                         {
                             artwork.DbInsert(Database);
@@ -236,7 +239,8 @@ public partial class LibraryViewModel
                 Database.Rollback();
                 Console.WriteLine(ex);
             }
-  
+            
+            //Processing Audio Files
             Database.BeginTransaction();
             try
             {
@@ -260,7 +264,7 @@ public partial class LibraryViewModel
 
                         track.TrackNumber = file.Tag.Track;
                         track.DiscNumber = file.Tag.Disc;
-                        track.Comment = file.Tag.Comment;
+                        track.Comment = file.Tag.Comment??String.Empty;
 
                         track.Duration = file.Properties.Duration;
                         track.BitrateKbps = file.Properties.AudioBitrate;
@@ -292,7 +296,7 @@ public partial class LibraryViewModel
                         }
                         track.Year = year;
                         
-                        var format = AudioFormat.Generate(track.Codec, track.BitrateKbps.Value);
+                        var format = AudioFormat.Generate(track.Codec, track.BitrateKbps);
                         if (!audioFormats.TryGetValue(format, out var audioFormat))
                         {
                             audioFormat = new AudioFormat(format);
@@ -621,7 +625,7 @@ public partial class LibraryViewModel
                 Console.WriteLine(ex.ToString());
             }
             
-            
+            // Completing Albums Info.
             Database.BeginTransaction();
             try
             {
@@ -748,7 +752,7 @@ public partial class LibraryViewModel
             }
             
             
-
+            //Processing Playlists
             Database.BeginTransaction();
             try
             {
@@ -809,10 +813,12 @@ public partial class LibraryViewModel
                             {
                                 sheetMultiTracks.Add(multitrack);
                                 var track = Track.Copy(multitrack);
-                                
+                                if(createdAlbum && album.Year is null)
+                                    album.Year = track.Year;    
                                 track.Title = cuetrack.Title;
                                 track.TrackNumber = cuetrack.Number;
                                 track.Album = album;
+                                
                                 if (!string.IsNullOrWhiteSpace(cuetrack.Performer) &&
                                     artists.TryGetValue(cuetrack.Performer, out var artist))
                                 {
@@ -831,6 +837,7 @@ public partial class LibraryViewModel
 
                         if (createdAlbum)
                         {
+                            
                             album.Added = TimeUtils.Latest(sheetTracks.Select(x=>x.DateAdded));
                             album.Modified = TimeUtils.Latest(sheetTracks.Select(x=>x.Modified));
                             album.Created = TimeUtils.Earliest(sheetTracks.Select(x=>x.Created));
@@ -948,46 +955,7 @@ public partial class LibraryViewModel
         
     }
 
-    public void FindArtworkRole(Artwork artwork)
-    {
-        var filename = System.IO.Path.GetFileName(artwork.SourcePath);
-        if (filename.Contains("cover", StringComparison.OrdinalIgnoreCase) 
-            ||filename.Contains("front", StringComparison.OrdinalIgnoreCase)
-            ||filename.Contains("folder", StringComparison.OrdinalIgnoreCase))
-        {
-            artwork.Role = ArtworkRole.CoverFront;
-            return;
-        }
-        if (filename.Contains("back", StringComparison.OrdinalIgnoreCase))
-        {
-            artwork.Role = ArtworkRole.CoverBack;
-            return;
-        }
-        if (filename.Contains("disc", StringComparison.OrdinalIgnoreCase)
-            ||filename.Contains("cd", StringComparison.OrdinalIgnoreCase)
-            ||filename.Contains("vinyl", StringComparison.OrdinalIgnoreCase))
-        {
-            artwork.Role = ArtworkRole.Disk;
-            return;
-        }
-        if (filename.Contains("artist", StringComparison.OrdinalIgnoreCase))
-        {
-            artwork.Role = ArtworkRole.Artist;
-            return;
-        }
-        if (filename.Contains("booklet", StringComparison.OrdinalIgnoreCase))
-        {
-            artwork.Role = ArtworkRole.Booklet;
-            return;
-        }
-        if (filename.Contains("inlay", StringComparison.OrdinalIgnoreCase)
-            ||filename.Contains("tray", StringComparison.OrdinalIgnoreCase))
-        {
-            artwork.Role = ArtworkRole.Inlay;
-            return;
-        }
-        artwork.Role = ArtworkRole.Other;
-    }
+    
     
     #endregion
 

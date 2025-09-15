@@ -17,14 +17,14 @@ public class Album
     public long ArtistId { get; set; }
     public Artwork? Cover { get; set; }
     public long? CoverId { get; set; }
-    public Year? Year { get; set; }
-    public long? YearId { get; set; }
+    public Year Year { get; set; }
+    public long YearId { get; set; }
     public Folder Folder { get; set; }
     public long FolderId { get; set; }
-    public DateTime? Modified { get; set; }
-    public DateTime? Created { get; set; }
+    public DateTime Modified { get; set; }
+    public DateTime Created { get; set; }
     public DateTime? LastPlayed { get; set; }
-    public DateTime? Added { get; set; }
+    public DateTime Added { get; set; }
     public HashSet<Artwork> Artworks { get; set; }=new HashSet<Artwork>();
     public List<long> ArtworkIds { get; set; }=new List<long>();
 
@@ -52,9 +52,9 @@ public class Album
     {
         if (obj is Album album)
         {
-            return this.Title.Equals(album.Title, StringComparison.Ordinal)
-                   && this.AlbumArtist.Name.Equals(album.AlbumArtist.Name, StringComparison.Ordinal)
-                   && this.Year.Equals(album.Year);    
+            return Title.Equals(album.Title, StringComparison.Ordinal)
+                   && AlbumArtist.Name.Equals(album.AlbumArtist.Name, StringComparison.Ordinal)
+                   && Year.Equals(album.Year);    
         }
         return false;
     }
@@ -81,14 +81,14 @@ public class Album
     {
         ["$id"] = DatabaseIndex,
         ["$title"] = Title,
-        ["$year"] = Year?.DatabaseIndex,
-        ["$rootfolder"] = Folder?.DatabaseIndex,
-        ["$albumartist"] = AlbumArtist?.DatabaseIndex,
+        ["$year"] = Year.DatabaseIndex,
+        ["$rootfolder"] = Folder.DatabaseIndex,
+        ["$albumartist"] = AlbumArtist.DatabaseIndex,
         ["$cover"] = Cover?.DatabaseIndex,
-        ["$modified"] = Modified.HasValue ? TimeUtils.ToUnixTime(Modified!.Value) : null,
-        ["$created"] = Created.HasValue ? TimeUtils.ToUnixTime(Created!.Value) : null,
+        ["$modified"] = TimeUtils.ToUnixTime(Modified),
+        ["$created"] = TimeUtils.ToUnixTime(Created),
         ["$lastplayed"] = LastPlayed.HasValue ? TimeUtils.ToUnixTime(LastPlayed!.Value) : null,
-        ["$added"] = Added.HasValue ? TimeUtils.ToUnixTime(Added!.Value) : null,
+        ["$added"] = TimeUtils.ToUnixTime(Added),
     };
     public void DbInsert(Database db)
     {
@@ -130,21 +130,21 @@ public class Album
         foreach (var row in db.ExecuteReader(sql))
         {
             
-            var modified = Database.GetValue<long>(row, "Modified");
-            var added = Database.GetValue<long>(row, "Added");
+            var modified = Convert.ToInt64(row["Modified"]);
+            var added =  Convert.ToInt64(row["Added"]);
             var lastPlayed = Database.GetValue<long>(row, "LastPlayed");
-            var created = Database.GetValue<long>(row, "Created");
+            var created =  Convert.ToInt64(row["Created"]);
 
             Album album = new Album()
             {
                 DatabaseIndex = Convert.ToInt64(row["Id"]),
                 Title = (string?)row["Title"] ?? string.Empty,
                 ArtistId = Convert.ToInt64(row["AlbumArtist"]),
-                YearId = Database.GetValue<long>(row, "YearId"),
+                YearId = Convert.ToInt64(row["YearId"]),
                 FolderId = Convert.ToInt64(row["FolderId"]),
-                Added = added!=null ? TimeUtils.FromUnixTime(added.Value) : null,
-                Modified = modified!=null ? TimeUtils.FromUnixTime(modified.Value) : null,
-                Created = created!=null ? TimeUtils.FromUnixTime(created.Value) : null,
+                Added = TimeUtils.FromUnixTime(added) ,
+                Modified = TimeUtils.FromUnixTime(modified) ,
+                Created = TimeUtils.FromUnixTime(created) ,
                 LastPlayed = lastPlayed!=null ? TimeUtils.FromUnixTime(lastPlayed.Value) : null,
                 CoverId = Database.GetValue<long>(row, "CoverId"),
             };

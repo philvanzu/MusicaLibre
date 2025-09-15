@@ -5,7 +5,7 @@ using MusicaLibre.Services;
 
 namespace MusicaLibre.ViewModels;
 
-public partial class LibraryViewModel : ViewModelBase
+public partial class LibraryViewModel
 {
    
    //When Database is in async mode

@@ -150,9 +150,9 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
             }
         }
 
-        SelectedAlbum.Added = TimeUtils.FromDateTimeString(Added);
-        SelectedAlbum.Modified = TimeUtils.FromDateTimeString(Modified);
-        SelectedAlbum.Created = TimeUtils.FromDateTimeString(Created);
+        SelectedAlbum.Added = TimeUtils.FromDateTimeString(Added)??SelectedAlbum.Added;
+        SelectedAlbum.Modified = TimeUtils.FromDateTimeString(Modified)??SelectedAlbum.Modified;
+        SelectedAlbum.Created = TimeUtils.FromDateTimeString(Created)??SelectedAlbum.Created;
         SelectedAlbum.LastPlayed = TimeUtils.FromDateTimeString(Played);
 
         await SelectedAlbum.DbUpdateAsync(Library.Database);

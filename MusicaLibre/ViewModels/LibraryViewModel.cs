@@ -1,18 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MusicaLibre.Models;
 using MusicaLibre.Services;
-using MusicaLibre.ViewModels;
 using MusicaLibre.Views;
 using TagLib;
 using File = System.IO.File;
@@ -21,7 +16,6 @@ namespace MusicaLibre.ViewModels;
 
 public partial class LibraryViewModel : ViewModelBase
 {
-    
     [ObservableProperty] private string _name;
     [ObservableProperty] private string _path;
     [ObservableProperty] private LibrarySettingsViewModel _settings;
@@ -50,7 +44,7 @@ public partial class LibraryViewModel : ViewModelBase
     public Dictionary<long, Year> Years { get; set; } = new();
     public Dictionary<long, Folder> Folders { get; set; } = new();
 
-    private int _currentStepIndex = 0;
+    private int _currentStepIndex;
 
     private CustomOrdering CurrentOrdering { get; set; } = new();
     public OrderingStep CurrentStep {
@@ -65,7 +59,7 @@ public partial class LibraryViewModel : ViewModelBase
        
 
     [ObservableProperty] private NavigatorViewModel<LibraryDataPresenter>? _navigator;
-    [ObservableProperty] private string _searchString;
+    [ObservableProperty] private string _searchString=string.Empty;
     //partial void OnSearchStringChanged(string value)=>DataPresenter.Filter(value);
     
     public LibraryViewModel(Database db, string libraryRoot, MainWindowViewModel mainWindowViewModel)
@@ -76,7 +70,7 @@ public partial class LibraryViewModel : ViewModelBase
         Path = libraryRoot;
         Database = db;
         Settings = LibrarySettingsViewModel.Load(Database);
-        Settings.PropertyChanged += (sender, args) =>
+        Settings.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(Settings.SelectedOrdering))
             {
@@ -170,21 +164,14 @@ public partial class LibraryViewModel : ViewModelBase
                     track.Remixer = Artists[track.RemixerId.Value];
                 
                 track.AudioFormat = AudioFormats[track.AudioFormatId];
-                
-                if(track.YearId != null) 
-                    track.Year = Years[track.YearId.Value];
-                
+                track.Year = Years[track.YearId];
                 track.Folder = Folders[track.FolderId];
             }
             foreach (var album in Albums.Values)
             {
                 album.Folder = Folders[album.FolderId];
-                
                 album.AlbumArtist = Artists[album.ArtistId];
-                
-                if(album.YearId != null) 
-                    album.Year = Years[album.YearId.Value];
-                
+                album.Year = Years[album.YearId];
                 if(album.CoverId != null) 
                     album.Cover = Artworks[album.CoverId.Value];
             }
@@ -343,7 +330,6 @@ public partial class LibraryViewModel : ViewModelBase
             case OrderGroupingType.Bitrate_Format:
                 DataPresenter = new AudioFormatsListViewModel(this, pool);
                 break;
-            default: break;
         }
 
         if (DataPresenter != null)

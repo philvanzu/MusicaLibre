@@ -286,7 +286,46 @@ public class Artwork:IDisposable
         return sourceBitmap.Resize(new SKImageInfo(targetWidth, targetHeight), SKSamplingOptions.Default);
     }
 
-
+    public void FindRole()
+    {
+        var filename = System.IO.Path.GetFileName(SourcePath);
+        if (filename.Contains("cover", StringComparison.OrdinalIgnoreCase) 
+            ||filename.Contains("front", StringComparison.OrdinalIgnoreCase)
+            ||filename.Contains("folder", StringComparison.OrdinalIgnoreCase))
+        {
+            Role = ArtworkRole.CoverFront;
+            return;
+        }
+        if (filename.Contains("back", StringComparison.OrdinalIgnoreCase))
+        {
+            Role = ArtworkRole.CoverBack;
+            return;
+        }
+        if (filename.Contains("disc", StringComparison.OrdinalIgnoreCase)
+            ||filename.Contains("cd", StringComparison.OrdinalIgnoreCase)
+            ||filename.Contains("vinyl", StringComparison.OrdinalIgnoreCase))
+        {
+            Role = ArtworkRole.Disk;
+            return;
+        }
+        if (filename.Contains("artist", StringComparison.OrdinalIgnoreCase))
+        {
+            Role = ArtworkRole.Artist;
+            return;
+        }
+        if (filename.Contains("booklet", StringComparison.OrdinalIgnoreCase))
+        {
+            Role = ArtworkRole.Booklet;
+            return;
+        }
+        if (filename.Contains("inlay", StringComparison.OrdinalIgnoreCase)
+            ||filename.Contains("tray", StringComparison.OrdinalIgnoreCase))
+        {
+            Role = ArtworkRole.Inlay;
+            return;
+        }
+        Role = ArtworkRole.Other;
+    }
 
 }
 public enum ArtworkSourceType

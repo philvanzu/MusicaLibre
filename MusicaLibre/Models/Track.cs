@@ -2,10 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Media.Imaging;
-using CommunityToolkit.Mvvm.ComponentModel.__Internals;
-using DynamicData.Binding;
 using MusicaLibre.Services;
 using MusicaLibre.ViewModels;
 
@@ -14,7 +10,7 @@ namespace MusicaLibre.Models;
 public class Track
 {
     // Identity
-    public long DatabaseIndex { get; set; } // Persistent internal ID
+    public long DatabaseIndex { get; private set; } // Persistent internal ID
     public string FilePath { get; set; } = string.Empty;
     public string FileName { get; set; } = string.Empty;
     
@@ -33,26 +29,26 @@ public class Track
     public long? ConductorId { get; set; }
     public Artist? Remixer { get; set; }
     public long? RemixerId { get; set; }
-    public Year? Year { get; set; }
-    public long? YearId { get; set; }
+    public Year Year { get; set; }
+    public long YearId { get; set; }
     public uint TrackNumber { get; set; }
     public uint DiscNumber { get; set; }
     public List<Genre> Genres { get; set; } = new();
     public Publisher? Publisher { get; set; }
     public long? PublisherId { get; set; }
-    public string? Comment { get; set; }
+    public string Comment { get; set; }=string.Empty;
     public double? Rating { get; set; }
 
     // Technical
     public TimeSpan Duration { get; set; }
     public double Start { get; set; } = 0;
     public double End { get; set; } = 1;
-    public int? BitrateKbps { get; set; }
-    public string? Codec { get; set; } // e.g., FLAC, MP3, Opus
+    public int BitrateKbps { get; set; }
+    public string Codec { get; set; } = string.Empty;  // e.g., FLAC, MP3, Opus
     public AudioFormat AudioFormat { get; set; }
     public long AudioFormatId { get; set; }
-    public int? SampleRate { get; set; }
-    public int? Channels { get; set; }
+    public int SampleRate { get; set; }
+    public int Channels { get; set; }
     
     
 
@@ -115,14 +111,14 @@ public class Track
             Rating = $rating
         WHERE Id = $id;";
 
-    public Dictionary<string, object?> Parameters => new()
+    private Dictionary<string, object?> Parameters => new()
     {
         ["$filepath"] = FilePath,
         ["$filename"]=FileName,
-        ["$folderId"]=Folder?.DatabaseIndex,
+        ["$folderId"]=Folder.DatabaseIndex,
         ["$ext"]=FileExtension,
         ["$title"] = Title,
-        ["$yearId"] = Year?.DatabaseIndex,
+        ["$yearId"] = Year.DatabaseIndex,
         ["$tracknumber"]=TrackNumber,
         ["$disc"] = DiscNumber,
         ["$duration"] = TimeUtils.ToMilliseconds(Duration),
@@ -130,7 +126,7 @@ public class Track
         ["$end"] = End,
         ["$codec"] = Codec,
         ["$bitrate"] = BitrateKbps,
-        ["$format"] = AudioFormat?.DatabaseIndex,
+        ["$format"] = AudioFormat.DatabaseIndex,
         ["$samplerate"] = SampleRate,
         ["$channels"] = Channels,
         ["$added"] =  TimeUtils.ToUnixTime(DateAdded),
@@ -201,22 +197,22 @@ public class Track
                 FolderId = Convert.ToInt64(row["FolderId"]),
                 FileExtension = (string?) row["FileExtension"]??String.Empty,
                 Title = Database.GetString(row, "Title"),
-                YearId = Database.GetValue<long>(row, "YearId"),
+                YearId = Convert.ToInt64(row["YearId"]),
                 TrackNumber = Convert.ToUInt32(row["TrackNumber"]),
                 DiscNumber = Convert.ToUInt32(row["DiscNumber"]),
                 Duration = TimeUtils.FromMilliseconds(duration),
                 Start = Convert.ToDouble(row["Start"]),
                 End = Convert.ToDouble(row["End"]),
-                Codec = Database.GetString(row, "Codec"),
-                BitrateKbps = Database.GetValue<int>(row, "Bitrate"),
-                SampleRate = Database.GetValue<int>(row, "SampleRate"),
-                Channels = Database.GetValue<int>(row, "Channels"),
+                Codec = (string?)row["Codec"]??string.Empty,
+                BitrateKbps = Convert.ToInt32(row["Bitrate"]),
+                SampleRate = Convert.ToInt32(row["SampleRate"]),
+                Channels = Convert.ToInt32(row["Channels"]),
                 AudioFormatId =  Convert.ToInt64(row["AudioFormatId"]), 
                 DateAdded = TimeUtils.FromUnixTime(added),
                 Modified = TimeUtils.FromUnixTime(modified),
                 Created = TimeUtils.FromUnixTime(created),
                 LastPlayed = lastPlayed!=null ? TimeUtils.FromUnixTime(lastPlayed.Value) : null,
-                Comment = Database.GetString(row, "Comments"),
+                Comment = (string?)row["Comments"]??String.Empty,
                 Rating = Database.GetValue<double>(row, "Rating"),
                 PlayCount = Convert.ToInt32(row["PlayCount"]),
             };

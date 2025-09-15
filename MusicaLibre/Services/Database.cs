@@ -479,19 +479,19 @@ CREATE TABLE IF NOT EXISTS Tracks (
     FolderId INTEGER NOT NULL,
     FileExtension TEXT NOT NULL,
     Title TEXT NOT NULL,
-    YearId INTEGER,
-    TrackNumber INTEGER,
-    DiscNumber INTEGER,
-    Duration REAL, -- seconds
+    YearId INTEGER NOT NULL,
+    TrackNumber INTEGER NOT NULL,
+    DiscNumber INTEGER NOT NULL,
+    Duration REAL NOT NULL, -- seconds
     Start REAL DEFAULT 0,
     End REAL DEFAULT 1,
-    Bitrate INTEGER,
-    Codec TEXT,
-    SampleRate INTEGER,
-    Channels INTEGER,
-    Added INTEGER, -- Unix timestamp
-    Modified INTEGER, -- Unix timestamp
-    Created INTEGER, -- Unix timestamp
+    Bitrate INTEGER NOT NULL,
+    Codec TEXT  NOT NULL,
+    SampleRate INTEGER NOT NULL,
+    Channels INTEGER NOT NULL,
+    Added INTEGER NOT NULL, -- Unix timestamp
+    Modified INTEGER NOT NULL, -- Unix timestamp
+    Created INTEGER NOT NULL, -- Unix timestamp
     LastPlayed INTEGER, -- Unix timestamp
     HasEmbeddedCover INTEGER DEFAULT 0, -- 0=false, 1=true
     AlbumId INTEGER,
@@ -499,16 +499,16 @@ CREATE TABLE IF NOT EXISTS Tracks (
     ConductorId INTEGER,
     RemixerId INTEGER,
     AudioFormatId INTEGER NOT NULL,
-    Comments TEXT,
+    Comments TEXT NOT NULL,
     Rating REAL,
     PlayCount INTEGER,
     FOREIGN KEY (AlbumId) REFERENCES Albums(Id) ON DELETE SET NULL,
     FOREIGN KEY (PublisherId) REFERENCES Publishers(Id) ON DELETE SET NULL,
     FOREIGN KEY (ConductorId) REFERENCES Artists(Id) ON DELETE SET NULL,
     FOREIGN KEY (RemixerId) REFERENCES Artists(Id) ON DELETE SET NULL,
-    FOREIGN KEY (AudioFormatId) REFERENCES AudioFormats(Id) ON DELETE CASCADE,
-    FOREIGN KEY (YearId) REFERENCES Years(Id) ON DELETE SET NULL,
-    FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE SET NULL
+    FOREIGN KEY (AudioFormatId) REFERENCES AudioFormats(Id) ON DELETE RESTRICT,
+    FOREIGN KEY (YearId) REFERENCES Years(Id) ON DELETE RESTRICT,
+    FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE CASCADE
 );
 
 -- =========================
@@ -517,18 +517,18 @@ CREATE TABLE IF NOT EXISTS Tracks (
 CREATE TABLE IF NOT EXISTS Albums (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
     Title TEXT NOT NULL,
-    AlbumArtist INT,
-    YearId INTEGER,
+    AlbumArtist INT NOT NULL,
+    YearId INTEGER NOT NULL,
     FolderId INTEGER NOT NULL,
-    Added INTEGER, -- Unix timestamp
-    Modified INTEGER, -- Unix timestamp
-    Created INTEGER, -- Unix timestamp
+    Added INTEGER NOT NULL, -- Unix timestamp
+    Modified INTEGER NOT NULL, -- Unix timestamp
+    Created INTEGER NOT NULL, -- Unix timestamp
     LastPlayed INTEGER, -- Unix timestamp
     CoverId INTEGER,
-    FOREIGN KEY (AlbumArtist) REFERENCES Artists(Id) ON DELETE SET NULL,
+    FOREIGN KEY (AlbumArtist) REFERENCES Artists(Id) ON DELETE RESTRICT,
     FOREIGN KEY (CoverId) REFERENCES Artworks(Id) ON DELETE SET NULL,
-    FOREIGN KEY (YearId) REFERENCES Years(Id) ON DELETE SET NULL,
-    FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE SET NULL
+    FOREIGN KEY (YearId) REFERENCES Years(Id) ON DELETE RESTRICT,
+    FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE CASCADE
 );
 -- =========================
 -- Discs
@@ -539,8 +539,8 @@ CREATE TABLE IF NOT EXISTS Discs (
     Number INTEGER NOT NULL,
     Name TEXT,
     ArtworkId INTEGER,
-    FOREIGN KEY (AlbumId) REFERENCES Albums(Id) ON DELETE SET NULL,
-    FOREIGN KEY (ArtworkId) REFERENCES Artworks(Id) ON DELETE SET NULL
+    FOREIGN KEY (AlbumId) REFERENCES Albums(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ArtworkId) REFERENCES Artworks(Id) ON DELETE CASCADE
 );
 
 -- =========================
