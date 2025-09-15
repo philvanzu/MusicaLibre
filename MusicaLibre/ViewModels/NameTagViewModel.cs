@@ -33,7 +33,7 @@ public abstract partial class NameTagViewModelBase : ViewModelBase, IVirtualizab
         }
     }
     
-    public long DatabaseIndex => _model.DatabaseIndex != null? _model.DatabaseIndex.Value:-1;
+    public long DatabaseIndex => _model.DatabaseIndex;
     public int RandomIndex { get; set; }
     public Bitmap? Thumbnail => Artwork?.Thumbnail;
     [ObservableProperty] private bool _isSelected;

@@ -104,9 +104,39 @@ public partial class NameTagsListViewModel<T> : NameTagsPresenterViewModelBase, 
         foreach (var item in _items)
             item.RandomIndex = CryptoRandom.NextInt();
     }
+
+    public override void Filter(string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            Sort();
+            return;
+        }
+        Dictionary<Track, double> weights = SearchUtils.FilterTracks( searchString, TracksPool, Library);
+        
+        var groupWeights = new Dictionary<NameTagViewModel<T>, double>();
+        foreach (var item in _items)
+        {
+            double w = 0;
+            foreach(var track in item.Tracks)
+                w += weights.GetValueOrDefault(track);
+            if(w > 0)
+                groupWeights.Add(item, w);
+        }
+        var filtered = _items.Where(x => groupWeights.GetValueOrDefault(x) > 0);
+        var ordered = filtered.OrderByDescending(x => groupWeights.GetValueOrDefault(x));
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(ordered);
+
+        OnPropertyChanged(nameof(Items));
+    }
     public void Sort()
     {
-        
+        if (!string.IsNullOrWhiteSpace(Library.SearchString))
+        {
+            Filter(Library.SearchString);
+            return;
+        }
 
         if(Library.CurrentStep.SortingKeys.Any(x => x is SortingKey<NameSortKeys> sk && sk.Key == NameSortKeys.Random))
             ShufflePages();
@@ -151,7 +181,7 @@ public class ArtistsListViewModel(LibraryViewModel library, List<Track> tracksPo
         (t, a) => t.Where(x => x.Artists.Contains(a)).ToList(),
         t =>
         {
-            var ids =  t.SelectMany(track => track.Artists).Select(artist => artist.DatabaseIndex).Where(id => id.HasValue)
+            var ids =  t.SelectMany(track => track.Artists).Select(artist => artist.DatabaseIndex)
                 .Distinct().ToList();
             return library.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
@@ -170,7 +200,7 @@ public class GenresListViewModel(LibraryViewModel library, List<Track> tracksPoo
         (t, g) => t.Where(x => x.Genres.Contains(g)).ToList(),
         t =>
         {
-            var ids =  t.SelectMany(track => track.Genres).Select(genre => genre.DatabaseIndex).Where(id => id.HasValue)
+            var ids =  t.SelectMany(track => track.Genres).Select(genre => genre.DatabaseIndex)
                 .Distinct().ToList();
             return library.Genres.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
@@ -198,8 +228,9 @@ public class ComposersListViewModel(LibraryViewModel library, List<Track> tracks
         (t, a) => t.Where(x => x.Composers.Contains(a)).ToList(),
         t =>
         {
-            var ids = t.SelectMany(track => track.Composers).Select(composer => composer.DatabaseIndex)
-                .Where(id => id.HasValue).Distinct().ToList();
+            var ids = t.SelectMany(track => track.Composers)
+                .Select(composer => composer.DatabaseIndex)
+                .Distinct().ToList();
             return library.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
@@ -208,7 +239,7 @@ public class AudioFormatsListViewModel(LibraryViewModel library, List<Track> tra
         (t, a) => t.Where(x => x.AudioFormat == a).ToList(),
         t =>
         {
-            var ids = t.Select(track => track.AudioFormatId).Where(id => id.HasValue).Distinct().ToList();
+            var ids = t.Select(track => track.AudioFormatId).Distinct().ToList();
             return library.AudioFormats.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
@@ -226,7 +257,7 @@ public class FoldersListViewModel(LibraryViewModel library, List<Track> tracksPo
         (t, a) => t.Where(x => x.Folder == a).ToList(),
         t =>
         {
-          var ids = t.Select(track => track.FolderId).Where(id => id.HasValue).Distinct().ToList();
+          var ids = t.Select(track => track.FolderId).Distinct().ToList();
           return  library.Folders.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         } );
 

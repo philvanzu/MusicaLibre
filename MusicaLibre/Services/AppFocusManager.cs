@@ -78,12 +78,12 @@ public class AppFocusManager
             _isAppActive = anyActive;
             if (anyActive)
             {
-                Console.WriteLine("Bubbles gained focus");
+                //Console.WriteLine("Bubbles gained focus");
                 AppGainedFocus?.Invoke(this, EventArgs.Empty);
             }
             else
             {
-                Console.WriteLine("Bubbles lost focus");
+                //Console.WriteLine("Bubbles lost focus");
                 AppLostFocus?.Invoke(this, EventArgs.Empty);
             }
         }

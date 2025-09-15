@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using MusicaLibre.Models;
 using MusicaLibre.Views; 
 using MusicaLibre.ViewModels;
 namespace MusicaLibre.Services;
 
-public class DialogService : IDialogService
+public static class DialogUtils
 {
-    public async Task<string?> PickFileAsync(Window owner, string directoryPath, IEnumerable<FilePickerFileType>? filters = null)
+    public static async Task<string?> PickFileAsync(Window owner, string directoryPath, IEnumerable<FilePickerFileType>? filters = null)
     {
         var options = new FilePickerOpenOptions
         {
@@ -27,7 +28,7 @@ public class DialogService : IDialogService
 
         return files.Count > 0 ? files[0].Path.LocalPath : null;
     }
-    public async Task<string?> PickDirectoryAsync(Window owner)
+    public static async Task<string?> PickDirectoryAsync(Window owner)
     {
         var folders = await owner.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
@@ -38,7 +39,7 @@ public class DialogService : IDialogService
         return folders.Count > 0 ? folders[0].Path.LocalPath : null;
     }
 
-    public async Task<TResult?> ShowDialogAsync<TResult>(Window owner, object viewModel)
+    public static async Task<TResult?> ShowDialogAsync<TResult>(Window owner, object viewModel)
     {
         var window = CreateWindowForViewModel(viewModel);
         window.DataContext = viewModel;
@@ -47,13 +48,13 @@ public class DialogService : IDialogService
     
     
 
-    public void ShowModelessDialog(Window owner, object viewModel)
+    public static void ShowModelessDialog(Window owner, object viewModel)
     {
         var window = CreateWindowForViewModel(viewModel);
         window.DataContext = viewModel;
         window.Show(owner);
     }
-    public  Window CreateWindowForViewModel(object viewModel)
+    public static Window CreateWindowForViewModel(object viewModel)
     {
         return viewModel switch
         {
@@ -61,6 +62,27 @@ public class DialogService : IDialogService
             ProgressDialogViewModel vm => new ProgressDialog(vm),
             _ => throw new NotImplementedException($"No view mapped for view model: {viewModel.GetType().Name}")
         };
+    }
+    
+    public static async Task<Artwork?> ArtworkPicker(Window owner, LibraryViewModel library, List<Track> tracks, ArtworkRole role)
+    {
+        ArtworkPickerDialog dlg = new ArtworkPickerDialog();
+        ArtworkPickerViewModel vm = new ArtworkPickerViewModel(library, dlg, tracks, role);
+        dlg.DataContext = vm;
+        return await dlg.ShowDialog<Artwork?>(owner);
+    }
+
+    public static async Task MessageBox(Window owner, string title, string message)
+    {
+        var dlg = new OkCancelDialog();
+        var vm = new OkCancelViewModel()
+        {
+            Title = title,
+            Content = message,
+            ShowCancelButton = false,
+        };
+        dlg.DataContext = vm;
+        await dlg.ShowDialog(owner);
     }
 
 }

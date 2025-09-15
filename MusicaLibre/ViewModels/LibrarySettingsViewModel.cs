@@ -11,6 +11,8 @@ namespace MusicaLibre.ViewModels;
 
 public partial class LibrarySettingsViewModel: ViewModelBase
 {
+    public enum LibCreationAddedDateSources {now, fromCreated, fromModified}
+    public LibCreationAddedDateSources LibCreationAddedDateSource { get; set; } = LibCreationAddedDateSources.fromModified;
     
     private List<CustomOrdering> _customOrderings = new() { CustomOrdering.Default, };
     public List<CustomOrdering> CustomOrderings

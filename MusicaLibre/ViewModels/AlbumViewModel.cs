@@ -32,19 +32,22 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
     public virtual Artwork? Artwork => Model.Cover;
     public Bitmap? Thumbnail => Artwork?.Thumbnail;
 
+    private bool _suppressSelectedUpdates;
     [ObservableProperty] bool _isSelected;
-
     partial void OnIsSelectedChanged(bool oldValue, bool newValue)
     {
-        if (newValue && Presenter.SelectedItem != this )
+        if (_suppressSelectedUpdates) return;
+        try
         {
-            Presenter.SelectedItem = this;
-            Console.WriteLine($"{Title} is selected");
+            _suppressSelectedUpdates = true;   
+            if (newValue && Presenter.SelectedItem != this )
+                Presenter.SelectedItem = this;
+            else if (oldValue && Presenter.SelectedItem == this)
+                Presenter.SelectedItem = null;
         }
-        else if (oldValue && Presenter.SelectedItem == this)
+        finally
         {
-            Presenter.SelectedItem = null;
-            Console.WriteLine($"{Title} is unselected");
+            _suppressSelectedUpdates = false;
         }
     }
 
@@ -83,7 +86,7 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
     [RelayCommand] void Play()=>Presenter.Library.NowPlayingList.Replace(Tracks);
     [RelayCommand] void InsertNext()=>Presenter.Library.NowPlayingList.Insert(Tracks);
     [RelayCommand] void Append()=>Presenter.Library.NowPlayingList.Append(Tracks);
-    [RelayCommand] void OpenInExplorer() { }
+    [RelayCommand] void OpenInExplorer() { PathUtils.OpenInExplorer(Model.Folder.Name);}
 
     [RelayCommand] void Delete(){}
 

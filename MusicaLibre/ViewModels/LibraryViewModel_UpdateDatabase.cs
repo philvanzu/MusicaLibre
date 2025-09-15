@@ -21,7 +21,7 @@ public partial class LibraryViewModel : ViewModelBase
          TagUtils.EnqueueFileUpdate(track);
       }
       
-      Genres.Remove(genre.DatabaseIndex!.Value);
+      Genres.Remove(genre.DatabaseIndex);
       _ = genre.DbRemoveAsync(Database);
    }
 
@@ -61,7 +61,7 @@ public partial class LibraryViewModel : ViewModelBase
    public void AddDisc(uint number, Album album)
    {
       var disc = new Disc(number, album);
-      Discs.Add((number, album.DatabaseIndex.Value), disc);
+      Discs.Add((number, album.DatabaseIndex), disc);
       _ = disc.DbInsertAsync(Database);
    }
 
@@ -85,6 +85,6 @@ public partial class LibraryViewModel : ViewModelBase
    public void AddFolder(Folder folder)
    {
       _ = folder.DbInsertAsync(Database);
-      Folders.Add(folder.DatabaseIndex.Value, folder);
+      Folders.Add(folder.DatabaseIndex, folder);
    }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using MusicaLibre.Services;
@@ -10,16 +11,16 @@ namespace MusicaLibre.Models;
 
 public class Album
 {
-    public long? DatabaseIndex { get; set; }
+    public long DatabaseIndex { get; set; }
     public string Title { get; set; }
     public Artist AlbumArtist { get; set; }
-    public long? ArtistId { get; set; }
+    public long ArtistId { get; set; }
     public Artwork? Cover { get; set; }
     public long? CoverId { get; set; }
     public Year? Year { get; set; }
     public long? YearId { get; set; }
     public Folder Folder { get; set; }
-    public long? FolderId { get; set; }
+    public long FolderId { get; set; }
     public DateTime? Modified { get; set; }
     public DateTime? Created { get; set; }
     public DateTime? LastPlayed { get; set; }
@@ -136,18 +137,18 @@ public class Album
 
             Album album = new Album()
             {
-                DatabaseIndex = Database.GetValue<long>(row, "Id"),
-                Title = Database.GetString(row, "Title"),
-                ArtistId = Database.GetValue<long>(row, "AlbumArtist"),
-                YearId = Database.GetValue<long>(row, "YearId")!.Value,
-                FolderId = Database.GetValue<long>(row, "FolderId"),
+                DatabaseIndex = Convert.ToInt64(row["Id"]),
+                Title = (string?)row["Title"] ?? string.Empty,
+                ArtistId = Convert.ToInt64(row["AlbumArtist"]),
+                YearId = Database.GetValue<long>(row, "YearId"),
+                FolderId = Convert.ToInt64(row["FolderId"]),
                 Added = added!=null ? TimeUtils.FromUnixTime(added.Value) : null,
                 Modified = modified!=null ? TimeUtils.FromUnixTime(modified.Value) : null,
                 Created = created!=null ? TimeUtils.FromUnixTime(created.Value) : null,
                 LastPlayed = lastPlayed!=null ? TimeUtils.FromUnixTime(lastPlayed.Value) : null,
                 CoverId = Database.GetValue<long>(row, "CoverId"),
             };
-            albums.Add(album.DatabaseIndex!.Value, album);
+            albums.Add(album.DatabaseIndex, album);
         }
 
         return albums;
@@ -168,19 +169,44 @@ public class Album
         {
             rootf = new Folder(rootFolder);
             await rootf.DbInsertAsync(library.Database);
-            library.Folders.Add(rootf.DatabaseIndex.Value, rootf);
+            library.Folders.Add(rootf.DatabaseIndex, rootf);
         }
         Folder = rootf;
         await DbUpdateAsync(library.Database);
     }
-
-    public static Album Null = new Album()
-    {
-        DatabaseIndex = 0,
-        Title = "Null",
-        AlbumArtist = Artist.Null,
-        Year = Year.Null,
-    };
     
+    public void FindAlbumCover()
+    {
+        if (Artworks.Count == 0) return;
+        else if (Artworks.Count == 1)
+        {
+            Cover = Artworks.First();
+            return;
+        }
+        foreach (var artwork in Artworks)
+        {
+            if (artwork.Role == ArtworkRole.CoverFront )
+            {
+                Cover = artwork;
+                return;
+            }
 
+            if (artwork.Role == ArtworkRole.Other)
+            {
+                var filename = System.IO.Path.GetFileNameWithoutExtension(artwork.SourcePath)??string.Empty;
+                var escapedTitle = Regex.Escape(Title);
+                var pattern = Regex.Replace(escapedTitle, @"\s+", @"\W+"); 
+                bool match = Regex.IsMatch(filename, pattern, RegexOptions.IgnoreCase);
+
+                if ( match)
+                {
+                    Cover = artwork;
+                    return;
+                }
+            }
+            
+        }
+
+        Cover = Artworks.First();
+    }
 }

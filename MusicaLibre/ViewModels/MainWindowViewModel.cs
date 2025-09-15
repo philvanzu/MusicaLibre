@@ -18,7 +18,6 @@ namespace MusicaLibre.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private DialogService DialogService { get; init; }
     [ObservableProperty] ProgressViewModel _statusProgress =  new ProgressViewModel();
     [ObservableProperty] LibraryViewModel? _library;
     
@@ -27,11 +26,10 @@ public partial class MainWindowViewModel : ViewModelBase
     private ProgressDialogViewModel _progressDialog;
     public Window MainWindow { get; init; }
   
-    public MainWindowViewModel(Window mainWindow, DialogService dialogService)
+    public MainWindowViewModel(Window mainWindow)
     {
         MainWindow = mainWindow;
-        DialogService = dialogService;
-        _progressDialog = new ProgressDialogViewModel(DialogService);
+        _progressDialog = new ProgressDialogViewModel();
         
         _player = new PlayerViewModel(this);
     }
@@ -62,7 +60,7 @@ public partial class MainWindowViewModel : ViewModelBase
         await  Dispatcher.UIThread.InvokeAsync(async () =>
         {
             string? selectedPath;
-            selectedPath = await DialogService.PickDirectoryAsync(MainWindow);
+            selectedPath = await DialogUtils.PickDirectoryAsync(MainWindow);
 
             if (!string.IsNullOrEmpty(selectedPath) && Directory.Exists(selectedPath))
             {
@@ -107,7 +105,7 @@ public partial class MainWindowViewModel : ViewModelBase
         await  Dispatcher.UIThread.InvokeAsync(async () =>
         {
             string? selectedPath;
-            selectedPath = await DialogService.PickFileAsync(MainWindow, AppData.Path, new[]
+            selectedPath = await DialogUtils.PickFileAsync(MainWindow, AppData.Path, new[]
             {
                 new FilePickerFileType("MusicaLibre Library Files") { Patterns = new[] { "*.db" } },
                 FilePickerFileTypes.All // built-in “All files (*.*)”

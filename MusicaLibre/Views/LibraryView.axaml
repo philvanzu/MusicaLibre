@@ -98,7 +98,8 @@
                                  Width="400"
                                  Height="30"
                                  Text="{Binding SearchString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Watermark="Search ..." />
+                                 Watermark="Search ..." 
+                                 KeyDown="OnSearBoxKeyDown"/>
 
                         <!-- Clear Button (small "x") -->
                         <Button Width="16"

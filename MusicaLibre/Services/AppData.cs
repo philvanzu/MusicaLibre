@@ -93,5 +93,9 @@ public class AppState
 public class UserSettings
 {
     
+    public string ImagesImportPath { get; set; } = "/ImportedImages";
+    public bool FilterOutEmptyPlaylists { get; set; } = true;
 }
+
+
 

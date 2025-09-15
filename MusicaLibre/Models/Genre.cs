@@ -44,7 +44,7 @@ public class Genre:NameTag
 
     public Dictionary<string, object?> GetUpdateParameters() => new() {
         ["$name"] = Name,
-        ["artworkId"] = Artwork?.DatabaseIndex != null ? Artwork.DatabaseIndex.Value : null, 
+        ["artworkId"] = Artwork?.DatabaseIndex != null ? Artwork.DatabaseIndex : null, 
         ["id"] = DatabaseIndex, };
     public void DbUpdate(Database db)=> db.ExecuteNonQuery(updateSql, GetUpdateParameters());
     public async Task DbUpdateAsync(Database db)=>await db.ExecuteNonQueryAsync(updateSql, GetUpdateParameters());
@@ -71,18 +71,11 @@ public class Genre:NameTag
             var name = Database.GetString(row, "Name");
             Genre genre = new Genre(name!)
             {
-                DatabaseIndex = Database.GetValue<long>(row, "Id")
+                DatabaseIndex = Convert.ToInt64(row["Id"])
             };
-            genres.Add(genre.DatabaseIndex!.Value, genre);
+            genres.Add(genre.DatabaseIndex, genre);
         }
 
         return genres;
     }
-
-
-    
-    public static Genre Null = new Genre("Null")
-    {
-        DatabaseIndex = null
-    };
 }

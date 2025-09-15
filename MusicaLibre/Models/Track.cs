@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media.Imaging;
+using CommunityToolkit.Mvvm.ComponentModel.__Internals;
 using DynamicData.Binding;
 using MusicaLibre.Services;
 using MusicaLibre.ViewModels;
@@ -14,13 +15,13 @@ public class Track
 {
     // Identity
     public long DatabaseIndex { get; set; } // Persistent internal ID
-    public string? FilePath { get; set; } // Full path or UNC path
-    public string? FileName { get; set; }
+    public string FilePath { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
     
-    public string FolderPathstr { get; set; }
-    public Folder? Folder { get; set; }
-    public long? FolderId { get; set; }
-    public string? FileExtension { get; set; }
+    public string FolderPathstr { get; set; } = string.Empty;
+    public Folder Folder { get; set; }
+    public long FolderId { get; set; }
+    public string FileExtension { get; set; } = string.Empty;
 
     // Core tags
     public string? Title { get; set; }
@@ -43,11 +44,13 @@ public class Track
     public double? Rating { get; set; }
 
     // Technical
-    public TimeSpan? Duration { get; set; }
+    public TimeSpan Duration { get; set; }
+    public double Start { get; set; } = 0;
+    public double End { get; set; } = 1;
     public int? BitrateKbps { get; set; }
     public string? Codec { get; set; } // e.g., FLAC, MP3, Opus
-    public AudioFormat? AudioFormat { get; set; }
-    public long? AudioFormatId { get; set; }
+    public AudioFormat AudioFormat { get; set; }
+    public long AudioFormatId { get; set; }
     public int? SampleRate { get; set; }
     public int? Channels { get; set; }
     
@@ -58,13 +61,13 @@ public class Track
     
 
     // State info
-    public DateTime? DateAdded { get; set; }
+    public DateTime DateAdded { get; set; }
     public DateTime? LastPlayed { get; set; }
-    public DateTime? Modified { get; set; }
-    public DateTime? Created { get; set; }
-    public int? PlayCount { get; set; }
-    
+    public DateTime Modified { get; set; }
+    public DateTime Created { get; set; }
+    public int PlayCount { get; set; }
 
+    public static Track Copy (Track other) => (Track)other.MemberwiseClone();
     // Flags
     public bool IsMissing { get; set; } // File not found
     
@@ -73,85 +76,11 @@ public class Track
         var id = db.ExecuteScalar(insertSql, Parameters);
         DatabaseIndex =  Convert.ToInt64(id);
     }
-
-    public async Task DbInsertAsync(Database db, Action<long>? callback = null)
-    {
-        try
-        {
-            var id = await db.ExecuteScalarAsync(insertSql, Parameters);
-            DatabaseIndex =  Convert.ToInt64(id);
-            callback?.Invoke(DatabaseIndex);    
-        }
-        catch(Exception e){Console.WriteLine(e);}
-    }
-    
-    public void DbUpdate(Database db)=>db.ExecuteNonQuery(updateSql, Parameters);
-    public async Task DbUpdateAsync(Database db)
-    {
-        try
-        {
-            await db.ExecuteNonQueryAsync(updateSql, Parameters);    
-        }
-        catch(Exception e){Console.WriteLine(e);}
-    }
-
-    public static Dictionary<long, Track> FromDatabase(Database db, int[]? indexes = null)
-    {
-        string filter = String.Empty;
-        if (indexes != null && indexes.Length == 0)
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
-
-        string sql = $@"SELECT * FROM Tracks {filter};";
-
-        Dictionary<long, Track> tracks = new();
-        foreach (var row in db.ExecuteReader(sql))
-        {
-            
-            var  modified = Database.GetValue<long>(row, "Modified");
-            var lastPlayed = Database.GetValue<long>(row, "LastPlayed");
-            var created = Database.GetValue<long>(row, "Created");
-            var added = Database.GetValue<long>(row, "Added");
-            var duration = Database.GetValue<double>(row, "Duration");
-            Track track = new Track()
-            {
-                DatabaseIndex = Convert.ToInt64(row["Id"]),
-                AlbumId = Database.GetValue<long>(row, "AlbumId"),
-                PublisherId = Database.GetValue<long>(row, "PublisherId"),
-                RemixerId = Database.GetValue<long>(row, "RemixerId"),
-                ConductorId = Database.GetValue<long>(row, "ConductorId"),
-                FilePath = Database.GetString(row, "FilePath"),
-                FileName = Database.GetString(row, "FileName"),
-                FolderId = Database.GetValue<long>(row, "FolderId"),
-                FileExtension = Database.GetString(row, "FileExtension"),
-                Title = Database.GetString(row, "Title"),
-                YearId = Database.GetValue<long>(row, "YearId"),
-                TrackNumber = Convert.ToUInt32(row["TrackNumber"]),
-                DiscNumber = Convert.ToUInt32(row["DiscNumber"]),
-                Duration = duration !=null ? TimeUtils.FromMilliseconds(duration.Value):null,
-                Codec = Database.GetString(row, "Codec"),
-                BitrateKbps = Database.GetValue<int>(row, "Bitrate"),
-                SampleRate = Database.GetValue<int>(row, "SampleRate"),
-                Channels = Database.GetValue<int>(row, "Channels"),
-                AudioFormatId =  Database.GetValue<long>(row, "AudioFormatId"), 
-                DateAdded = added!=null ? TimeUtils.FromUnixTime(added.Value) : null,
-                Modified = modified!=null ? TimeUtils.FromUnixTime(modified.Value) : null,
-                Created = created!=null ? TimeUtils.FromUnixTime(created.Value) : null,
-                LastPlayed = lastPlayed!=null ? TimeUtils.FromUnixTime(lastPlayed.Value) : null,
-                Comment = Database.GetString(row, "Comments"),
-                Rating = Database.GetValue<double>(row, "Rating"),
-                PlayCount = Database.GetValue<int>(row, "PlayCount"),
-            };
-            tracks.Add(track.DatabaseIndex, track);
-        }
-
-        return tracks;
-    }
-    
     private const string insertSql= @"
-        INSERT INTO Tracks (FilePath, FileName, FolderId, FileExtension, Title, YearId, TrackNumber, DiscNumber, Duration, 
+        INSERT INTO Tracks (FilePath, FileName, FolderId, FileExtension, Title, YearId, TrackNumber, DiscNumber, Duration, Start, End, 
                             Codec, Bitrate, AudioFormatId, SampleRate, Channels, Added, Modified, Created, LastPlayed, AlbumId, 
                             PublisherId, ConductorId, RemixerId, Comments, Rating)
-        VALUES ($filepath, $filename, $folderId, $ext, $title, $yearId, $tracknumber, $disc, $duration, 
+        VALUES ($filepath, $filename, $folderId, $ext, $title, $yearId, $tracknumber, $disc, $duration, $start, $end,
                 $codec, $bitrate, $format, $samplerate, $channels, $added, $modified, $created, $played, $albumId, 
                 $publisherId, $conductorId, $remixerId, $comments, $rating);
         SELECT last_insert_rowid();";
@@ -167,6 +96,8 @@ public class Track
             TrackNumber = $tracknumber, 
             DiscNumber = $disc, 
             Duration = $duration, 
+            Start = $start,
+            End = $end,
             Codec = $codec, 
             Bitrate = $bitrate, 
             AudioFormatId = $format, 
@@ -194,15 +125,17 @@ public class Track
         ["$yearId"] = Year?.DatabaseIndex,
         ["$tracknumber"]=TrackNumber,
         ["$disc"] = DiscNumber,
-        ["$duration"] = Duration.HasValue? TimeUtils.ToMilliseconds(Duration.Value):null,
+        ["$duration"] = TimeUtils.ToMilliseconds(Duration),
+        ["$start"] = Start,
+        ["$end"] = End,
         ["$codec"] = Codec,
         ["$bitrate"] = BitrateKbps,
         ["$format"] = AudioFormat?.DatabaseIndex,
         ["$samplerate"] = SampleRate,
         ["$channels"] = Channels,
-        ["$added"] =  DateAdded.HasValue ? TimeUtils.ToUnixTime(DateAdded.Value):null,
-        ["$modified"] = Modified.HasValue ? TimeUtils.ToUnixTime(Modified.Value):null,
-        ["$created"] = Created.HasValue ? TimeUtils.ToUnixTime(Created.Value):null,
+        ["$added"] =  TimeUtils.ToUnixTime(DateAdded),
+        ["$modified"] = TimeUtils.ToUnixTime(Modified),
+        ["$created"] = TimeUtils.ToUnixTime(Created),
         ["$played"] = LastPlayed.HasValue ? TimeUtils.ToUnixTime(LastPlayed.Value):null, 
         ["$albumId"] = Album?.DatabaseIndex, 
         ["$publisherId"] = Publisher?.DatabaseIndex, 
@@ -213,7 +146,87 @@ public class Track
         ["$id"] = DatabaseIndex
     };
     
+    const string deleteSql="DELETE FROM Tracks WHERE Id = $id;";
     
+    public async Task DbInsertAsync(Database db, Action<long>? callback = null)
+    {
+        try
+        {
+            var id = await db.ExecuteScalarAsync(insertSql, Parameters);
+            DatabaseIndex =  Convert.ToInt64(id);
+            callback?.Invoke(DatabaseIndex);    
+        }
+        catch(Exception e){Console.WriteLine(e);}
+    }
+    
+    public void DbUpdate(Database db)=>db.ExecuteNonQuery(updateSql, Parameters);
+    public async Task DbUpdateAsync(Database db)
+    {
+        try
+        {
+            await db.ExecuteNonQueryAsync(updateSql, Parameters);    
+        }
+        catch(Exception e){Console.WriteLine(e);}
+    }
+    
+    public void DbDelete(Database db)=>db.ExecuteNonQuery(deleteSql, Parameters);
+    public async Task DbDeleteAsync(Database db)=>await db.ExecuteNonQueryAsync(deleteSql, Parameters);
+
+    public static Dictionary<long, Track> FromDatabase(Database db, int[]? indexes = null)
+    {
+        string filter = String.Empty;
+        if (indexes != null && indexes.Length == 0)
+            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
+
+        string sql = $@"SELECT * FROM Tracks {filter};";
+
+        Dictionary<long, Track> tracks = new();
+        foreach (var row in db.ExecuteReader(sql))
+        {
+            
+            var  modified = Convert.ToInt64(row["Modified"]);
+            var lastPlayed = Database.GetValue<long>(row, "LastPlayed");
+            var created = Convert.ToInt64(row["Created"]);
+            var added = Convert.ToInt64(row["Added"]);
+            var duration = Convert.ToInt64(row["Duration"]);
+            Track track = new Track()
+            {
+                DatabaseIndex = Convert.ToInt64(row["Id"]),
+                AlbumId = Database.GetValue<long>(row, "AlbumId"),
+                PublisherId = Database.GetValue<long>(row, "PublisherId"),
+                RemixerId = Database.GetValue<long>(row, "RemixerId"),
+                ConductorId = Database.GetValue<long>(row, "ConductorId"),
+                FilePath = (string?) row["FilePath"]??String.Empty,
+                FileName = (string?) row["FileName"]??String.Empty,
+                FolderId = Convert.ToInt64(row["FolderId"]),
+                FileExtension = (string?) row["FileExtension"]??String.Empty,
+                Title = Database.GetString(row, "Title"),
+                YearId = Database.GetValue<long>(row, "YearId"),
+                TrackNumber = Convert.ToUInt32(row["TrackNumber"]),
+                DiscNumber = Convert.ToUInt32(row["DiscNumber"]),
+                Duration = TimeUtils.FromMilliseconds(duration),
+                Start = Convert.ToDouble(row["Start"]),
+                End = Convert.ToDouble(row["End"]),
+                Codec = Database.GetString(row, "Codec"),
+                BitrateKbps = Database.GetValue<int>(row, "Bitrate"),
+                SampleRate = Database.GetValue<int>(row, "SampleRate"),
+                Channels = Database.GetValue<int>(row, "Channels"),
+                AudioFormatId =  Convert.ToInt64(row["AudioFormatId"]), 
+                DateAdded = TimeUtils.FromUnixTime(added),
+                Modified = TimeUtils.FromUnixTime(modified),
+                Created = TimeUtils.FromUnixTime(created),
+                LastPlayed = lastPlayed!=null ? TimeUtils.FromUnixTime(lastPlayed.Value) : null,
+                Comment = Database.GetString(row, "Comments"),
+                Rating = Database.GetValue<double>(row, "Rating"),
+                PlayCount = Convert.ToInt32(row["PlayCount"]),
+            };
+            tracks.Add(track.DatabaseIndex, track);
+        }
+
+        return tracks;
+    }
+    
+
     public async Task UpdateGenresAsync(LibraryViewModel library)
     {
         try
@@ -222,18 +235,37 @@ public class Track
             await library.Database.ExecuteNonQueryAsync(delete);
         
             string insert = "INSERT INTO TrackGenres (TrackId, GenreId) VALUES ($id, $genreId);";
-            foreach( var genre in Genres .Select(x=>x.DatabaseIndex))
-                if (genre.HasValue)
+            foreach (var genre in Genres.Select(x => x.DatabaseIndex))
+            {
+                _ = library.Database.ExecuteNonQueryAsync(insert, new()
                 {
-                    _ = library.Database.ExecuteNonQueryAsync(insert, new()
-                    {
-                        ["$id"] = DatabaseIndex,
-                        ["$genreId"] = genre.Value,
-                    });
-                }    
+                    ["$id"] = DatabaseIndex,
+                    ["$genreId"] = genre,
+                });
+            }
         }
         catch(Exception e){Console.WriteLine(e);}
-    } 
+    }
+
+    public async Task UpdateArtistsAsync(LibraryViewModel library)
+    {
+        try
+        {
+            string delete = $"DELETE FROM TrackArtists WHERE TrackId = {DatabaseIndex};";
+            await library.Database.ExecuteNonQueryAsync(delete);
+            
+            string insert=$"INSERT INTO TrackArtists (TrackId, ArtistId) VALUES ($id, $artistId);";
+            foreach (var artist in Artists.Select(x => x.DatabaseIndex))
+            {
+                _ = library.Database.ExecuteNonQueryAsync(insert, new()
+                {
+                    ["$id"] = DatabaseIndex,
+                    ["$artistId"] = artist
+                });
+            }
+        }
+        catch(Exception e){Console.WriteLine(e);}
+    }
 
     /*
     public static Track Null = new Track()

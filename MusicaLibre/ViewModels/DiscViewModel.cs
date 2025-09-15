@@ -11,7 +11,7 @@ public partial class DiscViewModel:ViewModelBase, IDisposable
     
     [ObservableProperty] private Disc _disc;
         
-    Bitmap? Thumbnail => Disc.Artwork?.Thumbnail;
+    public Bitmap? Thumbnail => Disc.Artwork?.Thumbnail;
 
     public DiscViewModel(Disc disc)
     {

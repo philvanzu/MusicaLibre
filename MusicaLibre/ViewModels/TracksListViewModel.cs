@@ -148,14 +148,14 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
                 ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Publisher??"")
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.Publisher??""),
             TrackSortKeys.Added => ascending
-                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.DateAdded??DateTime.MinValue)
-                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.DateAdded??DateTime.MinValue),
+                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.DateAdded)
+                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.DateAdded),
             TrackSortKeys.Modified => ascending
-                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.Modified??DateTime.MinValue)
-                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.Modified??DateTime.MinValue),
+                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.Modified)
+                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.Modified),
             TrackSortKeys.Created => ascending
-                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.Created??DateTime.MinValue)
-                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.Created??DateTime.MinValue),
+                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.Created)
+                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.Created),
             TrackSortKeys.Played => ascending
                 ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.LastPlayed??DateTime.MinValue)
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.LastPlayed??DateTime.MinValue),
@@ -163,8 +163,8 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
                 ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.Comment??"")
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.Comment??""),
             TrackSortKeys.Duration => ascending
-                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.Duration??TimeSpan.MinValue)
-                : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.Duration??TimeSpan.MinValue),
+                ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.TrackDuration??TimeSpan.MinValue)
+                : SortExpressionComparer<TrackViewModel>.Descending(x => x.TrackDuration??TimeSpan.MinValue),
             TrackSortKeys.Bitrate => ascending
                 ? SortExpressionComparer<TrackViewModel>.Ascending(x => x.Model.BitrateKbps??0)
                 : SortExpressionComparer<TrackViewModel>.Descending(x => x.Model.BitrateKbps??0),
@@ -194,8 +194,35 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
         foreach (var track in _tracks)
             track.RandomIndex = CryptoRandom.NextInt();
     }
+
+    public override void Filter(string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            Sort();
+            return;
+        }
+
+        var weights = SearchUtils.FilterTracks( searchString, _tracks.Select(x => x.Model).ToList(), Library);
+
+        var ordered = _tracks.Where(x => weights.GetValueOrDefault(x.Model) > 0)
+            .OrderByDescending(x => weights.GetValueOrDefault(x.Model))
+            .ThenBy(x => x.Model.Title);
+            
+        
+        _tracksMutable.Clear();
+        _tracksMutable.AddRange(ordered);
+
+        OnPropertyChanged(nameof(Tracks));
+    }
+
     public void Sort()
     {
+        if (!string.IsNullOrWhiteSpace(Library.SearchString))
+        {
+            Filter(Library.SearchString);
+            return;
+        }
         if(Library.CurrentStep.SortingKeys.Select(x=>  (x is SortingKey<TrackSortKeys> sk) && sk.Key == TrackSortKeys.Random).Any())
             ShufflePages();
 

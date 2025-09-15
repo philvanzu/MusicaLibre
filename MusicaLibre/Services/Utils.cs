@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using MusicaLibre.Models;
+using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.Services;
 
@@ -161,6 +163,38 @@ public static class PathUtils
     {
         throw new NotImplementedException();
     }
+
+    public static void OpenInExplorer(string filePath)
+    {
+        bool fileExists = File.Exists(filePath);
+        bool directoryExists = Directory.Exists(filePath);
+        var directoryPath = directoryExists? filePath : Path.GetDirectoryName(filePath);
+
+        if (fileExists)
+        {
+            string? desktop = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP")
+                              ?? Environment.GetEnvironmentVariable("DESKTOP_SESSION")
+                              ?? string.Empty;
+            desktop = desktop.ToLowerInvariant();
+                
+            //GNOME (Nautilus)
+            if (desktop.Contains("gnome") || desktop.Contains("unity") || desktop.Contains("cinnamon"))
+                Process.Start("nautilus", $"--select \"{filePath}\"");
+            //Dolphin (KDE)
+            else if (desktop.Contains("kde"))
+                Process.Start("dolphin", $"--select \"{filePath}\"");
+            // Try with xdg-open (common across most Linux desktop environments)
+            else
+                Process.Start(new ProcessStartInfo("xdg-open", $"\"{directoryPath}\"") { UseShellExecute = true });    
+        }
+        else
+        {
+            Process.Start(new ProcessStartInfo("xdg-open", $"\"{directoryPath}\"") { UseShellExecute = true });
+        }
+                
+    }
+
+    
 }
 
 public static class EnumUtils
@@ -239,6 +273,50 @@ public static class TimeUtils
         
         return null;
     }
+
+    public static DateTime Earliest(IEnumerable<DateTime> array)
+    {
+        var ret = DateTime.MaxValue;
+        foreach (var date in array)
+            if (date !=null && date < ret)
+                ret = date;
+        
+        return ret;
+    }
+
+    public static DateTime Latest(IEnumerable<DateTime> array)
+    {
+        var ret = DateTime.MinValue;
+        foreach (var date in array)
+            if (date > ret)
+                ret = date;
+        return ret;
+    }
+    
+    public static TimeSpan ParseCueTime(string timecode)
+    {
+        // mm:ss:ff (75 frames per second)
+        var parts = timecode.Split(':');
+        if (parts.Length != 3) return TimeSpan.Zero;
+
+        int mm = int.Parse(parts[0]);
+        int ss = int.Parse(parts[1]);
+        int ff = int.Parse(parts[2]);
+
+        return TimeSpan.FromSeconds(mm * 60 + ss + ff / 75.0);
+    }
+
+    public static (double start, double end) GetCueTrackTimes(TimeSpan tStart, TimeSpan? tEnd, TimeSpan tDuration)
+    {
+        if (tDuration.Ticks <= 0)
+            return (0, 1);
+        
+        var start= (double) tStart.Ticks / tDuration.Ticks;
+        var end = tEnd.HasValue ? (double)tEnd.Value.Ticks / tDuration.Ticks : 1;
+        start = Math.Clamp(start, 0, 1);
+        end   = Math.Clamp(end, start, 1);
+        return (start, end);
+    }
 }
 
 public static class UnicodeUtils
@@ -248,6 +326,77 @@ public static class UnicodeUtils
     public static string desc = "⌄";
     public static string hamburger = "☰";
     public static string play = "▶";
+}
+
+public static class SearchUtils
+{
+    public static double GetScore(string[] searchTokens, string[] fieldTokens, double weight)
+    {
+        double score = 0.0;
+        var tokens = fieldTokens.ToList(); // mutable copy
+        double penalty = weight * 0.05;   // 5% of the field weight
+
+        foreach (var search in searchTokens)
+        {
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                if (string.Equals(tokens[i], search, StringComparison.OrdinalIgnoreCase))
+                {
+                    score += weight * 2;   // exact match bonus
+                    tokens.RemoveAt(i);
+                    break;
+                }
+                else if (tokens[i].Contains(search, StringComparison.OrdinalIgnoreCase))
+                {
+                    score += weight;       // partial match bonus
+                    tokens.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        // Penalize remaining unmatched tokens
+        score -= tokens.Count * penalty;
+
+        return score;
+    }
+
+    public static Dictionary<Track, double> FilterTracks(string searchString, List<Track> tracks, LibraryViewModel library)
+    {
+        var splits = searchString.Split(' ').Select(x => x.Trim()).ToArray();
+        
+        var weights =  new Dictionary<Track, double>();
+        var artistWeights = new Dictionary<Artist, double>();
+
+        foreach (var artist in library.Artists.Values)
+        {
+            string[] arr = { artist.Name };
+            var aw = GetScore(splits, arr, 1.0);
+            if (aw > 0)
+                artistWeights[artist] = artistWeights.GetValueOrDefault(artist) + aw;
+        }
+        // Title matches – strongest
+        foreach (var track in tracks)
+        {
+            
+            var titleweight = string.IsNullOrWhiteSpace(track.Title)? 0 :
+                GetScore(splits, track.Title.Split(' ').Select(x => x.Trim()).ToArray(), 1.0);
+
+            var albumweight = track.Album is null ? 0 : 
+                GetScore(splits, track.Album.Title.Split(' ').Select(x => x.Trim()).ToArray(), 1.0);
+
+            double artistweight = 0;
+            foreach(var kv in artistWeights)
+                if(track.Artists.Contains(kv.Key))
+                    artistweight += kv.Value;
+                
+            var weight = Math.Max(artistweight, Math.Max(titleweight, albumweight));
+            if (weight > 0)
+                weights[track] = weights.GetValueOrDefault(track) + weight;    
+        }
+        return weights;
+    }
+
 }
 
 

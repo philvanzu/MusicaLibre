@@ -13,6 +13,7 @@ namespace MusicaLibre.ViewModels;
 
 public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
 {
+    TagsEditorViewModel _tagsEditor;
     [ObservableProperty] LibraryViewModel _library;
     [ObservableProperty] private ObservableCollection<Album> _albums;
     [ObservableProperty] private ObservableCollection<DiscViewModel>? _selectedDiscs;
@@ -20,6 +21,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
     [ObservableProperty] private int _selectedIndex;
     [ObservableProperty] private string? _title;
     [ObservableProperty] private string? _artist;
+    [ObservableProperty] IEnumerable<string>? _artistOptions;
     [ObservableProperty] private string? _folder;
     [ObservableProperty] private string? _year;
     [ObservableProperty] private string? _added;
@@ -31,6 +33,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
 
     public AlbumsEditorViewModel(TagsEditorViewModel tagsEditor, List<Album> albums)
     {
+        _tagsEditor = tagsEditor;
         _albums = new ObservableCollection<Album>(albums);
         Library = tagsEditor.Library;
         SelectedIndex = 0;
@@ -87,13 +90,32 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
         }
     }
 
+    partial void OnArtistChanged(string? value)
+    {
+        if (!string.IsNullOrEmpty(value))
+            ArtistOptions = Library.Artists.Values
+                .Where(x => x.Name.StartsWith(value, StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Name);
+
+        else ArtistOptions = null;
+    }
 
     [RelayCommand]
     async Task UpdatePressed()
     {
         if (SelectedAlbum == null) return;
-        
-        if(!string.IsNullOrEmpty(Title)) SelectedAlbum.Title = Title;
+
+        if (!string.IsNullOrEmpty(Title))
+        {
+            var album = Library.Albums.Values.FirstOrDefault(x => x.Title.Equals(Title));
+            if (album != null)
+            {
+                await DialogUtils.MessageBox(_tagsEditor.Window, "Error", "An Album with that Title already exists!");
+                //Transfer all album tracks to existing album?
+                return;
+            }
+            else SelectedAlbum.Title = Title;
+        }
         if (!string.IsNullOrEmpty(Artist))
         {
             var artist = Library.Artists.Values
@@ -102,6 +124,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
             {
                 artist = new Artist(Artist);
                 await artist.DbInsertAsync(Library.Database);
+                Library.Artists.Add(artist.DatabaseIndex, artist);
             }
             SelectedAlbum.AlbumArtist = artist;
         }
@@ -114,6 +137,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
             {
                 year = new Year(yearNumber);
                 await year.DbInsertAsync(Library.Database);
+                Library.Years.Add(year.DatabaseIndex, year);
             }
             SelectedAlbum.Year = year;
             if (SelectedTracks != null)
@@ -121,7 +145,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
                 foreach (var track in SelectedTracks)
                 {
                     track.Year = year;
-                    _ = track.DbUpdateAsync(Library.Database);
+                    await track.DbUpdateAsync(Library.Database);
                 }
             }
         }
@@ -131,7 +155,57 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
         SelectedAlbum.Created = TimeUtils.FromDateTimeString(Created);
         SelectedAlbum.LastPlayed = TimeUtils.FromDateTimeString(Played);
 
-        _ = SelectedAlbum.DbUpdateAsync(Library.Database);
+        await SelectedAlbum.DbUpdateAsync(Library.Database);
+    }
+
+    [RelayCommand] async Task PickArtwork()
+    {
+        if(SelectedAlbum is null) return;
+        
+        var tracks = Library.Tracks.Values.Where(x => x.Album == SelectedAlbum).ToList();
+        var artwork = await DialogUtils.ArtworkPicker(_tagsEditor.Window, Library, tracks, ArtworkRole.CoverFront);
+        if (artwork != null)
+        {
+            SelectedAlbum.Cover = artwork;
+            await SelectedAlbum.DbUpdateAsync(Library.Database);    
+        }
+    }
+
+    [RelayCommand]
+    private void ComputeAdded()
+    {
+        if(SelectedAlbum == null) return;
+        var tracksArray = Library.Tracks.Values
+            .Where(x => x.Album == SelectedAlbum)
+            .Select(x => x.DateAdded);
+        SelectedAlbum.Added = TimeUtils.Earliest(tracksArray);
+        Added =  TimeUtils.FormatDateTime(SelectedAlbum?.Added);
+        
+        OnPropertyChanged(nameof(Added));
+    }
+
+    [RelayCommand]
+    private void ComputeModified()
+    {
+        if(SelectedAlbum == null) return;
+        var tracksArray = Library.Tracks.Values
+            .Where(x => x.Album == SelectedAlbum)
+            .Select(x => x.Modified);
+        SelectedAlbum.Modified = TimeUtils.Latest(tracksArray);
+        Modified = TimeUtils.FormatDateTime(SelectedAlbum?.Modified);
+        OnPropertyChanged(nameof(Modified));
+    }
+
+    [RelayCommand]
+    private void ComputeCreated()
+    {
+        if(SelectedAlbum == null) return;
+        var tracksArray = Library.Tracks.Values
+            .Where(x => x.Album == SelectedAlbum)
+            .Select(x => x.Created);
+        SelectedAlbum.Created = TimeUtils.Earliest(tracksArray);
+        Created = TimeUtils.FormatDateTime(SelectedAlbum?.Created);
+        OnPropertyChanged(nameof(Created));
     }
 
 }

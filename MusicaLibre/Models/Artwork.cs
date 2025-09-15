@@ -7,29 +7,32 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using ImageMagick;
 using MusicaLibre.Services;
+using MusicaLibre.ViewModels;
+using MusicaLibre.Views;
 using SkiaSharp;
 
 namespace MusicaLibre.Models;
 
 public class Artwork:IDisposable
 {
-    public long? DatabaseIndex { get; set; }
-    public string? Hash { get; set; }
+    public long DatabaseIndex { get; set; }
+    public string Hash { get; set; }
     public ArtworkSourceType? SourceType { get; set; }
     public ArtworkRole? Role { get; set; }
-    public string? SourcePath { get; set; } // File path, UNC path, or URL
+    public string SourcePath { get; set; } // File path, UNC path, or URL
     public string FolderPathstr { get; set; }
-    public Folder? Folder { get; set; }
-    public long? FolderId { get; set; }
+    public Folder Folder { get; set; }
+    public long FolderId { get; set; }
     public int? BookletPage { get; set; }
     public byte[]? ThumbnailData { get; set; } // only stores a value before db insertion 
-    public int? Width { get; set; }
-    public int? Height { get; set; }
-    public string? MimeType { get; set; } // e.g., "image/jpeg", "image/png"
+    public int Width { get; set; }
+    public int Height { get; set; }
+    public string MimeType { get; set; } // e.g., "image/jpeg", "image/png"
     public int? EmbedIdx { get; set; }
 
     private Database _db;
@@ -149,9 +152,15 @@ public class Artwork:IDisposable
         ["$bookletPage"] = BookletPage,
     };
     
-    public void DataBaseInsert(Database db)
+    public void DbInsert(Database db)
     {
         var id = db.ExecuteScalar(insertSql, Parameters );
+        DatabaseIndex =  Convert.ToInt64(id);
+    }
+
+    public async Task DbInsertAsync(Database db)
+    {
+        var id = await db.ExecuteScalarAsync(insertSql, Parameters );
         DatabaseIndex =  Convert.ToInt64(id);
     }
     
@@ -169,21 +178,21 @@ public class Artwork:IDisposable
         {
             Artwork artwork = new Artwork(db)
             {
-                DatabaseIndex     = (int)Database.GetValue<int>(row, "Id")!,
-                Hash              = Database.GetString(row, "Hash"),
-                Width             = Database.GetValue<int>(row, "Width"),
-                Height            = Database.GetValue<int>(row, "Height"),
+                DatabaseIndex     = Convert.ToInt64(row["Id"]),
+                Hash              = (string)row["Hash"],
+                Width             = Convert.ToInt32(row["Width"]),
+                Height            = Convert.ToInt32(row["Height"]),
                 //Thumbnail         = row["Thumbnail"] as byte[],
-                MimeType          = Database.GetString(row, "MimeType"),
-                SourcePath        = Database.GetString(row, "SourcePath"),
-                FolderId      = Database.GetValue<long>(row, "FolderId"),
+                MimeType          = (string)row["MimeType"],
+                SourcePath        = (string)row["SourcePath"],
+                FolderId      = Convert.ToInt64(row["FolderId"]),
                 SourceType        = Database.GetEnum<ArtworkSourceType>(row, "SourceType"),
                 Role              = Database.GetEnum<ArtworkRole>(row, "Role"),
                 EmbedIdx     = Database.GetValue<int>(row, "EmbedIdx"),
                 BookletPage = Database.GetValue<int>(row, "BookletPage")
             };
 
-            artworks.Add(artwork.DatabaseIndex.Value, artwork);
+            artworks.Add(artwork.DatabaseIndex, artwork);
         }
 
         return artworks;
@@ -227,8 +236,8 @@ public class Artwork:IDisposable
         }
         catch (Exception e)
         {
-            Width = null;
-            Height = null;
+            Width = 0;
+            Height = 0;
             ThumbnailData = null;
             stream.Seek(0, SeekOrigin.Begin);
             ProcessImageFallback(stream);
@@ -256,9 +265,9 @@ public class Artwork:IDisposable
         }
         catch (Exception e)
         {
-            Hash = null;
-            Width = null;
-            Height = null;
+            Hash = string.Empty;
+            Width = 0;
+            Height = 0;
             ThumbnailData = null;
             Console.WriteLine($"Failed to decode image in {SourcePath}");
         }
@@ -277,10 +286,7 @@ public class Artwork:IDisposable
         return sourceBitmap.Resize(new SKImageInfo(targetWidth, targetHeight), SKSamplingOptions.Default);
     }
 
-    public void DbInsert(Database db)
-    {
-        
-    }
+
 
 }
 public enum ArtworkSourceType

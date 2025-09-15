@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -75,13 +76,17 @@ public partial class PlayerViewModel : ViewModelBase
     {
         if (CurrentPlayer != null && CurrentTrack != null)
         {
-            var pos = CurrentPlayer.GetPosition();
-            var elapsed = pos * CurrentTrack.Model.Duration.Value;
+            var filepos = CurrentPlayer.GetPosition();
+            var trackpos = CurrentTrack.FileToTrackPosition(filepos);
+            var elapsed = trackpos * CurrentTrack.TrackDuration.Value;
             Elapsed = TimeUtils.FormatDuration(elapsed);
-            var remaining = CurrentTrack.Model.Duration.Value - elapsed;
+            var remaining = CurrentTrack.TrackDuration.Value - elapsed;
             Remaining = TimeUtils.FormatDuration(remaining);
             if (!IsSeeking)
-                Position = pos;
+                Position = trackpos;
+            
+            if(trackpos >= 1 && CurrentTrack.FileIsMultitrack && !CurrentTrack.IsLastMultitrackFileTrack) 
+                TrackEnded();
         }
         if (CurrentPlayer == null)
             Position = 0;
@@ -104,11 +109,14 @@ public partial class PlayerViewModel : ViewModelBase
         if(value) _positionTimer.Start();
         else _positionTimer.Stop();
     }
-    public void SetTrackPosition(double position)
+    public void SetTrackPosition(double trackPosition)
     {
-        Position = position;
+        Position = trackPosition;
         if (CurrentPlayer != null)
-            CurrentPlayer.SetPosition( (float)position); 
+        {
+            var filepos = CurrentTrack.TrackToFilePosition(trackPosition);
+            CurrentPlayer.SetPosition( (float)filepos );
+        } 
     }
 
     public void LoadCurrentTrack()
@@ -126,9 +134,11 @@ public partial class PlayerViewModel : ViewModelBase
             {
                 CurrentPlayer = new VlcAudioPlayer(_libVLC, CurrentTrack, TrackEnded);
                 CurrentPlayer.SetVolume(Volume);
-                
+
                 IsLoaded = true;
                 CurrentPlayer.Play();
+                if(CurrentTrack.FileIsMultitrack)
+                    CurrentPlayer.SetPosition( (float)CurrentTrack.TrackToFilePosition(0) );
                 IsPlaying = true;
             }
             else
@@ -137,7 +147,7 @@ public partial class PlayerViewModel : ViewModelBase
                 CurrentPlayer = null;
             }
         }
-        Duration = (CurrentTrack != null)? TimeUtils.FormatDuration(CurrentTrack.Model.Duration.Value): string.Empty;
+        Duration = (CurrentTrack != null)? TimeUtils.FormatDuration(CurrentTrack.TrackDuration.Value): string.Empty;
     }
 
     public void PreloadNextTrack()
@@ -153,35 +163,47 @@ public partial class PlayerViewModel : ViewModelBase
             if (NextTrack != null)
             {
                 NextPlayer=new VlcAudioPlayer(_libVLC, NextTrack,  TrackEnded);
+
                 NextPlayer.Pause();
+                if(NextTrack.FileIsMultitrack)
+                    NextPlayer.SetPosition((float) NextTrack.TrackToFilePosition(0));
             }
             else NextPlayer = null;
         }
     }
     
-
+    private int _endedFlag = 0;
     public void TrackEnded()
     {
-        if (CurrentPlayer != null)
-        {
-            ReleasePlayer(CurrentPlayer);
-            CurrentPlayer = null;  
+        if (Interlocked.Exchange(ref _endedFlag, 1) == 1)
+            return; // already handled
+        try{
+            if (CurrentPlayer != null)
+            {
+                ReleasePlayer(CurrentPlayer);
+                CurrentPlayer = null;  
+            }
+                
+            if (NextPlayer != null)
+            {
+                CurrentPlayer = NextPlayer;
+                Duration = TimeUtils.FormatDuration(CurrentTrack.TrackDuration.Value);
+                CurrentPlayer.SetVolume(Volume);
+                CurrentPlayer.Play();
+                NextPlayer = null;
+            }
+            else
+            {
+                IsPlaying = false;
+                IsLoaded = false;
+            }
+            _nowPlayingList?.Next();
         }
-            
-        if (NextPlayer != null)
+        finally
         {
-            CurrentPlayer = NextPlayer;
-            Duration = TimeUtils.FormatDuration(CurrentTrack.Model.Duration.Value);
-            CurrentPlayer.SetVolume(Volume);
-            CurrentPlayer.Play();
-            NextPlayer = null;
+            // reset flag for next track cycle
+            Interlocked.Exchange(ref _endedFlag, 0);
         }
-        else
-        {
-            IsPlaying = false;
-            IsLoaded = false;
-        }
-        _nowPlayingList?.Next();
     }
 
     public void ReleasePlayer(VlcAudioPlayer player)
@@ -202,7 +224,10 @@ public partial class PlayerViewModel : ViewModelBase
             }
             else if (CurrentPlayer != null)
             {
+                bool stopped = !CurrentPlayer.IsPlaying;
                 CurrentPlayer?.Play();
+                if (stopped && CurrentTrack.FileIsMultitrack)
+                    CurrentPlayer.SetPosition( (float)CurrentTrack.TrackToFilePosition(0) );
                 IsPlaying = true;
             }
         }

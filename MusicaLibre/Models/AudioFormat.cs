@@ -45,12 +45,12 @@ public class AudioFormat:NameTag
         foreach (var row in db.ExecuteReader(sql))
         {
             var name = Database.GetString(row, "Name");
-            var id = Database.GetValue<long>(row, "Id");
+            var id = Convert.ToInt64(row["Id"]);
             var format = new AudioFormat(name)
             {
                 DatabaseIndex = id,
             };
-            formats.Add(id.Value, format);
+            formats.Add(id, format);
         }
         return formats;
     }
@@ -118,9 +118,6 @@ public class AudioFormat:NameTag
         return string.Empty;
     }
 
-    public static AudioFormat Null = new AudioFormat("Null")
-    {
-        DatabaseIndex = null
-    };
+
 }
 

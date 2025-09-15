@@ -26,5 +26,6 @@ public abstract partial class LibraryDataPresenter:ViewModelBase
     public abstract void Reverse();
 
     public abstract NavCapsuleViewModel? GetCapsule();
+    public abstract void Filter(string searchString);
     public NavCapsuleViewModel? PreviousCapsule { get; set; }
 }

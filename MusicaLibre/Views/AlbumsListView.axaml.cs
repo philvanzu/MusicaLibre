@@ -27,7 +27,11 @@ public partial class AlbumsListView : UserControl
         if (sender is Border border && border.DataContext is AlbumViewModel album)
         {
             if (album.IsSelected && InputManager.CtrlPressed) album.IsSelected = false;
-            else album.IsSelected = true;
+            else
+            {
+                if (album.IsSelected && !InputManager.ShiftPressed) album.Presenter.SelectedItem = null;
+                album.IsSelected = true;
+            }
         }
     }
     private void PlayButton_Click(object? sender, RoutedEventArgs e)

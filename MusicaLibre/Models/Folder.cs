@@ -63,17 +63,11 @@ public class Folder:NameTag
             var name = Database.GetString(row, "Name");
             Folder Folder = new Folder(name!)
             {
-                DatabaseIndex = Database.GetValue<long>(row, "Id")
+                DatabaseIndex = Convert.ToInt64(row["Id"])
             };
-            Folders.Add(Folder.DatabaseIndex!.Value, Folder);
+            Folders.Add(Folder.DatabaseIndex, Folder);
         }
 
         return Folders;
     }
-    public static Folder Null = new Folder("Null")
-    {
-        DatabaseIndex = null
-    };
-
-
 }

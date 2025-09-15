@@ -18,16 +18,27 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
     public ReadOnlyObservableCollection<AlbumViewModel>? Items { get; set; }
     
     [ObservableProperty] private AlbumViewModel? _selectedItem;
+    private AlbumViewModel? _shiftSelectionAnchor;
     partial void OnSelectedItemChanged(AlbumViewModel? value)
     {
-        if (!InputManager.CtrlPressed)
+        if (!InputManager.CtrlPressed && !InputManager.IsDragSelecting && !InputManager.ShiftPressed)
         {
             foreach (var item in _items)
             {
-                if(item != value && item.IsSelected)
-                    item.IsSelected = false;
-            }
-        } 
+                item.IsSelected = item == value;
+            }    
+        }
+        
+        if (Items != null && InputManager.ShiftPressed && _shiftSelectionAnchor != null && value != null){
+            var startIdx = GetItemIndex(_shiftSelectionAnchor);
+            var endIdx = GetItemIndex(value);
+            var step = startIdx <= endIdx ? 1 : -1;
+            for (var i = startIdx; i != endIdx + step; i += step)
+                Items[i].IsSelected = true;
+        }
+        
+        if(!InputManager.ShiftPressed) 
+            _shiftSelectionAnchor = value;
         
         OnPropertyChanged(nameof(SelectedItemTracks));
         SelectedItems = _items.Where(x => x.IsSelected).ToList();
@@ -115,8 +126,38 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
         foreach (var item in _items)
             item.RandomIndex = CryptoRandom.NextInt();
     }
+
+    public override void Filter(string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            Sort();
+            return;
+        }
+        Dictionary<Track, double> weights = SearchUtils.FilterTracks( searchString, TracksPool, Library);
+        var albumWeights = new Dictionary<Album, double>();
+        foreach (var kv in weights)
+        {
+            var album = kv.Key.Album;
+            if (album == null) continue;
+            albumWeights[album] = albumWeights.GetValueOrDefault(album) + kv.Value;
+        }
+
+        var filtered = _items.Where(x => albumWeights.GetValueOrDefault(x.Model) > 0);
+        var ordered = filtered.OrderByDescending(x => albumWeights.GetValueOrDefault(x.Model));
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(ordered);
+
+        OnPropertyChanged(nameof(Items));
+    }
+    
     public virtual void Sort()
     {
+        if (!string.IsNullOrWhiteSpace(Library.SearchString))
+        {
+            Filter(Library.SearchString);
+            return;
+        }
         if(Library.CurrentStep.SortingKeys.Select(x=>  (x is SortingKey<AlbumSortKeys> sk) && sk.Key == AlbumSortKeys.Random).ToList().Count > 0)
             ShufflePages();
         

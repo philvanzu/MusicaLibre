@@ -140,20 +140,8 @@ public class OrderingStep
 
     public string GroupedByString =>$"Grouped by {EnumUtils.GetDisplayName(Type)}";
 
-    public string OrderedByString
-    {
-        get
-        {
-            var str = $"Ordered by";
-            int i = 0;
-            foreach (var key in SortingKeys)
-            {
-                if (i++ > 0) str = $"{str} then by ";
-                str = $"{str} {key.ToString()}";
-            }
-            return str;
-        }
-    }
+    public string OrderedByString=>$"Ordered by {SortingKeys.FirstOrDefault()}";
+    
 
     public OrderingStep()
     {

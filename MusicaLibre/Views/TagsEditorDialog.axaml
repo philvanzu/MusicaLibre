@@ -60,7 +60,7 @@
                 <!--GridSplitter-->
                 <GridSplitter Grid.Column="1" Width="6" Background="Transparent"/>
                 <!-- Tags -->
-                <Border Grid.Column="2"  BorderBrush="White" BorderThickness="1">
+                <Border Grid.Column="2"  BorderBrush="White" BorderThickness="1" Padding="16">
                     <Grid>
         <!--
                        immutable tab: path, codec, duration, bitrate, format, sample rate, channels
@@ -78,7 +78,7 @@
                                <ScrollViewer>
                                    <StackPanel>
                                        <TextBlock  FontWeight="Bold" FontSize="16" Margin="16">File Info</TextBlock>
-                                       <Grid ColumnDefinitions="Auto, 32, *" RowDefinitions="
+                                       <Grid ColumnDefinitions="Auto, 32, *, 150" RowDefinitions="
                                        Auto, Auto, Auto, Auto, Auto,
                                        Auto, Auto, Auto, Auto
                                        " >
@@ -86,7 +86,7 @@
                                            <TextBlock Grid.Row="0" Grid.Column="0"
                                                       Margin="0 12" VerticalAlignment="Top"
                                                       Text="Path"/>
-                                           <TextBlock Grid.Row="0" Grid.Column="2" 
+                                           <SelectableTextBlock Grid.Row="0" Grid.Column="2" 
                                                       Text="{Binding FilePath}"
                                                       TextWrapping="Wrap"/>
                                            
@@ -106,9 +106,12 @@
                                            <!-- Time Stamps-->
                                            <TextBlock Grid.Row="5" Grid.Column="0">Date Modified</TextBlock>
                                            <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding ModifiedBinding}"/>
+                                           <Button Grid.Row="5" Grid.Column="3" Content="frombackup" 
+                                                   Command="{Binding ModifiedFromBackupCommand}"/>
                                            
                                            <TextBlock Grid.Row="6" Grid.Column="0">Date Created</TextBlock>
                                            <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding CreatedBinding}"/>
+
                                            
 
                                            
@@ -163,22 +166,33 @@
                                            <!--Title-->
                                            <TextBlock Grid.Row="2" Grid.Column="0" >Title</TextBlock>
                                            <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding TitleBinding}"/>
-                                           <Button Grid.Row="2" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <Button Grid.Row="2" Grid.Column="4" 
+                                                   Command="{Binding TitleUpdatedCommand}"
+                                                   Content="Update Selected Track"/>
                                            <!--Album-->
                                            <TextBlock Grid.Row="3" Grid.Column="0" >Album</TextBlock>
                                            <ctrl:TagBox Grid.Row="3" Grid.Column="2" IsMultiValue="False" 
                                                         Text="{Binding AlbumBinding}"
                                                         Options="{Binding AlbumOptions}"
                                                         EnterPressedCommand="{Binding AlbumUpdatedCommand}" />
-                                           <Button Grid.Row="3" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <Button Grid.Row="3" Grid.Column="4"
+                                                   Command="{Binding AlbumUpdatedCommand}"
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Publisher-->
                                            <TextBlock Grid.Row="4" Grid.Column="0" >Publisher</TextBlock>
-                                           <TextBox  Grid.Row="4" Grid.Column="2"  Text="{Binding PublisherBinding}"/>
-                                           <Button Grid.Row="4" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <ctrl:TagBox Grid.Row="4" Grid.Column="2" IsMultiValue="False" 
+                                                        Text="{Binding PublisherBinding}"
+                                                        Options="{Binding PublisherOptions}"
+                                                        EnterPressedCommand="{Binding PublisherUpdatedCommand}" />
+                                           <Button Grid.Row="4" Grid.Column="4"
+                                                   Command="{Binding PublisherUpdatedCommand}"
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Year-->
                                            <TextBlock Grid.Row="5" Grid.Column="0" >Year</TextBlock>
                                            <TextBox  Grid.Row="5" Grid.Column="2" Text="{Binding YearBinding}"/>
-                                           <Button Grid.Row="5" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <Button Grid.Row="5" Grid.Column="4"
+                                                   Command ="{Binding YearUpdatedCommand}"
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Artists-->
                                            <TextBlock Grid.Row="6" Grid.Column="0" >Artists</TextBlock>
                                            <TextBox  Grid.Row="6" Grid.Column="2" Text="{Binding ArtistsBinding}"/>
@@ -190,7 +204,9 @@
                                                           Options="{Binding GenreOptions}"
                                                           IsMultiValue="True"
                                                           EnterPressedCommand="{Binding GenreUpdatedCommand}" />
-                                           <Button Grid.Row="7" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <Button Grid.Row="7" Grid.Column="4"
+                                                   Command="{Binding GenreUpdatedCommand}"
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Composers-->
                                            <TextBlock Grid.Row="8" Grid.Column="0" >Composers</TextBlock>
                                            <TextBox  Grid.Row="8" Grid.Column="2" Text="{Binding ComposersBinding}"/>

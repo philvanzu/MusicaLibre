@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices.JavaScript;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DynamicData;
 using DynamicData.Binding;
@@ -63,7 +64,9 @@ public partial class PlaylistsListViewModel : LibraryDataPresenter, ISelectVirtu
         
         var playlistIds = TracksPool.Select(x => x.AlbumId).Where(albumId => albumId.HasValue).Distinct().ToList();
 
-        var playlistsPool = Library.Playlists.Values.AsEnumerable();
+        var playlistsPool = AppData.Instance.UserSettings.FilterOutEmptyPlaylists?
+                Library.Playlists.Values.Where(x => x.Tracks.Count > 0)
+                :Library.Playlists.Values;
         if (playlistIds.Count > 0) playlistsPool = playlistsPool.Where(x => playlistIds.Contains(x.DatabaseIndex));
         foreach (var item in playlistsPool)
             _items.Add(new PlaylistViewModel(this, item));
@@ -83,16 +86,16 @@ public partial class PlaylistsListViewModel : LibraryDataPresenter, ISelectVirtu
                 : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.FilePath),
 
             PlaylistSortKeys.Added => ascending
-                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Added.Value)
-                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Added.Value),
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Added)
+                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Added),
             PlaylistSortKeys.Modified => ascending
-                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Modified.Value)
-                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Modified.Value),
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Modified)
+                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Modified),
             PlaylistSortKeys.Created => ascending
-                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Created.Value)
-                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Created.Value),
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Created)
+                : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Created),
             PlaylistSortKeys.LastPlayed => ascending
-                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Played.Value)
+                ? SortExpressionComparer<PlaylistViewModel>.Ascending(x => x.Model.Played.Value )
                 : SortExpressionComparer<PlaylistViewModel>.Descending(x => x.Model.Played.Value),
 
             PlaylistSortKeys.Random => 
@@ -107,8 +110,40 @@ public partial class PlaylistsListViewModel : LibraryDataPresenter, ISelectVirtu
         foreach (var item in _items)
             item.RandomIndex = CryptoRandom.NextInt();
     }
+    
+    public override void Filter(string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            Sort();
+            return;
+        }
+        Dictionary<Track, double> weights = SearchUtils.FilterTracks( searchString, TracksPool, Library);
+        
+        var playlistWeights = new Dictionary<PlaylistViewModel, double>();
+        foreach (var item in _items)
+        {
+            double w = 0;
+            foreach(var track in item.Tracks)
+                w += weights.GetValueOrDefault(track);
+            if(w > 0)
+                playlistWeights.Add(item, w);
+        }
+        var filtered = _items.Where(x => playlistWeights.GetValueOrDefault(x) > 0);
+        var ordered = filtered.OrderByDescending(x => playlistWeights.GetValueOrDefault(x));
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(ordered);
+
+        OnPropertyChanged(nameof(Items));
+    }
+    
     public void Sort()
     {
+        if (!string.IsNullOrWhiteSpace(Library.SearchString))
+        {
+            Filter(Library.SearchString);
+            return;
+        }
         if(Library.CurrentStep.SortingKeys.Select(x=>  (x is SortingKey<PlaylistSortKeys> sk) && sk.Key == PlaylistSortKeys.Random).Any())
             ShufflePages();
         

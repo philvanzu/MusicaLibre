@@ -12,7 +12,7 @@
     </UserControl.Resources>
     <Border BorderBrush="White" BorderThickness="0">
         <Grid  ColumnDefinitions="150,*">
-            <Image Height="144" Width="144" Source="{Binding Artwork}"/>
+            <Image Height="144" Width="144" Source="{Binding Thumbnail}"/>
             <StackPanel Grid.Column="1" Margin="8">
                 <TextBlock Text="{Binding Title}" 
                            TextWrapping="Wrap"

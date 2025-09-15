@@ -15,15 +15,13 @@ public partial class ProgressDialogViewModel: ProgressViewModel
     private readonly TaskCompletionSource _shownTcs = new TaskCompletionSource();
     public Task DialogShown => _shownTcs.Task;
     
-    IDialogService _dialogService;
 
-    public ProgressDialogViewModel(IDialogService dialogService)
+    public ProgressDialogViewModel()
     {
         if (!Dispatcher.UIThread.CheckAccess())
         {
             throw(new InvalidOperationException("ProgressDialogViewModel constructor Must be invoked on the UI thread."));
         }
-        _dialogService=dialogService;
     }
 
     public async Task Show()
@@ -40,7 +38,7 @@ public partial class ProgressDialogViewModel: ProgressViewModel
         {
             try
             {
-                await _dialogService.ShowDialogAsync<object>(window, this);
+                await DialogUtils.ShowDialogAsync<object>(window, this);
             }
             catch (Exception ex)
             {

@@ -8,6 +8,7 @@ using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MusicaLibre.Models;
+using MusicaLibre.Services;
 
 namespace MusicaLibre.ViewModels;
 
@@ -27,7 +28,15 @@ public partial class PlaylistViewModel:ViewModelBase, IVirtualizableItem
         return Presenter.Library.Artworks.Values.Where(x => x.Folder == Model.Folder).FirstOrDefault();
     }
     public int RandomIndex { get; set; }
-    public bool IsSelected { get; set; }
+    [ObservableProperty] private bool _isSelected;
+    partial void OnIsSelectedChanged(bool oldValue, bool newValue)
+    {
+        if(newValue && Presenter.SelectedItem != this)
+            Presenter.SelectedItem = this;
+        if (oldValue && Presenter.SelectedItem == this)
+            Presenter.SelectedItem = null;
+    }
+
     public bool IsFirst => Presenter.GetItemIndex(this) == 0; 
     public bool IsPrepared { get; set; }
 
@@ -51,42 +60,8 @@ public partial class PlaylistViewModel:ViewModelBase, IVirtualizableItem
     }
 
     [RelayCommand]
-    void OpenInExplorer()
-    {
-        try
-        {
-            var folderPath = System.IO.Path.GetDirectoryName(FilePath);
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Process.Start("explorer.exe", string.Format("/select,\"{0}\"", FilePath));
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                string? desktop = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP")
-                                  ?? Environment.GetEnvironmentVariable("DESKTOP_SESSION")
-                                  ?? string.Empty;
-                desktop = desktop.ToLowerInvariant();
-                
-                //GNOME (Nautilus)
-                if (desktop.Contains("gnome") || desktop.Contains("unity") || desktop.Contains("cinnamon"))
-                    Process.Start("nautilus", $"--select \"{FilePath}\"");
-                //Dolphin (KDE)
-                else if (desktop.Contains("kde"))
-                    Process.Start("dolphin", $"--select \"{FilePath}\"");
-                // Try with xdg-open (common across most Linux desktop environments)
-                else if(Directory.Exists(folderPath))
-                    Process.Start(new ProcessStartInfo("xdg-open", $"\"{folderPath}\"") { UseShellExecute = true });    
-            }
-            else
-            {
-                throw new PlatformNotSupportedException("Only Windows and Linux are supported.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Failed to open path: {ex.Message}");
-        }
-    }
+    void OpenInExplorer() => PathUtils.OpenInExplorer(FilePath);
+    
     [RelayCommand]void Edit(){}
 
     [RelayCommand]void DoubleTapped()=>Presenter.Library.ChangeOrderingStep(Presenter);

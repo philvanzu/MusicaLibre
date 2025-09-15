@@ -60,16 +60,11 @@ public class Year:NameTag
             var number = Database.GetValue<uint>(row, "Number");
             Year Year = new Year(number!.Value)
             {
-                DatabaseIndex = Database.GetValue<long>(row, "Id")
+                DatabaseIndex = Convert.ToInt64(row["Id"])
             };
-            Years.Add(Year.DatabaseIndex!.Value, Year);
+            Years.Add(Year.DatabaseIndex, Year);
         }
 
         return Years;
     }
-    
-    public static Year Null =  new Year(0)
-    {
-        DatabaseIndex = null
-    };
 }

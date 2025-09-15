@@ -29,12 +29,12 @@
         <Border Grid.Column="1" BorderBrush="White" BorderThickness="1"
                 IsVisible="{Binding SelectedAlbum, Converter={StaticResource NullToBoolean}}">
             <Grid RowDefinitions="Auto, 32,32, *">
-                <Grid ColumnDefinitions="200, 32, 600" Margin="16">
+                <Grid ColumnDefinitions="200, 32, 800" Margin="16">
                     <StackPanel >
                         <Image Width="200" Height="200" Source="{Binding Thumbnail}"/>
-                        <Button Content="Change Artwork"/>
+                        <Button Content="Pick Artwork" Command="{Binding PickArtworkCommand}"/>
                     </StackPanel>
-                    <Grid Grid.Column="2" ColumnDefinitions="Auto, 32 *" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto, 32, Auto">
+                    <Grid Grid.Column="2" ColumnDefinitions="Auto, 32, *, 200" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto, 32, Auto">
                         <TextBlock Grid.Row="0" Grid.Column="0" >Folder</TextBlock>
                         <TextBlock Grid.Row="0" Grid.Column="2"  
                                    Text="{Binding Folder}" Margin="0 8" TextWrapping="Wrap"/>
@@ -43,19 +43,26 @@
                         <TextBox  Grid.Row="1" Grid.Column="2" Text="{Binding Title}"/>
                         
                         <TextBlock Grid.Row="2" Grid.Column="0">Album Artist</TextBlock>
-                        <TextBox  Grid.Row="2" Grid.Column="2"  Text="{Binding Artist}"/>
+                        <ctrl:TagBox  Grid.Row="2" Grid.Column="2"  Text="{Binding Artist}"
+                                      Options="{Binding ArtistOptions}"/>
                         
                         <TextBlock Grid.Row="3" Grid.Column="0" >Year</TextBlock>
                         <TextBox  Grid.Row="3" Grid.Column="2"  Text="{Binding Year}"/>
 
                         <TextBlock Grid.Row="4" Grid.Column="0">Added</TextBlock>
                         <TextBox  Grid.Row="4" Grid.Column="2"  Text="{Binding Added}"/>
+                        <Button Grid.Row="4" Grid.Column="3" Content="Compute from tracks" 
+                                Command="{Binding ComputeAddedCommand}"/>
                         
                         <TextBlock Grid.Row="5" Grid.Column="0">Created</TextBlock>
                         <TextBox  Grid.Row="5" Grid.Column="2"  Text="{Binding Created}"/>
+                        <Button Grid.Row="5" Grid.Column="3" Content="Compute from tracks" 
+                                Command="{Binding ComputeCreatedCommand}"/>
                         
                         <TextBlock Grid.Row="6" Grid.Column="0">Modified</TextBlock>
                         <TextBox  Grid.Row="6" Grid.Column="2"  Text="{Binding Modified}"/>
+                        <Button Grid.Row="6" Grid.Column="3" Content="Compute from tracks" 
+                                Command="{Binding ComputeModifiedCommand}"/>
                         
                         <TextBlock Grid.Row="7" Grid.Column="0">Played</TextBlock>
                         <TextBox  Grid.Row="7" Grid.Column="2"  Text="{Binding Played}"/>

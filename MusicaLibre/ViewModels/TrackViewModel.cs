@@ -16,6 +16,7 @@ namespace MusicaLibre.ViewModels;
 public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
 {
     [ObservableProperty] private Track _model; 
+    Artwork? _artwork;
     
     // Core tags
     public string? Title => Model.Title;
@@ -30,8 +31,11 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     public string? Remixer => Model.Remixer!= null ? $"Remixer:{Model.Remixer?.Name}":null;
     public string? Conductor => Model.Conductor!= null? $"Conductor: {Model.Conductor?.Name}":null;
     public string Genres => string.Join(", ", Model.Genres.Select((x) => x.Name));
+    public TimeSpan? TrackDuration => (Model.End - Model.Start) * Model.Duration;
+    public TimeSpan? FileDuration_ => Model.Duration;
+    public string Duration => TimeUtils.FormatDuration(TrackDuration.Value);
     
-    public string Duration => TimeUtils.FormatDuration(Model.Duration.Value);
+    
     public string Added => TimeUtils.FormatDate(Model.DateAdded);
     public string Modified => TimeUtils.FormatDate(Model.Modified);
     public string Created => TimeUtils.FormatDate(Model.Created);
@@ -49,7 +53,7 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
         }
     }
 
-    public Bitmap? Artwork => Model.Artworks.FirstOrDefault()?.Thumbnail;
+    public Bitmap? Thumbnail => _artwork?.Thumbnail;
     
     public bool EvenRow=> Presenter.GetItemIndex(this) % 2 == 0;
     
@@ -86,21 +90,49 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
         }
     }
 
+    public bool FileIsMultitrack => Model.Start != 0 || Model.End != 1;
+    public bool IsLastMultitrackFileTrack => Model.End == 1;
     public TracksListViewModel Presenter { get; set; }
+    
     public TrackViewModel(Track model, TracksListViewModel presenter)
     {
         _model = model;
         Presenter = presenter;
     }
+
+    public double FileToTrackPosition(double filePosition)
+    {
+        if (Model.Start == 0 && Model.End == 1)
+            return filePosition;
+
+        double range = Model.End - Model.Start;
+        if (range <= 0)
+            return 0; // invalid cue, avoid div-by-zero
+
+        double pos = (filePosition - Model.Start) / range;
+        return Math.Clamp(pos, 0, 1);
+    }
+
+    public double TrackToFilePosition(double trackPosition)
+    {
+        if (Model.Start == 0 && Model.End == 1)
+            return trackPosition;
+
+        double range = Model.End - Model.Start;
+        return Math.Clamp(Model.Start + trackPosition * range, 0, 1);
+    }
+
     
     public void GetThumbnail()
     {
-        Model.Artworks.FirstOrDefault()?.RequestThumbnail(this, ()=>OnPropertyChanged(nameof(Artwork)));
+        _artwork = Model.Artworks.FirstOrDefault() ?? Model.Album?.Cover;
+        _artwork?.RequestThumbnail(this, ()=>OnPropertyChanged(nameof(Thumbnail)));
     }
 
     public void ReleaseThumbnail()
     {
-        Model.Artworks.FirstOrDefault()?.ReleaseThumbnail(this);
+        _artwork?.ReleaseThumbnail(this);
+        _artwork = null;
     }
 
     public bool IsFirst => Presenter.GetItemIndex(this) == 0;
@@ -125,5 +157,5 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     [RelayCommand] void Append() => Presenter.Library.NowPlayingList.Append(Presenter.SelectedTracks);
     [RelayCommand] void InsertNext()=> Presenter.Library.NowPlayingList.Insert(Presenter.SelectedTracks);
     [RelayCommand] void EditTags()=>Presenter.Library.EditTracks(Presenter.SelectedTracks);
-    [RelayCommand] void OpenInExplorer(){}
+    [RelayCommand] void OpenInExplorer(){PathUtils.OpenInExplorer(Model.FilePath);}
 }

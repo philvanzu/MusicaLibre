@@ -7,7 +7,7 @@ namespace MusicaLibre.Models;
 
 public class Disc
 {
-    public long? DatabaseIndex { get; set; }
+    public long DatabaseIndex { get; set; }
     public Album Album { get; set; }
     public long AlbumId { get; set; }
     public uint Number { get; set; }
@@ -24,8 +24,7 @@ public class Disc
     public Disc(uint number, Album album)
     {
         Number = number;
-        if(!album.DatabaseIndex.HasValue)throw new ("Cannot create album disc without an album database index");
-        AlbumId = album.DatabaseIndex.Value;
+        AlbumId = album.DatabaseIndex;
     }
     const string insertSql = @"
         INSERT INTO Discs (AlbumId, Number) VALUES ($AlbumId, $number);
@@ -55,7 +54,7 @@ public class Disc
     {
         var id = await db.ExecuteScalarAsync(insertSql, Parameters);
         DatabaseIndex =  Convert.ToInt64(id);
-        callback?.Invoke(DatabaseIndex.Value);
+        callback?.Invoke(DatabaseIndex);
     }
     
     public async Task DbUpdateAsync(Database db)
@@ -101,9 +100,4 @@ public class Disc
 
         return discs;
     }
-
-    public static Disc Null = new Disc(0, Album.Null)
-    {
-        DatabaseIndex = null
-    };
 }

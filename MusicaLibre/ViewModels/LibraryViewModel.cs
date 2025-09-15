@@ -66,11 +66,8 @@ public partial class LibraryViewModel : ViewModelBase
 
     [ObservableProperty] private NavigatorViewModel<LibraryDataPresenter>? _navigator;
     [ObservableProperty] private string _searchString;
-    partial void OnSearchStringChanged(string value)
-    {
-        
-    }
-
+    //partial void OnSearchStringChanged(string value)=>DataPresenter.Filter(value);
+    
     public LibraryViewModel(Database db, string libraryRoot, MainWindowViewModel mainWindowViewModel)
     {
         MainWindowViewModel = mainWindowViewModel;
@@ -146,76 +143,63 @@ public partial class LibraryViewModel : ViewModelBase
         try
         {
             Genres = Genre.FromDatabase(Database);
-            Genres.Add(0, Genre.Null);
             Publishers = Publisher.FromDatabase(Database);
-            Publishers.Add(0, Publisher.Null);
             Artists = Artist.FromDatabase(Database);
-            Artists.Add(0, Artist.Null);
             Tracks = Track.FromDatabase(Database);
             AudioFormats = AudioFormat.FromDatabase(Database);
-            AudioFormats.Add(0, AudioFormat.Null);
             Artworks = Artwork.FromDatabase(Database);
             Albums = Album.FromDatabase(Database);
-            Albums.Add(0, Album.Null);
             Discs = Disc.FromDatabase(Database);
-            Discs.Add((0,0), Disc.Null);
             Playlists = Playlist.FromDatabase(Database);
             Years = Year.FromDatabase(Database);
-            Years.Add(0, Year.Null);
             Folders = Folder.FromDatabase(Database);
-            Folders.Add(0, Folder.Null);
 
             //Resolve all foreign keys
             foreach (var track in Tracks.Values)
             {
-                if(track.AlbumId != null) track.Album = Albums[track.AlbumId.Value];
-                else track.Album = Albums[0];
+                if(track.AlbumId != null) 
+                    track.Album = Albums[track.AlbumId.Value];
                 
-                if(track.PublisherId != null) track.Publisher = Publishers[track.PublisherId.Value];
-                else track.Publisher = Publishers[0];
+                if(track.PublisherId != null) 
+                    track.Publisher = Publishers[track.PublisherId.Value];
                 
-                if(track.ConductorId != null) track.Conductor = Artists[track.ConductorId.Value];
-                else track.Conductor = Artists[0];
+                if(track.ConductorId != null) 
+                    track.Conductor = Artists[track.ConductorId.Value];
                 
-                if(track.RemixerId != null) track.Remixer = Artists[track.RemixerId.Value];
-                else track.Remixer = Artists[0];
+                if(track.RemixerId != null) 
+                    track.Remixer = Artists[track.RemixerId.Value];
                 
-                if (track.AudioFormatId != null) track.AudioFormat = AudioFormats[track.AudioFormatId.Value];
-                else track.AudioFormat = AudioFormats[0];
+                track.AudioFormat = AudioFormats[track.AudioFormatId];
                 
-                if(track.YearId != null) track.Year = Years[track.YearId.Value];
-                else track.Year = Years[0];
+                if(track.YearId != null) 
+                    track.Year = Years[track.YearId.Value];
                 
-                if(track.FolderId != null) track.Folder = Folders[track.FolderId.Value];
-                else track.Folder = Folders[0];
+                track.Folder = Folders[track.FolderId];
             }
             foreach (var album in Albums.Values)
             {
-                if(album.FolderId != null) album.Folder = Folders[album.FolderId.Value];
-                else album.Folder = Folders[0];
+                album.Folder = Folders[album.FolderId];
                 
-                if(album.ArtistId != null) album.AlbumArtist = Artists[album.ArtistId.Value];
-                else album.AlbumArtist = Artists[0];
+                album.AlbumArtist = Artists[album.ArtistId];
                 
-                if(album.YearId != null) album.Year = Years[album.YearId.Value];
-                else album.Year = Years[0];
+                if(album.YearId != null) 
+                    album.Year = Years[album.YearId.Value];
                 
-                if(album.CoverId != null) album.Cover = Artworks[album.CoverId.Value];
+                if(album.CoverId != null) 
+                    album.Cover = Artworks[album.CoverId.Value];
             }
 
             foreach (var disc in Discs.Values)
-                if(disc.AlbumId > 0) disc.Album = Albums[disc.AlbumId];
-                else disc.Album = Albums[0];
+                if(disc.AlbumId > 0) 
+                    disc.Album = Albums[disc.AlbumId];
 
             foreach (var artwork in Artworks.Values)
             {
-                if(artwork.FolderId != null) artwork.Folder = Folders[artwork.FolderId.Value];
-                else artwork.Folder = Folders[0];
+                artwork.Folder = Folders[artwork.FolderId];
             }
             foreach (var playlist in Playlists.Values)
             {
-                if(playlist.FolderId != null) playlist.Folder = Folders[playlist.FolderId.Value];
-                else playlist.Folder = Folders[0];
+                playlist.Folder = Folders[playlist.FolderId];
             }
             
             //Resolve all many to many relationships
@@ -398,12 +382,13 @@ public partial class LibraryViewModel : ViewModelBase
     [RelayCommand]
     void Search()
     {
-        
+        DataPresenter?.Filter(SearchString);
     }
     [RelayCommand]
     void ClearSearch()
     {
         SearchString = string.Empty;
+        Search();
     }
 
     public async Task EditTracks(List<Track>? tracks)

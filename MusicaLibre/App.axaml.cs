@@ -20,7 +20,6 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        DialogService dlgService = new DialogService();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
@@ -36,7 +35,7 @@ public partial class App : Application
                 WindowState=state.WindowState,
             };
             */
-            var vm= new MainWindowViewModel(window, dlgService);
+            var vm= new MainWindowViewModel(window);
             window.DataContext = vm;
             desktop.MainWindow = window;
         }

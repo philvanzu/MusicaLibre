@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using MusicaLibre.Models;
 namespace MusicaLibre.Services;
+using System.IO;
 
 public static class TagUtils
 {
@@ -57,8 +59,11 @@ public static class TagUtils
     {
         await foreach (var track in _channel.Reader.ReadAllAsync())
         {
+            if (!File.Exists(track.FilePath)) return;
             try
             {
+                var created = File.GetCreationTime(track.FilePath);
+                var modified = File.GetLastWriteTime(track.FilePath);
                 using var file = TagLib.File.Create(track.FilePath);
                 file.Tag.Title = track.Title;
                 file.Tag.Album = track.Album?.Title;
@@ -73,6 +78,8 @@ public static class TagUtils
                 file.Tag.Track = track.TrackNumber;
                 file.Tag.Comment = track.Comment;
                 file.Save();
+                File.SetCreationTime(track.FilePath, created);
+                File.SetLastWriteTime(track.FilePath, modified);
             }
             catch (Exception ex)
             {

@@ -40,7 +40,7 @@ public class Artist:NameTag
     {
         var id = await db.ExecuteScalarAsync(updateSql, Parameters);
         DatabaseIndex =  Convert.ToInt64(id);
-        callback?.Invoke(DatabaseIndex.Value);
+        callback?.Invoke(DatabaseIndex);
     }
     public async Task DbUpdateAsync(Database db)=>await db.ExecuteNonQueryAsync(updateSql, Parameters);
     public async Task DbDeleteAsync(Database db) => await db.ExecuteNonQueryAsync(deleteSql, Parameters);
@@ -60,16 +60,13 @@ public class Artist:NameTag
             var name = Database.GetString(row, "Name");
             Artist artist = new Artist(name!)
             {
-                DatabaseIndex = Database.GetValue<long>(row, "Id")
+                DatabaseIndex = Convert.ToInt64(row["Id"]),
+                Name = name! 
             };
-            artists.Add(artist.DatabaseIndex!.Value, artist);
+            artists.Add(artist.DatabaseIndex, artist);
         }
 
         return artists;
     }
     
-    public static Artist Null = new Artist("Null")
-    {
-        DatabaseIndex = null
-    };
 }

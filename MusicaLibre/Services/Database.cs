@@ -474,15 +474,17 @@ CREATE TABLE IF NOT EXISTS Info (
 -- =========================
 CREATE TABLE IF NOT EXISTS Tracks (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    FilePath TEXT NOT NULL UNIQUE,
+    FilePath TEXT NOT NULL,
     FileName TEXT NOT NULL,
-    FolderId INT NOT NULL,
+    FolderId INTEGER NOT NULL,
     FileExtension TEXT NOT NULL,
     Title TEXT NOT NULL,
     YearId INTEGER,
     TrackNumber INTEGER,
     DiscNumber INTEGER,
-    Duration FLOAT, -- seconds
+    Duration REAL, -- seconds
+    Start REAL DEFAULT 0,
+    End REAL DEFAULT 1,
     Bitrate INTEGER,
     Codec TEXT,
     SampleRate INTEGER,
@@ -498,13 +500,13 @@ CREATE TABLE IF NOT EXISTS Tracks (
     RemixerId INTEGER,
     AudioFormatId INTEGER NOT NULL,
     Comments TEXT,
-    Rating FLOAT,
+    Rating REAL,
     PlayCount INTEGER,
     FOREIGN KEY (AlbumId) REFERENCES Albums(Id) ON DELETE SET NULL,
     FOREIGN KEY (PublisherId) REFERENCES Publishers(Id) ON DELETE SET NULL,
     FOREIGN KEY (ConductorId) REFERENCES Artists(Id) ON DELETE SET NULL,
     FOREIGN KEY (RemixerId) REFERENCES Artists(Id) ON DELETE SET NULL,
-    FOREIGN KEY (AudioFormatId) REFERENCES AudioFormats(Id) ON DELETE SET NULL,
+    FOREIGN KEY (AudioFormatId) REFERENCES AudioFormats(Id) ON DELETE CASCADE,
     FOREIGN KEY (YearId) REFERENCES Years(Id) ON DELETE SET NULL,
     FOREIGN KEY (FolderId) REFERENCES Folders(Id) ON DELETE SET NULL
 );

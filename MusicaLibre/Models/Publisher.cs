@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using MusicaLibre.Services;
 namespace MusicaLibre.Models;
 
@@ -10,21 +10,39 @@ public class Publisher:NameTag
     {
         this.Name = Name;
     }
-    
-    public void DatabaseInsert(Database db)
-    {
-        const string sql = @"
+ 
+    const string insertSql = @"
         INSERT INTO Publishers (Name)
         VALUES ($name);
         SELECT last_insert_rowid();";
 
-        var id = db.ExecuteScalar(sql, new()
-        {
-            ["$name"] = Name,
-        });
-
+    private const string updateSql = @"
+        UPDATE Publishers SET Name = $name, ArtworkId = $artworkId
+        WHERE Id=$id";
+    
+    private const string deleteSql = @"
+        DELETE FROM Publishers WHERE Id=$id;";
+    
+    private Dictionary<string, object?> Parameters => new()
+    {
+        ["$name"] = Name,
+        ["$artworkId"] = Artwork?.DatabaseIndex,
+        ["$id"]= DatabaseIndex,
+    };
+    
+    public void DbInsert(Database db)
+    {
+        var id = db.ExecuteScalar(insertSql, Parameters);
         DatabaseIndex =  Convert.ToInt64(id);
     }
+    public async Task DbInsertAsync(Database db)
+    {
+        var id = await  db.ExecuteScalarAsync(insertSql, Parameters);
+        DatabaseIndex =  Convert.ToInt64(id);
+    }
+    
+    public async Task DbUpdateAsync(Database db)=> await db.ExecuteNonQueryAsync(updateSql, Parameters);
+    public async Task DbDeleteAsync(Database db)=> await db.ExecuteNonQueryAsync(deleteSql, Parameters);
     
     public static Dictionary<long, Publisher> FromDatabase(Database db, int[]? indexes = null)
     {
@@ -40,16 +58,11 @@ public class Publisher:NameTag
             var name = Database.GetString(row, "Name");
             Publisher publisher = new Publisher(name!)
             {
-                DatabaseIndex = Database.GetValue<long>(row, "Id")
+                DatabaseIndex = Convert.ToInt64(row["Id"]),
             };
-            publishers.Add(publisher.DatabaseIndex!.Value, publisher);
+            publishers.Add(publisher.DatabaseIndex, publisher);
         }
 
         return publishers;
     }
-
-    public static Publisher Null = new Publisher("Null")
-    {
-        DatabaseIndex = null
-    };
 }

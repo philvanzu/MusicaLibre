@@ -39,7 +39,7 @@
                         </Border.Styles>
                         <Grid ColumnDefinitions="50, *" VerticalAlignment="Center">
                         <Border BorderBrush="White" BorderThickness="1">
-                            <Image Height="48" Width="48" Source="{Binding Artwork}"/>
+                            <Image Height="48" Width="48" Source="{Binding Thumbnail}"/>
                         </Border>
                         <Border Grid.Column="1">
                             <Grid RowDefinitions="0.5*, 0.5*">
