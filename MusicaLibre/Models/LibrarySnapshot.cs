@@ -4,7 +4,7 @@ using MusicaLibre.Services;
 
 namespace MusicaLibre.Models;
 
-public class Library
+public class LibrarySnapshot
 {
     public Dictionary<long, Track> Tracks { get; set; } = new();
     public Dictionary<long, Album> Albums { get; set; } = new();

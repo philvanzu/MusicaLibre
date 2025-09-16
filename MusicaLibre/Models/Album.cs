@@ -58,6 +58,8 @@ public class Album
         }
         return false;
     }
+
+    private const string selectSql = "SELECT * FROM Albums;";
     
     const string insertSql = @"
             INSERT INTO Albums (Title, YearId, FolderId, AlbumArtist, CoverId, Modified, Created, LastPlayed, Added)
@@ -118,16 +120,17 @@ public class Album
         try { await db.ExecuteNonQueryAsync(deleteSql, Parameters); }
         catch (Exception ex) {Console.WriteLine(ex);}
     }
-    public static Dictionary<long, Album> FromDatabase(Database db, int[]? indexes=null)
+
+    public static Dictionary<long, Album> FromDatabase(Database db) 
+        => ProcessReaderResult(db.ExecuteReader(selectSql));
+    
+    public static async Task<Dictionary<long, Album>> FromDatabaseAsync(Database db) 
+        => ProcessReaderResult(await db.ExecuteReaderAsync(selectSql));
+
+    static Dictionary<long, Album> ProcessReaderResult(List<Dictionary<string, object?>> result)
     {
-        string filter = String.Empty;
-        if (indexes != null && indexes.Length == 0)
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
-
-        string sql = $@"SELECT * FROM Albums  {filter};";
-
         Dictionary<long, Album> albums = new();
-        foreach (var row in db.ExecuteReader(sql))
+        foreach (var row in result)
         {
             
             var modified = Convert.ToInt64(row["Modified"]);
@@ -152,7 +155,7 @@ public class Album
         }
 
         return albums;
-    }
+    }  
 
     public async Task ComputeRootFolder(LibraryViewModel library, List<Track> tracks)
     {
@@ -164,12 +167,12 @@ public class Album
         if (string.IsNullOrEmpty(rootFolder))
             throw new Exception("Root folder not found");
         
-        var rootf = library.Folders.Values.FirstOrDefault(x => x.Name == rootFolder);
+        var rootf = library.Data.Folders.Values.FirstOrDefault(x => x.Name == rootFolder);
         if (rootf is null)
         {
             rootf = new Folder(rootFolder);
             await rootf.DbInsertAsync(library.Database);
-            library.Folders.Add(rootf.DatabaseIndex, rootf);
+            library.Data.Folders.Add(rootf.DatabaseIndex, rootf);
         }
         Folder = rootf;
         await DbUpdateAsync(library.Database);

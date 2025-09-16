@@ -25,7 +25,7 @@ public partial class PlaylistViewModel:ViewModelBase, IVirtualizableItem
 
     public Artwork? FindArtwork()
     {
-        return Presenter.Library.Artworks.Values.Where(x => x.Folder == Model.Folder).FirstOrDefault();
+        return Presenter.Library.Data.Artworks.Values.Where(x => x.Folder == Model.Folder).FirstOrDefault();
     }
     public int RandomIndex { get; set; }
     [ObservableProperty] private bool _isSelected;

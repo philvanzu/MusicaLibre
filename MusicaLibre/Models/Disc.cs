@@ -38,6 +38,8 @@ public class Disc
     private const string deleteSql = @"
         DELETE FROM Discs
         WHERE Id = $id ";
+    
+    private const string selectSql = "SELECT * FROM Discs;";
     private Dictionary<string, object?> Parameters => new()
     {
         ["$id"] = DatabaseIndex,
@@ -75,16 +77,16 @@ public class Disc
         catch(Exception e){Console.WriteLine(e);}
     }
     
-    public static Dictionary<(uint, long), Disc> FromDatabase(Database db, int[]? indexes = null)
+    public static Dictionary<(uint, long), Disc> FromDatabase(Database db)
+        => ProcessReaderResult(db.ExecuteReader(selectSql));
+    
+    public static async Task<Dictionary<(uint, long), Disc>> FromDatabaseAsync(Database db)
+        => ProcessReaderResult(await db.ExecuteReaderAsync(selectSql));
+    
+    public static Dictionary<(uint, long), Disc> ProcessReaderResult(List<Dictionary<string, object?>> result)
     {
-        string filter = String.Empty;
-        if (indexes != null && indexes.Length == 0)
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
-
-        string sql = $@" SELECT * FROM Discs {filter};";
-
         Dictionary<(uint, long), Disc> discs = new();
-        foreach (var row in db.ExecuteReader(sql))
+        foreach (var row in result)
         {
             var number = Convert.ToUInt32(row["Number"]);
             var albumId = Convert.ToInt64(row["AlbumId"]);

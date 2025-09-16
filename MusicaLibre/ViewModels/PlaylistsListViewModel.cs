@@ -65,8 +65,8 @@ public partial class PlaylistsListViewModel : LibraryDataPresenter, ISelectVirtu
         var playlistIds = TracksPool.Select(x => x.AlbumId).Where(albumId => albumId.HasValue).Distinct().ToList();
 
         var playlistsPool = AppData.Instance.UserSettings.FilterOutEmptyPlaylists?
-                Library.Playlists.Values.Where(x => x.Tracks.Count > 0)
-                :Library.Playlists.Values;
+                Library.Data.Playlists.Values.Where(x => x.Tracks.Count > 0)
+                :Library.Data.Playlists.Values;
         if (playlistIds.Count > 0) playlistsPool = playlistsPool.Where(x => playlistIds.Contains(x.DatabaseIndex));
         foreach (var item in playlistsPool)
             _items.Add(new PlaylistViewModel(this, item));

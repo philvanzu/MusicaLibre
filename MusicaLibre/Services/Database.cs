@@ -436,15 +436,16 @@ public class Database
                 using var command = connection.CreateCommand();
                 command.CommandText = CreateTables;
                 command.ExecuteNonQuery();
-                
-                var settings = JsonSerializer.Serialize(new LibrarySettingsViewModel());
+                var settings = new LibrarySettingsViewModel();
+                settings.LoadDefaultOrderings();
+                var serializedSettings = JsonSerializer.Serialize(settings);
                 var sql = $"INSERT INTO Info (DBPath, LibraryRoot, Added, Settings) Values ($dbpath, $libraryroot, $added, $settings)";
                 db.ExecuteNonQuery(sql, new ()
                 {
                     ["$dbpath"] = path,
                     ["$libraryroot"] = libraryRoot.FullName,
                     ["$added"] = DateTime.Now,
-                    ["$settings"] = settings,
+                    ["$settings"] = serializedSettings,
                 });
                 return db;
             }
@@ -593,21 +594,27 @@ CREATE TABLE Artworks (
 -- =========================
 CREATE TABLE IF NOT EXISTS AudioFormats (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    Name TEXT NOT NULL UNIQUE
+    Name TEXT NOT NULL UNIQUE,
+    ArtworkId INTEGER,
+    FOREIGN KEY (ArtworkId) REFERENCES Artworks(Id) ON DELETE SET NULL
 );
 -- =========================
 -- Years
 -- =========================
 CREATE TABLE IF NOT EXISTS Years (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    Number INT NOT NULL UNIQUE
+    Number INT NOT NULL UNIQUE,
+    ArtworkId INTEGER,
+    FOREIGN KEY (ArtworkId) REFERENCES Artworks(Id) ON DELETE SET NULL
 );
 -- =========================
 -- Folders
 -- =========================
 CREATE TABLE IF NOT EXISTS Folders (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    Name TEXT NOT NULL UNIQUE
+    Name TEXT NOT NULL UNIQUE,
+    ArtworkId INTEGER,
+    FOREIGN KEY (ArtworkId) REFERENCES Artworks(Id) ON DELETE SET NULL
 );
 
 

@@ -106,8 +106,8 @@
                                            <!-- Time Stamps-->
                                            <TextBlock Grid.Row="5" Grid.Column="0">Date Modified</TextBlock>
                                            <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding ModifiedBinding}"/>
-                                           <Button Grid.Row="5" Grid.Column="3" Content="frombackup" 
-                                                   Command="{Binding ModifiedFromBackupCommand}"/>
+                                           <Button Grid.Row="5" Grid.Column="3" Content="Refresh from files TimeStamps" 
+                                                   Command="{Binding RefreshTimeStampsCommand}"/>
                                            
                                            <TextBlock Grid.Row="6" Grid.Column="0">Date Created</TextBlock>
                                            <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding CreatedBinding}"/>

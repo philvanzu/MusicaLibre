@@ -19,12 +19,9 @@ public class Folder:NameTag
     private const string deleteSql = @"
         DELETE FROM Folders WHERE Id = $id;";
 
-    private Dictionary<string, object?> Parameters => new(){
-        ["$name"] = Name,
-        ["$artworkId"] = Artwork?.DatabaseIndex,
-        ["$id"] = DatabaseIndex,
-    };
+    private const string selectSql = "SELECT * FROM Folders;";
     
+    public Folder() { }
     public Folder(string name)
     {
         Name = name;
@@ -44,30 +41,28 @@ public class Folder:NameTag
     public void DbDelete(Database db) => db.ExecuteNonQuery(deleteSql,Parameters);
     public async Task DbDeleteAsync(Database db)=> await db.ExecuteNonQueryAsync(deleteSql,Parameters);
     
-    public static Dictionary<long, Folder> FromDatabase(Database db, int[]? indexes = null)
+    public static Dictionary<long, Folder> FromDatabase(Database db)
+        =>ProcessReaderQuery<Folder>(db.ExecuteReader(selectSql));
+    public static async Task<Dictionary<long, Folder>> FromDatabaseAsync(Database db)
+        =>ProcessReaderQuery<Folder>(await db.ExecuteReaderAsync(selectSql));
+    
+    
+    static Dictionary<long, Folder> ProcessReaderQuery(List<Dictionary<string, object?>> result)
     {
-        string filter = string.Empty;
-        if (indexes != null && indexes.Length > 0)
-        {
-            // Build a parameterized query for all IDs
-             
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
-        }
-
-        string sql = $@" SELECT * FROM Folders {filter};";
-        
-
-        Dictionary<long, Folder> Folders = new();
-        foreach (var row in db.ExecuteReader(sql))
+        Dictionary<long,Folder> folders = new();
+        foreach (var row in result)
         {
             var name = Database.GetString(row, "Name");
-            Folder Folder = new Folder(name!)
+            Folder folder = new Folder(name!)
             {
-                DatabaseIndex = Convert.ToInt64(row["Id"])
+                DatabaseIndex = Convert.ToInt64(row["Id"]),
+                ArtworkId = Convert.ToInt64(row["ArtworkId"]), 
+                Name = name! 
             };
-            Folders.Add(Folder.DatabaseIndex, Folder);
+            folders.Add(folder.DatabaseIndex, folder);
         }
 
-        return Folders;
+        return folders;
     }
+
 }

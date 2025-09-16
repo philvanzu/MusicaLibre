@@ -13,7 +13,7 @@ public partial class LibraryViewModel
    
    public void DeleteGenre(Genre genre)
    {
-      var tracks = Tracks.Values.Where(x=>x.Genres.Contains(genre));
+      var tracks = Data.Tracks.Values.Where(x=>x.Genres.Contains(genre));
       foreach (var track in tracks)
       {
          track.Genres.Remove(genre);
@@ -21,7 +21,7 @@ public partial class LibraryViewModel
          TagUtils.EnqueueFileUpdate(track);
       }
       
-      Genres.Remove(genre.DatabaseIndex);
+      Data.Genres.Remove(genre.DatabaseIndex);
       _ = genre.DbRemoveAsync(Database);
    }
 
@@ -61,30 +61,30 @@ public partial class LibraryViewModel
    public void AddDisc(uint number, Album album)
    {
       var disc = new Disc(number, album);
-      Discs.Add((number, album.DatabaseIndex), disc);
+      Data.Discs.Add((number, album.DatabaseIndex), disc);
       _ = disc.DbInsertAsync(Database);
    }
 
    public bool IsAlbumEmpty(Album album)
    {
-      return Tracks.Values.Any(x=>x.Album == album);
+      return Data.Tracks.Values.Any(x=>x.Album == album);
    }
 
    public void RemoveEmptyAlbum(Album album)
    {
-      foreach (var disc in Discs.Values.Where(x => x.AlbumId == album.DatabaseIndex))
+      foreach (var disc in Data.Discs.Values.Where(x => x.AlbumId == album.DatabaseIndex))
          _ = disc.DbDeleteAsync(Database);  
       _ = album.DbDeleteAsync(Database);
    }
    public void RemoveDisc(Disc disc)
    {
       _ = disc.DbDeleteAsync(Database);
-      Discs.Remove((disc.Number, disc.AlbumId));
+      Data.Discs.Remove((disc.Number, disc.AlbumId));
    }
 
    public void AddFolder(Folder folder)
    {
       _ = folder.DbInsertAsync(Database);
-      Folders.Add(folder.DatabaseIndex, folder);
+      Data.Folders.Add(folder.DatabaseIndex, folder);
    }
 }

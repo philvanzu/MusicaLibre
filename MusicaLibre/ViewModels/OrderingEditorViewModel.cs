@@ -37,6 +37,13 @@ public partial class OrderingEditorViewModel:ViewModelBase
         SelectedItem = ordering;
     }
 
+    [RelayCommand]
+    void ResetToDefault()
+    {
+        Library.Settings.LoadDefaultOrderings();
+        Refresh();                  
+    }
+
     public void Refresh()
     {
         SelectedItem = null;

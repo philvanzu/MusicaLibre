@@ -36,19 +36,19 @@ public partial class TagsEditorViewModel:TracksListViewModel
         
         UpdateCollection();
         var albums =TracksPool.Select(x=>x.Album).Distinct();
-        PoolAlbums = Library.Albums.Values.Where(x=> albums.Contains(x)).ToList();
+        PoolAlbums = Library.Data.Albums.Values.Where(x=> albums.Contains(x)).ToList();
         
         var discs = TracksPool.Select(x=>(x.DiscNumber, x.AlbumId)).Distinct();
-        PoolDiscs = Library.Discs.Values.Where(x=> discs.Contains((x.Number, x.AlbumId))).ToList();
+        PoolDiscs = Library.Data.Discs.Values.Where(x=> discs.Contains((x.Number, x.AlbumId))).ToList();
         
         var artists = TracksPool.SelectMany(x => x.Artists).Distinct(); 
-        PoolArtists = Library.Artists.Values.Where(x=> artists.Contains(x)).ToList();
+        PoolArtists = Library.Data.Artists.Values.Where(x=> artists.Contains(x)).ToList();
         
         var composers = TracksPool.SelectMany(x => x.Composers).Distinct();
-        PoolComposers = Library.Artists.Values.Where(x=> composers.Contains(x)).ToList();
+        PoolComposers = Library.Data.Artists.Values.Where(x=> composers.Contains(x)).ToList();
         
         var genres = TracksPool.SelectMany(x => x.Genres).Distinct();
-        PoolGenres = Library.Genres.Values.Where(x=> genres.Contains(x)).ToList();
+        PoolGenres = Library.Data.Genres.Values.Where(x=> genres.Contains(x)).ToList();
         
         InputManager.IsDragSelecting = true;
         foreach (var track in _tracks)
@@ -107,7 +107,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
         ??_mult;
     public string Codec=> IsMultiple ? CoalescedCodec : $"{SelectedTrack?.Model.Codec}";
     public string CoalescedCodec =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.Codec??"").ToArray())
+        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.Codec).ToArray())
         ??_mult;
     public string Bitrate=>IsMultiple ? CoalescedBitrate:$"{SelectedTrack?.Model.BitrateKbps}Kbps";
     public string CoalescedBitrate =>
@@ -125,19 +125,20 @@ public partial class TagsEditorViewModel:TracksListViewModel
     [ObservableProperty] private string _addedBinding = string.Empty;
     public string Added => IsMultiple? CoalescedAdded : $"{SelectedTrack?.Model.DateAdded}";
     public string CoalescedAdded =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.DateAdded).ToArray()).ToString()
-        ??_mult;
+        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.DateAdded.ToString()).ToArray()) 
+        ?? _mult;
     [ObservableProperty] private string _modifiedBinding = string.Empty;
     public string Modified => IsMultiple ? CoalescedModified : $"{SelectedTrack?.Model.Modified}";
+
     public string CoalescedModified =>
-        TagUtils.Coalesce(SelectedVms.Select(x=> x.Model.Modified).ToArray()).ToString()
+        TagUtils.Coalesce(SelectedVms.Select(x => x.Model.Modified.ToString()).ToArray()) 
         ??_mult;
 
     [ObservableProperty] private string _createdBinding = string.Empty;
     public string Created => IsMultiple ? CoalescedCreated : $"{SelectedTrack?.Model.Created}";
     public string CoalescedCreated =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.Created).ToArray()).ToString()
-        ??_mult;
+        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.Created.ToString()).ToArray()) 
+        ?? _mult;
 
     [ObservableProperty] private string _playedBinding = string.Empty;
     public string Played => IsMultiple? CoalescedPlayed : $"{SelectedTrack?.Model.LastPlayed}";
@@ -212,9 +213,9 @@ public partial class TagsEditorViewModel:TracksListViewModel
         foreach (var album in SelectedTracks.Select(x => x.Album).Distinct())
         {
             if (album == null) continue;
-            var albumDiscs = Library.Discs.Values.Where(x => x.AlbumId == album.DatabaseIndex).ToList();
+            var albumDiscs = Library.Data.Discs.Values.Where(x => x.AlbumId == album.DatabaseIndex).ToList();
             //remove discs that no track references anymore
-            var discNumbersInAlbumTracks = Library.Tracks.Values
+            var discNumbersInAlbumTracks = Library.Data.Tracks.Values
                 .Where(x => x.AlbumId == album.DatabaseIndex)
                 .Select(x => x.DiscNumber).Distinct().ToArray();
             foreach (var disc in albumDiscs)
@@ -237,7 +238,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
         ??_mult;
     partial void OnAlbumBindingChanged(string value)
     {
-        var albums = Library.Albums.Values.Where(x => x.Title.StartsWith(value, StringComparison.OrdinalIgnoreCase));
+        var albums = Library.Data.Albums.Values.Where(x => x.Title.StartsWith(value, StringComparison.OrdinalIgnoreCase));
         AlbumOptions = albums.Select(x=>$"{x.Title}");
     }
 
@@ -245,7 +246,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
     {
         var title = AlbumBinding;
         var oldAlbums = SelectedTracks?.Select(x=> x.Album).Distinct().ToList();
-        var album = Library.Albums.Values.FirstOrDefault(x => x.Title == title);
+        var album = Library.Data.Albums.Values.FirstOrDefault(x => x.Title == title);
 
         if (album is null || album.DatabaseIndex == 0) // new title doesn't exist yet
         {
@@ -254,7 +255,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
             {
                 album.Title = title; //rename selected track's album to title input
                 album.Year = SelectedTrack?.Model.Year;
-                album.Folder = SelectedTrack?.Model.Folder??Library.Folders[0];
+                album.Folder = SelectedTrack?.Model.Folder??Library.Data.Folders[0];
                 await  album.DbUpdateAsync(Library.Database);
             }
         }
@@ -291,12 +292,12 @@ public partial class TagsEditorViewModel:TracksListViewModel
         if(string.IsNullOrWhiteSpace(YearBinding))return;
         if (uint.TryParse(YearBinding, out uint y))
         {
-            var year = Library.Years.Values.FirstOrDefault(x => x.Number.Equals(y));
+            var year = Library.Data.Years.Values.FirstOrDefault(x => x.Number.Equals(y));
             if (year is null || year.DatabaseIndex == 0)
             {
                 year = new Year(y);
                 await year.DbInsertAsync(Library.Database);
-                Library.Years.Add(year.DatabaseIndex, year);
+                Library.Data.Years.Add(year.DatabaseIndex, year);
             }
             if(SelectedTracks is not null)
             {
@@ -320,7 +321,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
         ??_mult;
     partial void OnPublisherBindingChanged(string value)
     {
-        PublisherOptions= Library.Publishers.Values
+        PublisherOptions= Library.Data.Publishers.Values
             .Where(x => x.Name.StartsWith(value, StringComparison.OrdinalIgnoreCase))
             .Select(x=>$"{x.Name}");
     }
@@ -329,14 +330,14 @@ public partial class TagsEditorViewModel:TracksListViewModel
     async Task PublisherUpdated()
     {
         if (string.IsNullOrWhiteSpace(PublisherBinding)) return;
-        var publisher = Library.Publishers.Values
+        var publisher = Library.Data.Publishers.Values
             .FirstOrDefault(x => x.Name.Equals(PublisherBinding, StringComparison.OrdinalIgnoreCase));
 
         if (publisher is null)
         {
             publisher = new Publisher(PublisherBinding);
             await publisher.DbInsertAsync(Library.Database);
-            Library.Publishers.Add(publisher.DatabaseIndex, publisher);
+            Library.Data.Publishers.Add(publisher.DatabaseIndex, publisher);
         }
         if(SelectedTracks is not null)
         {
@@ -364,7 +365,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
         var current = splits.LastOrDefault();
         if (current is null) return;
         
-        ArtistsOptions= Library.Artists.Values
+        ArtistsOptions= Library.Data.Artists.Values
             .Where(x => x.Name.StartsWith(current, StringComparison.OrdinalIgnoreCase))
             .Select(x=>$"{x.Name}");
     }
@@ -377,13 +378,13 @@ public partial class TagsEditorViewModel:TracksListViewModel
         var artists=new List<Artist>();
         foreach (var split in splits)
         {
-            var artist = Library.Artists.Values
+            var artist = Library.Data.Artists.Values
                 .FirstOrDefault(x => x.Name.Equals(split, StringComparison.OrdinalIgnoreCase));
             if (artist is null)
             {
                 artist = new Artist(split);
                 await artist.DbInsertAsync(Library.Database);
-                Library.Artists.Add(artist.DatabaseIndex, artist);
+                Library.Data.Artists.Add(artist.DatabaseIndex, artist);
             }
             artists.Add(artist);
         }
@@ -411,7 +412,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
         var current = split[split.Length - 1].Trim();
         if (!string.IsNullOrEmpty(current))
         {
-            GenreOptions = Library.Genres.Values
+            GenreOptions = Library.Data.Genres.Values
                 .Where(x => x.Name.StartsWith(current, StringComparison.OrdinalIgnoreCase))
                 .Select(x => x.Name);
         }
@@ -425,12 +426,12 @@ public partial class TagsEditorViewModel:TracksListViewModel
         var genres = new List<Genre>();
         foreach (var split in splits)
         {
-            var genre = Library.Genres.Values.FirstOrDefault(x => x.Name.Equals(split, StringComparison.OrdinalIgnoreCase));
+            var genre = Library.Data.Genres.Values.FirstOrDefault(x => x.Name.Equals(split, StringComparison.OrdinalIgnoreCase));
             if (genre == null)
             {
                 genre = new Genre(split);
                 genre.DbInsert(Library.Database);
-                Library.Genres.Add(genre.DatabaseIndex, genre);
+                Library.Data.Genres.Add(genre.DatabaseIndex, genre);
             }
             genres.Add(genre);
         }
@@ -512,8 +513,21 @@ public partial class TagsEditorViewModel:TracksListViewModel
             }
         }
     }
-    [RelayCommand] void CreatedFromBackup()
+    [RelayCommand] async Task RefreshTimeStamps()
     {
+        if(SelectedTracks is not null )
+        {
+            foreach (var track in SelectedTracks)
+            {
+                track.Created = File.GetCreationTime(track.FilePath);
+                track.Modified = File.GetLastWriteTime(track.FilePath);
+                
+                await track.DbUpdateAsync(Library.Database);
+                    
+                OnPropertyChanged(CreatedBinding);
+                OnPropertyChanged(ModifiedBinding);
+            }
+        }
     }
 
 

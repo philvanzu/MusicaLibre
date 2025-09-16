@@ -17,7 +17,8 @@ public class Year:NameTag
         WHERE Id = $id;";
     private const string deleteSql = @"
         DELETE FROM Years WHERE Id = $id;";
-    private Dictionary<string, object?> Parameters => new()
+    const string selectSql="SELECT * FROM Years;";
+    protected override Dictionary<string, object?> Parameters => new()
     {
         ["$id"] = DatabaseIndex,
         ["$number"] = Number,
@@ -25,7 +26,6 @@ public class Year:NameTag
     };
     public uint Number{get;set;}
     
-
     public Year(uint number)
     {
         Number = number;
@@ -45,26 +45,24 @@ public class Year:NameTag
     public async Task DbUpdateAsync(Database db)=> await db.ExecuteNonQueryAsync(updateSql, Parameters );
     public async Task DbDeleteAsync(Database db)=> await db.ExecuteNonQueryAsync(deleteSql, Parameters );
     
-    public static Dictionary<long, Year> FromDatabase(Database db, int[]? indexes=null)
+    public static Dictionary<long, Year> FromDatabase(Database db)
+        =>ProcessReaderQuery(db.ExecuteReader(selectSql));
+    public static async Task<Dictionary<long, Year>> FromDatabaseAsync(Database db)
+        => ProcessReaderQuery(await db.ExecuteReaderAsync(selectSql));
+    protected static Dictionary<long, Year> ProcessReaderQuery(List<Dictionary<string, object?>> result) 
     {
-        string filter = String.Empty;
-        if (indexes != null && indexes.Length == 0)
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
-
-        string sql = $@"SELECT * FROM Years {filter}";
-        
-
-        Dictionary<long,Year> Years = new();
-        foreach (var row in db.ExecuteReader(sql))
+        Dictionary<long,Year> ts = new();
+        foreach (var row in result)
         {
-            var number = Database.GetValue<uint>(row, "Number");
-            Year Year = new Year(number!.Value)
+            var number = Convert.ToUInt32(row["Number"]);
+            Year t = new Year(number)
             {
-                DatabaseIndex = Convert.ToInt64(row["Id"])
+                DatabaseIndex = Convert.ToInt64(row["Id"]),
+                ArtworkId = Database.GetValue<long>(row, "ArtworkId"), 
             };
-            Years.Add(Year.DatabaseIndex, Year);
+            ts.Add(t.DatabaseIndex, t);
         }
 
-        return Years;
+        return ts;
     }
 }

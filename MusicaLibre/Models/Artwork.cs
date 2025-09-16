@@ -135,7 +135,7 @@ public class Artwork:IDisposable
         INSERT INTO Artworks (Hash, Width, Height, Thumbnail, MimeType, SourcePath, FolderId, SourceType, Role, EmbedIdx, BookletPage)
         VALUES ($hash, $width, $height, $thumb, $mime, $sourcePath, $sourceFolder, $sourceType, $role, $embedIdx,  $bookletPage);
         SELECT last_insert_rowid();";
-
+    const string selectSql = "SELECT * FROM Artworks;";
     private Dictionary<string, object?> Parameters => new()
     {
         ["$id"] = DatabaseIndex,
@@ -164,17 +164,16 @@ public class Artwork:IDisposable
         DatabaseIndex =  Convert.ToInt64(id);
     }
     
-    public static Dictionary<long, Artwork> FromDatabase(Database db, int[]? indexes=null)
-    {
-        string filter = String.Empty;
-        if (indexes != null && indexes.Length == 0)
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
+    public static Dictionary<long, Artwork> FromDatabase(Database db)
+        => ProcessReaderResult(db.ExecuteReader(selectSql), db);
     
-        string sql = $@"
-        SELECT * FROM Artworks {filter}";
+    public static async Task<Dictionary<long, Artwork>> FromDatabaseAsync(Database db)
+        => ProcessReaderResult(await db.ExecuteReaderAsync(selectSql), db);
 
+    static Dictionary<long, Artwork> ProcessReaderResult(List<Dictionary<string, object?>> result, Database db)
+    {
         Dictionary<long,Artwork> artworks = new();
-        foreach (var row in db.ExecuteReader(sql))
+        foreach (var row in result)
         {
             Artwork artwork = new Artwork(db)
             {
@@ -197,7 +196,7 @@ public class Artwork:IDisposable
 
         return artworks;
     }
-    
+
     public void ProcessImage()
     {
         try

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using MusicaLibre.Services;
 namespace MusicaLibre.Models;
 
@@ -21,34 +22,41 @@ public class Playlist
     public DateTime? Played { get; set; }
     
     public List<(Track track, int position)> Tracks { get; set; } = new();
-
-
-    public void DatabaseInsert(Database db)
-    {
-        var sql = @"INSERT INTO Playlists (FilePath, FileName, FolderId, Created, Modified)  
+    
+    const string selectSql = "SELECT * FROM Playlists;";
+    const string insertSql = @"INSERT INTO Playlists (FilePath, FileName, FolderId, Created, Modified)  
                 VALUES ($filepath, $filename, $folderpath, $created, $modified);
                 SELECT last_insert_rowid();";
-        var playlistId = db.ExecuteScalar(sql, new ()
-        {
-            ["$filepath"]  = FilePath,
-            ["$filename"]  = FileName,
-            ["$folderpath"] = Folder?.DatabaseIndex,
-            ["$created"]   = TimeUtils.ToUnixTime(Created),
-            ["$modified"]  = TimeUtils.ToUnixTime(Modified),
-        });
+
+    private Dictionary<string, object?> Parameters => new()
+    {
+        ["$filepath"] = FilePath,
+        ["$filename"] = FileName,
+        ["$folderpath"] = Folder?.DatabaseIndex,
+        ["$created"] = TimeUtils.ToUnixTime(Created),
+        ["$modified"] = TimeUtils.ToUnixTime(Modified),
+    };
+    public void DatabaseInsert(Database db)
+    {
+        var playlistId = db.ExecuteScalar(insertSql, Parameters );
         DatabaseIndex = Convert.ToInt64(playlistId);
     }
 
-    public static Dictionary<long, Playlist> FromDatabase(Database db, long[]? indexes = null)
+    public async Task DatabaseInsertAsync(Database db)
     {
-        string filter = String.Empty;
-        if (indexes != null && indexes.Length == 0)
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
+        var playlistId = await db.ExecuteScalarAsync(insertSql, Parameters );
+        DatabaseIndex = Convert.ToInt64(playlistId);
+    }
 
-        string sql = $@"SELECT * FROM Playlists {filter};";
+    public static Dictionary<long, Playlist> FromDatabase(Database db)
+        => ProcessReaderResult(db.ExecuteReader(selectSql));
+    public static async Task<Dictionary<long, Playlist>> FromDatabaseAsync(Database db)
+        => ProcessReaderResult(await db.ExecuteReaderAsync(selectSql));
 
+    public static Dictionary<long, Playlist> ProcessReaderResult(List<Dictionary<string, object?>> result)
+    {
         Dictionary<long, Playlist> playlists = new();
-        foreach (var row in db.ExecuteReader(sql))
+        foreach (var row in result)
         {
             var created = Convert.ToInt64(row["Created"]);
             var modified = Convert.ToInt64(row["Modified"]);

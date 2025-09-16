@@ -62,7 +62,7 @@ public partial class ArtworkPickerViewModel:ViewModelBase, IDisposable, ISelectV
         Dispose();
         Artworks.Clear();
 
-        var artworks = _library.Artworks.Values
+        var artworks = _library.Data.Artworks.Values
             .Where(x => PathUtils.IsDescendantPath(_rootDirectory, x.Folder.Name))
             .Select(x=> new ArtworkViewModel(this, x));
         
@@ -88,7 +88,7 @@ public partial class ArtworkPickerViewModel:ViewModelBase, IDisposable, ISelectV
         } );
         if (!string.IsNullOrEmpty(selectedPath))
         {
-            var artwork = _library.Artworks.Values.FirstOrDefault(x => x.SourcePath?.Equals(selectedPath)??false);
+            var artwork = _library.Data.Artworks.Values.FirstOrDefault(x => x.SourcePath?.Equals(selectedPath)??false);
             Folder? folder=null;
             if (artwork == null && File.Exists(selectedPath))
             {
@@ -96,12 +96,12 @@ public partial class ArtworkPickerViewModel:ViewModelBase, IDisposable, ISelectV
                 {
                     var filename = Path.GetFileName(selectedPath);
                     var importPath = Path.Combine(_library.Path, AppData.Instance.UserSettings.ImagesImportPath, filename);
-                    folder = _library.Folders.Values.FirstOrDefault(x=>x.Name.Equals(importPath));
+                    folder = _library.Data.Folders.Values.FirstOrDefault(x=>x.Name.Equals(importPath));
                     if (folder is null)
                     {
                         folder = new Folder(importPath); 
                         await folder.DbInsertAsync(_library.Database);
-                        _library.Folders.Add(folder.DatabaseIndex, folder);
+                        _library.Data.Folders.Add(folder.DatabaseIndex, folder);
                     }
                     File.Move(selectedPath, importPath);
                     selectedPath = importPath;

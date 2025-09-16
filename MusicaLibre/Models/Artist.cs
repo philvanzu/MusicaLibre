@@ -20,12 +20,10 @@ public class Artist:NameTag
     private const string deleteSql=@"
         DELETE FROM Artists WHERE Id = $id;";
     
-    private Dictionary<string, object?> Parameters => new()
-    {
-        ["$name"] = Name,
-        ["$artworkId"] = Artwork?.DatabaseIndex,
-        ["$id"] = DatabaseIndex,
-    };
+    private const string selectSql = $@"SELECT * FROM Artists";
+    
+    public Artist() { }
+
     public Artist(string name)
     {
         Name = name;
@@ -45,28 +43,11 @@ public class Artist:NameTag
     public async Task DbUpdateAsync(Database db)=>await db.ExecuteNonQueryAsync(updateSql, Parameters);
     public async Task DbDeleteAsync(Database db) => await db.ExecuteNonQueryAsync(deleteSql, Parameters);
     
-    public static Dictionary<long, Artist> FromDatabase(Database db, int[]? indexes=null)
-    {
-        string filter = String.Empty;
-        if (indexes != null && indexes.Length == 0)
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
-
-        string sql = $@"SELECT Id, Name FROM Artists {filter}";
-        
-
-        Dictionary<long,Artist> artists = new();
-        foreach (var row in db.ExecuteReader(sql))
-        {
-            var name = Database.GetString(row, "Name");
-            Artist artist = new Artist(name!)
-            {
-                DatabaseIndex = Convert.ToInt64(row["Id"]),
-                Name = name! 
-            };
-            artists.Add(artist.DatabaseIndex, artist);
-        }
-
-        return artists;
-    }
+    public static Dictionary<long, Artist> FromDatabase(Database db)
+        =>ProcessReaderQuery<Artist>(db.ExecuteReader(selectSql));
     
+    public static async Task<Dictionary<long, Artist>> FromDatabaseAsync(Database db)
+        => ProcessReaderQuery<Artist>(await db.ExecuteReaderAsync(selectSql));
+  
+
 }

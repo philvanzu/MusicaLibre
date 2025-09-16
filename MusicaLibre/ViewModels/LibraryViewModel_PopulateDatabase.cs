@@ -799,7 +799,7 @@ public partial class LibraryViewModel
                                 Folder = playlist.Folder,
                                 Title = sheet.Title,
                                 AlbumArtist = artists[sheet.Performer],
-                                Cover = Artworks.Values.FirstOrDefault(x=>x.Folder == playlist.Folder)
+                                Cover = Data.Artworks.Values.FirstOrDefault(x=>x.Folder == playlist.Folder)
                             };
                             createdAlbum = true;
                         }

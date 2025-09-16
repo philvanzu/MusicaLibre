@@ -368,7 +368,7 @@ public static class SearchUtils
         var weights =  new Dictionary<Track, double>();
         var artistWeights = new Dictionary<Artist, double>();
 
-        foreach (var artist in library.Artists.Values)
+        foreach (var artist in library.Data.Artists.Values)
         {
             string[] arr = { artist.Name };
             var aw = GetScore(splits, arr, 1.0);

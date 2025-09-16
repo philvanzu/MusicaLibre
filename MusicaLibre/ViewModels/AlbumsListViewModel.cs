@@ -74,7 +74,7 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
         
         var albumIds = TracksPool.Select(x => x.AlbumId).Where(albumId => albumId.HasValue).Distinct().ToList();
 
-        var albumsPool = Library.Albums.Values.AsEnumerable();
+        var albumsPool = Library.Data.Albums.Values.AsEnumerable();
         if (albumIds.Count > 0) albumsPool = albumsPool.Where(x => albumIds.Contains(x.DatabaseIndex));
         foreach (var album in albumsPool)
             _items.Add(new AlbumViewModel(this, album));
@@ -218,7 +218,7 @@ public partial class DiscsListViewModel : AlbumsListViewModel
         
         var discIds = TracksPool.Select(x => (x.DiscNumber, x.AlbumId)).Distinct().ToList();
 
-        var discsPool = Library.Discs.Values.AsEnumerable();
+        var discsPool = Library.Data.Discs.Values.AsEnumerable();
         if (discIds.Count > 0) discsPool = discsPool.Where(x => discIds.Contains((x.Number, x.AlbumId)));
         foreach (var disc in discsPool)
             _items.Add(new AlbumDiscViewModel(this, disc));

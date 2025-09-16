@@ -1,16 +1,31 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using MusicaLibre.Services;
 
 namespace MusicaLibre.Models;
 
 public class AudioFormat:NameTag
 {
+    public AudioFormat(){}
     public AudioFormat(string name)
     {
         Name = name;
     }
+    private const string insertSql = @"
+                    INSERT INTO AudioFormats (Name) VALUES ($name);
+                    SELECT last_insert_rowid();";
+    
+    private const string selectSql="SELECT * FROM AudioFormats;";
+    
+    private const string updateSql = @"
+        UPDATE AudioFormats SET Name = $name, ArtworkId = $artworkId
+        WHERE Id = $id;";
+    
+    private const string deleteSql=@"
+        DELETE FROM AudioFormats WHERE Id = $id;";
+
     public static string Generate(string description, int bitrate)
     {
         string codec = NormalizeCodec(description);
@@ -21,39 +36,21 @@ public class AudioFormat:NameTag
 
     public void DbInsert(Database db)
     {
-        var sql = @"INSERT INTO AudioFormats (Name) VALUES ($name);
-                    SELECT last_insert_rowid();";
-
-        var id = db.ExecuteScalar(sql, new()
-        {
-            ["$name"] = Name
-        });
+        var id = db.ExecuteScalar(insertSql, Parameters);
         DatabaseIndex =  Convert.ToInt64(id);
     }
 
-    public static Dictionary<long, AudioFormat> FromDatabase(Database db, int[]? indexes = null)
+    public async Task DbInsertAsync(Database db)
     {
-        string filter = string.Empty;
-        if (indexes != null && indexes.Length > 0)
-        {
-            // Build a parameterized query for all IDs
-             
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
-        }
-        var sql  = $"SELECT * FROM AudioFormats {filter};";
-        Dictionary<long, AudioFormat> formats = new();
-        foreach (var row in db.ExecuteReader(sql))
-        {
-            var name = Database.GetString(row, "Name");
-            var id = Convert.ToInt64(row["Id"]);
-            var format = new AudioFormat(name)
-            {
-                DatabaseIndex = id,
-            };
-            formats.Add(id, format);
-        }
-        return formats;
+        var id = await db.ExecuteScalarAsync(insertSql, Parameters);
+        DatabaseIndex =  Convert.ToInt64(id);
     }
+
+    public static Dictionary<long, AudioFormat> FromDatabase(Database db)
+        => ProcessReaderQuery<AudioFormat>(db.ExecuteReader(selectSql));
+    public static async Task<Dictionary<long, AudioFormat>> FromDatabaseAsync(Database db, string codec)
+        => ProcessReaderQuery<AudioFormat>(await db.ExecuteReaderAsync(selectSql));
+    
     private static string NormalizeCodec(string description)
     {
         description = description.ToLowerInvariant();

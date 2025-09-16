@@ -183,7 +183,7 @@ public class ArtistsListViewModel(LibraryViewModel library, List<Track> tracksPo
         {
             var ids =  t.SelectMany(track => track.Artists).Select(artist => artist.DatabaseIndex)
                 .Distinct().ToList();
-            return library.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
+            return library.Data.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
 public class PublishersListViewModel(LibraryViewModel library, List<Track> tracksPool): 
@@ -192,7 +192,7 @@ public class PublishersListViewModel(LibraryViewModel library, List<Track> track
         t =>
         {
             var ids = t.Select(track => track.PublisherId).Where(id => id.HasValue).Distinct().ToList();
-            return library.Publishers.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
+            return library.Data.Publishers.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
 public class GenresListViewModel(LibraryViewModel library, List<Track> tracksPool):
@@ -202,7 +202,7 @@ public class GenresListViewModel(LibraryViewModel library, List<Track> tracksPoo
         {
             var ids =  t.SelectMany(track => track.Genres).Select(genre => genre.DatabaseIndex)
                 .Distinct().ToList();
-            return library.Genres.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
+            return library.Data.Genres.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
 public class RemixersListViewModel(LibraryViewModel library, List<Track> tracksPool) :
@@ -211,7 +211,7 @@ public class RemixersListViewModel(LibraryViewModel library, List<Track> tracksP
         t =>
         {
             var ids =  t.Select(track => track.RemixerId).Where(id => id.HasValue).Distinct().ToList();
-            return library.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
+            return library.Data.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
 public class ConductorsListViewModel(LibraryViewModel library, List<Track> tracksPool) :
@@ -220,7 +220,7 @@ public class ConductorsListViewModel(LibraryViewModel library, List<Track> track
         t =>
         {
             var ids = t.Select(track => track.ConductorId).Where(id => id.HasValue).Distinct().ToList();
-            return library.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
+            return library.Data.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
 public class ComposersListViewModel(LibraryViewModel library, List<Track> tracksPool) :
@@ -231,7 +231,7 @@ public class ComposersListViewModel(LibraryViewModel library, List<Track> tracks
             var ids = t.SelectMany(track => track.Composers)
                 .Select(composer => composer.DatabaseIndex)
                 .Distinct().ToList();
-            return library.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
+            return library.Data.Artists.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
 public class AudioFormatsListViewModel(LibraryViewModel library, List<Track> tracksPool) :
@@ -240,7 +240,7 @@ public class AudioFormatsListViewModel(LibraryViewModel library, List<Track> tra
         t =>
         {
             var ids = t.Select(track => track.AudioFormatId).Distinct().ToList();
-            return library.AudioFormats.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
+            return library.Data.AudioFormats.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
 public class YearsListViewModel(LibraryViewModel library, List<Track> tracksPool) :
@@ -249,7 +249,7 @@ public class YearsListViewModel(LibraryViewModel library, List<Track> tracksPool
         t =>
         {
             var ids = t.Select(track => track.YearId).Distinct().ToList();
-            return  library.Years.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
+            return  library.Data.Years.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         });
 
 public class FoldersListViewModel(LibraryViewModel library, List<Track> tracksPool) :
@@ -258,7 +258,7 @@ public class FoldersListViewModel(LibraryViewModel library, List<Track> tracksPo
         t =>
         {
           var ids = t.Select(track => track.FolderId).Distinct().ToList();
-          return  library.Folders.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
+          return  library.Data.Folders.Values.Where(x => ids.Contains(x.DatabaseIndex)).ToList();
         } );
 
 

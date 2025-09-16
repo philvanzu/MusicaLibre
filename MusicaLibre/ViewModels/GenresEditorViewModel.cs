@@ -23,7 +23,7 @@ public partial class GenresEditorViewModel:ViewModelBase, IDisposable
     public GenresEditorViewModel(LibraryViewModel library)
     {
         _library = library;
-        _genres = new(library.Genres.Values);
+        _genres = new(library.Data.Genres.Values);
     }
 
     
@@ -37,7 +37,7 @@ public partial class GenresEditorViewModel:ViewModelBase, IDisposable
             SelectedGenre = _oldGenre =Genres[value];
             Text = SelectedGenre.Name;
             SelectedGenre.Artwork?.RequestThumbnail(this, ()=>OnPropertyChanged(nameof(Thumbnail)));
-            SelectedTracks = new (_library.Tracks.Values.Where(x=>x.Genres.Contains(SelectedGenre)));
+            SelectedTracks = new (_library.Data.Tracks.Values.Where(x=>x.Genres.Contains(SelectedGenre)));
         }
         else
         {
@@ -67,7 +67,7 @@ public partial class GenresEditorViewModel:ViewModelBase, IDisposable
             Genre? genre = null;
             foreach (var name in split)
             {
-                var g = _library.Genres.Values
+                var g = _library.Data.Genres.Values
                     .FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
                 if (g is null )
                     g = _library.CreateGenre(name, SelectedTracks.ToList());
@@ -76,7 +76,7 @@ public partial class GenresEditorViewModel:ViewModelBase, IDisposable
                 if(genre == null) genre = g;
             }
             _genres.Clear();
-            _genres.AddRange(_library.Genres.Values);
+            _genres.AddRange(_library.Data.Genres.Values);
             if (genre != null)
                 SelectedGenreIndex = Genres.IndexOf(genre);
         }
@@ -98,7 +98,7 @@ public partial class GenresEditorViewModel:ViewModelBase, IDisposable
         {
             var genre = _library.CreateGenre(Text);
             _genres.Clear();
-            _genres.AddRange(_library.Genres.Values);
+            _genres.AddRange(_library.Data.Genres.Values);
             if (genre != null)
                 SelectedGenreIndex = Genres.IndexOf(genre);
         }

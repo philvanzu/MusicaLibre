@@ -73,8 +73,8 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
         Played = TimeUtils.FormatDateTime(value?.LastPlayed);
         if (value != null)
         {
-            SelectedTracks = new(Library.Tracks.Values.Where(x => x.Album == SelectedAlbum));
-            SelectedDiscs = new (Library.Discs.Values.Where(x=> x.Album == value)
+            SelectedTracks = new(Library.Data.Tracks.Values.Where(x => x.Album == SelectedAlbum));
+            SelectedDiscs = new (Library.Data.Discs.Values.Where(x=> x.Album == value)
                 .Select(x=>new DiscViewModel(x)));
         }
     }
@@ -93,7 +93,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
     partial void OnArtistChanged(string? value)
     {
         if (!string.IsNullOrEmpty(value))
-            ArtistOptions = Library.Artists.Values
+            ArtistOptions = Library.Data.Artists.Values
                 .Where(x => x.Name.StartsWith(value, StringComparison.OrdinalIgnoreCase))
                 .Select(x => x.Name);
 
@@ -107,7 +107,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
 
         if (!string.IsNullOrEmpty(Title))
         {
-            var album = Library.Albums.Values.FirstOrDefault(x => x.Title.Equals(Title));
+            var album = Library.Data.Albums.Values.FirstOrDefault(x => x.Title.Equals(Title));
             if (album != null)
             {
                 await DialogUtils.MessageBox(_tagsEditor.Window, "Error", "An Album with that Title already exists!");
@@ -118,26 +118,26 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
         }
         if (!string.IsNullOrEmpty(Artist))
         {
-            var artist = Library.Artists.Values
+            var artist = Library.Data.Artists.Values
                 .FirstOrDefault(x=>x.Name!.Equals(Artist, StringComparison.OrdinalIgnoreCase));
             if (artist is null)
             {
                 artist = new Artist(Artist);
                 await artist.DbInsertAsync(Library.Database);
-                Library.Artists.Add(artist.DatabaseIndex, artist);
+                Library.Data.Artists.Add(artist.DatabaseIndex, artist);
             }
             SelectedAlbum.AlbumArtist = artist;
         }
 
         if (uint.TryParse(Year, out var yearNumber))
         {
-            var year = Library.Years.Values
+            var year = Library.Data.Years.Values
                 .FirstOrDefault(x => x.Name!.Equals(Year, StringComparison.OrdinalIgnoreCase));
             if (year is null)
             {
                 year = new Year(yearNumber);
                 await year.DbInsertAsync(Library.Database);
-                Library.Years.Add(year.DatabaseIndex, year);
+                Library.Data.Years.Add(year.DatabaseIndex, year);
             }
             SelectedAlbum.Year = year;
             if (SelectedTracks != null)
@@ -162,7 +162,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
     {
         if(SelectedAlbum is null) return;
         
-        var tracks = Library.Tracks.Values.Where(x => x.Album == SelectedAlbum).ToList();
+        var tracks = Library.Data.Tracks.Values.Where(x => x.Album == SelectedAlbum).ToList();
         var artwork = await DialogUtils.ArtworkPicker(_tagsEditor.Window, Library, tracks, ArtworkRole.CoverFront);
         if (artwork != null)
         {
@@ -175,7 +175,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
     private void ComputeAdded()
     {
         if(SelectedAlbum == null) return;
-        var tracksArray = Library.Tracks.Values
+        var tracksArray = Library.Data.Tracks.Values
             .Where(x => x.Album == SelectedAlbum)
             .Select(x => x.DateAdded);
         SelectedAlbum.Added = TimeUtils.Earliest(tracksArray);
@@ -188,7 +188,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
     private void ComputeModified()
     {
         if(SelectedAlbum == null) return;
-        var tracksArray = Library.Tracks.Values
+        var tracksArray = Library.Data.Tracks.Values
             .Where(x => x.Album == SelectedAlbum)
             .Select(x => x.Modified);
         SelectedAlbum.Modified = TimeUtils.Latest(tracksArray);
@@ -200,7 +200,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
     private void ComputeCreated()
     {
         if(SelectedAlbum == null) return;
-        var tracksArray = Library.Tracks.Values
+        var tracksArray = Library.Data.Tracks.Values
             .Where(x => x.Album == SelectedAlbum)
             .Select(x => x.Created);
         SelectedAlbum.Created = TimeUtils.Earliest(tracksArray);

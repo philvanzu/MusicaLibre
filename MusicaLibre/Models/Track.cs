@@ -143,6 +143,7 @@ public class Track
     };
     
     const string deleteSql="DELETE FROM Tracks WHERE Id = $id;";
+    const string selectSql = "SELECT * FROM Tracks;";
     
     public async Task DbInsertAsync(Database db, Action<long>? callback = null)
     {
@@ -168,16 +169,16 @@ public class Track
     public void DbDelete(Database db)=>db.ExecuteNonQuery(deleteSql, Parameters);
     public async Task DbDeleteAsync(Database db)=>await db.ExecuteNonQueryAsync(deleteSql, Parameters);
 
-    public static Dictionary<long, Track> FromDatabase(Database db, int[]? indexes = null)
+    public static Dictionary<long, Track> FromDatabase(Database db)
+        => ProcessReaderResult( db.ExecuteReader(selectSql));
+    
+    public static async Task<Dictionary<long, Track>> FromDatabaseAsync(Database db)
+        => ProcessReaderResult(await db.ExecuteReaderAsync(selectSql));
+
+    public static Dictionary<long, Track> ProcessReaderResult(List<Dictionary<string, object?>> result)
     {
-        string filter = String.Empty;
-        if (indexes != null && indexes.Length == 0)
-            filter = $"WHERE Id IN ({string.Join(", ", indexes)})";
-
-        string sql = $@"SELECT * FROM Tracks {filter};";
-
         Dictionary<long, Track> tracks = new();
-        foreach (var row in db.ExecuteReader(sql))
+        foreach (var row in result)
         {
             
             var  modified = Convert.ToInt64(row["Modified"]);
@@ -221,7 +222,6 @@ public class Track
 
         return tracks;
     }
-    
 
     public async Task UpdateGenresAsync(LibraryViewModel library)
     {
