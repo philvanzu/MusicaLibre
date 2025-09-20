@@ -24,9 +24,11 @@ public class Playlist
     public List<(Track track, int position)> Tracks { get; set; } = new();
     
     const string selectSql = "SELECT * FROM Playlists;";
-    const string insertSql = @"INSERT INTO Playlists (FilePath, FileName, FolderId, Created, Modified)  
-                VALUES ($filepath, $filename, $folderpath, $created, $modified);
-                SELECT last_insert_rowid();";
+    const string deleteSql = "DELETE FROM Playlists WHERE Id = $id;";
+    const string insertSql = @"
+        INSERT INTO Playlists (FilePath, FileName, FolderId, Created, Modified)  
+        VALUES ($filepath, $filename, $folderpath, $created, $modified);
+        SELECT last_insert_rowid();";
 
     private Dictionary<string, object?> Parameters => new()
     {
@@ -47,7 +49,10 @@ public class Playlist
         var playlistId = await db.ExecuteScalarAsync(insertSql, Parameters );
         DatabaseIndex = Convert.ToInt64(playlistId);
     }
-
+    
+    public async Task DbDeleteAsync(Database db)
+        => await db.ExecuteNonQueryAsync(deleteSql, Parameters );
+    
     public static Dictionary<long, Playlist> FromDatabase(Database db)
         => ProcessReaderResult(db.ExecuteReader(selectSql));
     public static async Task<Dictionary<long, Playlist>> FromDatabaseAsync(Database db)

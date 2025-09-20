@@ -7,7 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="MusicaLibre.Views.PlaylistsListView"
              x:DataType="vm:PlaylistsListViewModel">
-     <ScrollViewer>
+     <ScrollViewer x:Name="Scroller" ScrollChanged="OnScrollChanged">
             <controls:VirtualizedItemsRepeater
                 ItemsSource="{Binding Items}"
                 SelectedItem="{Binding SelectedItem}"

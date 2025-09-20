@@ -36,7 +36,7 @@ public class Artist:NameTag
     }
     public async Task DbInsertAsync(Database db, Action<long>? callback=null)
     {
-        var id = await db.ExecuteScalarAsync(updateSql, Parameters);
+        var id = await db.ExecuteScalarAsync(insertSql, Parameters);
         DatabaseIndex =  Convert.ToInt64(id);
         callback?.Invoke(DatabaseIndex);
     }

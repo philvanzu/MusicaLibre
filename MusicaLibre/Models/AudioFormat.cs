@@ -48,7 +48,7 @@ public class AudioFormat:NameTag
 
     public static Dictionary<long, AudioFormat> FromDatabase(Database db)
         => ProcessReaderQuery<AudioFormat>(db.ExecuteReader(selectSql));
-    public static async Task<Dictionary<long, AudioFormat>> FromDatabaseAsync(Database db, string codec)
+    public static async Task<Dictionary<long, AudioFormat>> FromDatabaseAsync(Database db)
         => ProcessReaderQuery<AudioFormat>(await db.ExecuteReaderAsync(selectSql));
     
     private static string NormalizeCodec(string description)

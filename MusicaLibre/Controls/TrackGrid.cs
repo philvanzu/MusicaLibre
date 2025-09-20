@@ -383,7 +383,7 @@ private Control BuildCellHeader(TrackViewColumn column)
                     if (InputManager.CtrlPressed && track.IsSelected) track.IsSelected = false;
                     else
                     {
-                        if (track.IsSelected && !InputManager.ShiftPressed) track.Presenter.SelectedTrack = null;
+                        if (track.IsSelected && !InputManager.ShiftPressed) track.Presenter.SelectedItem = null;
                         track.IsSelected = true;
                     }
                 }

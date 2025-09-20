@@ -60,11 +60,16 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
     public event EventHandler<SelectedItemChangedEventArgs>? SelectionChanged;
     public event EventHandler? SortOrderChanged;
     public event EventHandler<int>? ScrollToIndexRequested;
+    
+    public Action<double>? ScrollToOffset;
+    public double ScrollOffset {get; set;}
+    
     public AlbumsListViewModel(LibraryViewModel library, List<Track> tracksPool)
         :base(library, tracksPool)
     {
         UpdateItemsCollection();
         Items = new (_itemsMutable);
+        _initialized = true;
     }
     
     protected virtual void UpdateItemsCollection()
@@ -81,6 +86,42 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
         
         Sort();
     }
+
+    protected override void OnTracksPoolChanged()
+    {
+        long? selectedId=null;
+        if (SelectedItem != null)
+            selectedId = SelectedItem.Model.DatabaseIndex;
+
+        List<long> selectedIds = new List<long>();
+        if (SelectedItems != null)
+            foreach (var item in SelectedItems)
+                selectedIds.Add(item.Model.DatabaseIndex);
+
+        var offset = ScrollOffset;
+        UpdateItemsCollection();
+        AlbumViewModel? selectedAlbum = null;
+        if (Items != null)
+        {
+            foreach (var item in Items)
+            {
+                if (selectedIds.Contains(item.Model.DatabaseIndex))
+                    item.IsSelected = true;
+                
+                if(selectedId.HasValue && item.Model.DatabaseIndex.Equals(selectedId.Value))
+                    selectedAlbum = item;
+            }
+
+            if (selectedAlbum != null)
+            {
+                InputManager.IsDragSelecting = true;
+                SelectedItem = selectedAlbum;
+                InputManager.IsDragSelecting = false;
+            }
+        }
+        ScrollToOffset?.Invoke(offset);
+    }
+
     protected IComparer<AlbumViewModel> GetComparer(AlbumSortKeys sort, bool ascending)
     {
         return sort switch

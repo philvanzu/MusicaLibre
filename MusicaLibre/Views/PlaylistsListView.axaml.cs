@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using MusicaLibre.Services;
 using MusicaLibre.ViewModels;
 
@@ -10,6 +11,7 @@ namespace MusicaLibre.Views;
 
 public partial class PlaylistsListView : UserControl
 {
+    private PlaylistsListViewModel? _oldvm;
     public PlaylistsListView()
     {
         InitializeComponent();
@@ -59,5 +61,35 @@ public partial class PlaylistsListView : UserControl
             vm.AppendCommand.Execute(null);
         }
         e.Handled = true;
+    }
+
+    private void OnScrollChanged(object? sender, ScrollChangedEventArgs e)
+    {
+        if (DataContext is PlaylistsListViewModel vm )
+            vm.ScrollOffset = Scroller.Offset.Y;
+    }
+
+    public void SetScrollOffset(double scrollOffset)
+    {
+        Dispatcher.UIThread.Post(() => 
+                Scroller.Offset = new Vector(Scroller.Offset.X, scrollOffset),
+            DispatcherPriority.Loaded);
+        
+    }
+
+    protected override void OnDataContextChanged(EventArgs e)
+    {
+        base.OnDataContextChanged(e);
+        if (_oldvm != null)
+        {
+            _oldvm.ScrollToOffset = null;
+            _oldvm = null;
+        }
+            
+        if (DataContext is PlaylistsListViewModel vm)
+        {
+            vm.ScrollToOffset = SetScrollOffset;
+            _oldvm = vm;
+        }
     }
 }

@@ -98,13 +98,13 @@ public class Album
         DatabaseIndex =  Convert.ToInt64(id);
     }
 
-    public async Task DbInsertAsync(Database db, Action<long> callback)
+    public async Task DbInsertAsync(Database db, Action<long>? callback=null)
     {
         try
         {
             var id = await db.ExecuteScalarAsync(insertSql, Parameters);
             DatabaseIndex =  Convert.ToInt64(id);
-            callback(Convert.ToInt64(id));    
+            callback?.Invoke(Convert.ToInt64(id));    
         }
         catch (Exception ex){Console.WriteLine(ex);}
     }

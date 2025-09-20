@@ -8,8 +8,8 @@
              x:Class="MusicaLibre.Views.NowPlayingListView"
              x:DataType="vm:NowPlayingListViewModel">
     <ScrollViewer>
-        <ctrl:VirtualizedItemsRepeater ItemsSource="{Binding Tracks}"
-                                       SelectedItem="{Binding SelectedTrack}"
+        <ctrl:VirtualizedItemsRepeater ItemsSource="{Binding Items}"
+                                       SelectedItem="{Binding SelectedItem}"
                                        ElementWidth="0" ElementHeight="64">
             <ctrl:VirtualizedItemsRepeater.Layout>
                 <StackLayout Orientation="Vertical"/>

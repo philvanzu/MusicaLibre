@@ -100,7 +100,7 @@ public class Database
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            Console.WriteLine(ex);
                             work.Tcs.TrySetException(ex);
                         }
                     }
@@ -118,7 +118,7 @@ public class Database
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            Console.WriteLine(ex);
                             workS.Tcs.TrySetException(ex);
                         }
                     }
@@ -136,7 +136,7 @@ public class Database
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            Console.WriteLine(ex);
                             workR.Tcs.TrySetException(ex);
                         }
                     }    
@@ -470,6 +470,11 @@ CREATE TABLE IF NOT EXISTS Info (
     Added INTEGER,
     Settings TEXT
 );
+CREATE TABLE IF NOT EXISTS DiscardedFiles (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    FilePath TEXT NOT NULL UNIQUE,
+    Error TEXT
+);
 -- =========================
 -- Tracks
 -- =========================
@@ -585,9 +590,9 @@ CREATE TABLE Artworks (
     Height      INTEGER NOT NULL,
     Thumbnail   BLOB NOT NULL,          -- 200x200 thumbnail bytes
     MimeType    TEXT NOT NULL,          -- e.g., 'image/png'
-    Role        INT,
-    EmbedIdx    INT,
-    BookletPage INT
+    Role        INTEGER,
+    EmbedIdx    INTEGER,
+    BookletPage INTEGER
 );
 -- =========================
 -- Formats

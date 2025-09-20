@@ -79,10 +79,10 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
         try
         {
             _suppressSelectedUpdates = true;
-            if (newValue && Presenter.SelectedTrack != this)
-                Presenter.SelectedTrack = this;
-            else if (oldValue && Presenter.SelectedTrack == this)
-                Presenter.SelectedTrack = null;
+            if (newValue && Presenter.SelectedItem != this)
+                Presenter.SelectedItem = this;
+            else if (oldValue && Presenter.SelectedItem == this)
+                Presenter.SelectedItem = null;
         }
         finally
         {

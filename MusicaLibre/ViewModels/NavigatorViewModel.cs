@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MusicaLibre.ViewModels;
@@ -7,6 +8,7 @@ public partial class NavigatorViewModel<T>:ViewModelBase
 {
     [ObservableProperty] private LibraryViewModel _library;
     private readonly Stack<T> _back = new();
+    
     public bool IsVisible => CanGoBack;
     public T? Current { get; private set; }
 
@@ -44,4 +46,10 @@ public partial class NavigatorViewModel<T>:ViewModelBase
 
 
     public T? PeekBack => _back.Peek();
+    public List<T> ToList()
+    { 
+        var list = _back.Reverse().ToList();
+        if(Current!= null) list.Add(Current);
+        return list;
+    }
 }

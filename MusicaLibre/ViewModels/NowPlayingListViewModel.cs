@@ -28,9 +28,9 @@ public partial class NowPlayingListViewModel:TracksListViewModel
     {
         if (replace == null || replace.Count == 0) return;
         var vms = replace.Select(x => new TrackViewModel(x, this));
-        _tracks = SortTracks(vms).ToList();
+        _items = SortTracks(vms).ToList();
         Update();
-        Tracks.First().IsPlaying = true;    
+        Items.First().IsPlaying = true;    
     }
     public void Insert(List<Track> insert, int position=-1)
     {
@@ -38,7 +38,7 @@ public partial class NowPlayingListViewModel:TracksListViewModel
         var vms = insert.Select(x => new TrackViewModel(x, this)).ToList();
         vms = SortTracks(vms).ToList();
         if (position == -1) position = _playingTrackIndex+1;
-        _tracks.InsertRange(position, vms);
+        _items.InsertRange(position, vms);
         Update();
     }
 
@@ -47,27 +47,27 @@ public partial class NowPlayingListViewModel:TracksListViewModel
         if(append == null || append.Count == 0) return;
         var vms = append.Select(x => new TrackViewModel(x, this)).ToList();
         vms = SortTracks(vms).ToList();
-        _tracks.AddRange(vms);
+        _items.AddRange(vms);
         Update();
     }
 
     public void Update()
     {
         int i = 0;
-        foreach (var track in _tracks)
+        foreach (var track in _items)
         {
             track.NowPlayingIndex = ++i;
         }
         
-        _tracksMutable.Clear();
-        _tracksMutable.AddRange(_tracks);
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(_items);
     }
     partial void OnPlayingTrackChanged(TrackViewModel? value)
     {
         if(PlayingTrack == null)
             Console.WriteLine("PlayingTrack set to null");
         
-        foreach (var item in _tracks)
+        foreach (var item in _items)
         {
             if(item.IsPlaying && item != value)
                 item.IsPlaying = false;
@@ -76,7 +76,7 @@ public partial class NowPlayingListViewModel:TracksListViewModel
         {
             _playingTrackIndex = GetItemIndex(value);
             var next = _playingTrackIndex + 1;
-            if (next < _tracks.Count) NextTrack = _tracks[next];   
+            if (next < _items.Count) NextTrack = _items[next];   
             else NextTrack = null;
         }
         else
@@ -88,13 +88,13 @@ public partial class NowPlayingListViewModel:TracksListViewModel
     public void SetIsPlaying(int index)
     {
         if (index == _playingTrackIndex) return;
-        if (index < 0 || index >= _tracks.Count) return;
-        Tracks[index].IsPlaying = true;
+        if (index < 0 || index >= _items.Count) return;
+        Items[index].IsPlaying = true;
     }
     public void Next()
     {
         var pos = _playingTrackIndex + 1;
-        if( pos < _tracks.Count) SetIsPlaying(pos);
+        if( pos < _items.Count) SetIsPlaying(pos);
     }
 
     public void Previous()

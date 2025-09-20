@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,28 +9,10 @@ using MusicaLibre.Models;
 namespace MusicaLibre.Services;
 using System.IO;
 
-public static class TagUtils
+public static class TagWriter
 {
-    public static  T? Coalesce<T>(T[] values)
-    {
-        if (values == null || values.Length == 0)
-            return default;
 
-        // take first value as reference
-        var first = values[0];
-
-        // use EqualityComparer<T> to handle nulls & custom equality
-        var comparer = EqualityComparer<T>.Default;
-
-        for (int i = 1; i < values.Length; i++)
-        {
-            if (!comparer.Equals(first, values[i]))
-                return default; // mismatch -> return null/default
-        }
-
-        return first;
-    }
-
+    public static ConcurrentDictionary<string, DateTime> OwnedFileWrites { get; } = new ConcurrentDictionary<string, DateTime>();
 
     private static readonly Channel<Track> _channel =
         Channel.CreateUnbounded<Track>(new UnboundedChannelOptions
@@ -64,6 +47,7 @@ public static class TagUtils
             {
                 var created = File.GetCreationTime(track.FilePath);
                 var modified = File.GetLastWriteTime(track.FilePath);
+                OwnedFileWrites.AddOrUpdate(track.FilePath, DateTime.Now, (key, old) => DateTime.Now);
                 using var file = TagLib.File.Create(track.FilePath);
                 file.Tag.Title = track.Title;
                 file.Tag.Album = track.Album?.Title;

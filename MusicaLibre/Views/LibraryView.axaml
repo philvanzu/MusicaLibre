@@ -15,7 +15,7 @@
         <conv:NullToInverseBooleanConverter x:Key="NullToInverseBoolean" />
         <conv:StringNotEmptyToBoolConverter x:Key="StringNotEmptyToBoolConverter"/>
     </UserControl.Resources>
-    <Grid RowDefinitions="80, *" >
+    <Grid RowDefinitions="80, *, Auto" >
         
         <!-- Library toolbar-->
         <Grid ColumnDefinitions="*, Auto" Background="#333333">
@@ -179,6 +179,17 @@
                 </DataTemplate>
             </ContentControl.DataTemplates>
         </ContentControl>
+        
+        <!-- Status bar (sync progress -->
+        <Grid Grid.Row="2" >
+            <Border BorderBrush="White" BorderThickness="1" Background="#505050"
+                    IsVisible="{Binding MainWindowViewModel.StatusProgress.IsBusy}"
+                    HorizontalAlignment="Right" Width="600">
+                <ContentControl  >
+                    <v:ProgressView DataContext="{Binding MainWindowViewModel.StatusProgress}"/>
+                </ContentControl>
+            </Border>
+        </Grid>
     </Grid>
     
     

@@ -49,15 +49,18 @@ public partial class PlaylistsListViewModel : LibraryDataPresenter, ISelectVirtu
     public event EventHandler<SelectedItemChangedEventArgs>? SelectionChanged;
     public event EventHandler? SortOrderChanged;
     public event EventHandler<int>? ScrollToIndexRequested;
+    public Action<double>? ScrollToOffset;
+    public double ScrollOffset {get; set;}
     
     public PlaylistsListViewModel(LibraryViewModel library, List<Track> tracksPool)
         :base(library, tracksPool)
     {
-        UpdateAlbumsCollection();
+        UpdateCollection();
         Items = new (_itemsMutable);
+        _initialized = true;
     }
     
-    void UpdateAlbumsCollection()
+    void UpdateCollection()
     {
         _items.Clear();
 
@@ -159,6 +162,41 @@ public partial class PlaylistsListViewModel : LibraryDataPresenter, ISelectVirtu
 
         OnPropertyChanged(nameof(Items));
         //InvokeSortOrderChanged();
+    }
+
+    protected override void OnTracksPoolChanged()
+    {
+        long? selectedId=null;
+        if (SelectedItem != null)
+            selectedId = SelectedItem.Model.DatabaseIndex;
+
+        List<long> selectedIds = new List<long>();
+        if (SelectedItems != null)
+            foreach (var item in SelectedItems)
+                selectedIds.Add(item.Model.DatabaseIndex);
+
+        var offset = ScrollOffset;
+        UpdateCollection();
+        PlaylistViewModel? selected = null;
+        if (Items != null)
+        {
+            foreach (var item in Items)
+            {
+                if (selectedIds.Contains(item.Model.DatabaseIndex))
+                    item.IsSelected = true;
+                
+                if(selectedId.HasValue && item.Model.DatabaseIndex.Equals(selectedId.Value))
+                    selected = item;
+            }
+
+            if (selected != null)
+            {
+                InputManager.IsDragSelecting = true;
+                SelectedItem = selected;
+                InputManager.IsDragSelecting = false;
+            }
+        }
+        ScrollToOffset?.Invoke(offset);
     }
 
     public override void Reverse()

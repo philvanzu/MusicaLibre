@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MusicaLibre.Models;
@@ -31,9 +32,23 @@ public partial class LibraryViewModel : ViewModelBase
 
     public MainWindowViewModel MainWindowViewModel { get; init; }
     public Database Database { get; init; }
+    public DbSyncManager DbSyncManager { get; init; }
 
+    private readonly object _dataLock = new();
     private volatile LibrarySnapshot _data = new LibrarySnapshot();
-    public LibrarySnapshot Data => _data;
+    public LibrarySnapshot Data
+    {
+        get { lock (_dataLock) return _data; }
+        private set
+        {
+            lock (_dataLock) 
+            {
+                _data = value;
+                Refresh();
+            }
+        }
+    }
+
 
     private int _currentStepIndex;
 
@@ -60,6 +75,7 @@ public partial class LibraryViewModel : ViewModelBase
         Name = System.IO.Path.GetFileName(libraryRoot.TrimEnd(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar));
         Path = libraryRoot;
         Database = db;
+        DbSyncManager = new DbSyncManager(this);
         Settings = LibrarySettingsViewModel.Load(Database);
         Settings.PropertyChanged += (_, args) =>
         {
@@ -111,6 +127,7 @@ public partial class LibraryViewModel : ViewModelBase
     {
         Data.Populate(Database); // load the whole db in memory except the blobs.
         Database.SetModeAsync(true).Wait();
+        DbSyncManager.StartSyncService();
         CurrentOrdering = Settings.CustomOrderings[Settings.SelectedOrdering];
         OrderingChanged();
         AppData.Instance.AppState.CurrentLibrary = Database.Path;
@@ -159,59 +176,78 @@ public partial class LibraryViewModel : ViewModelBase
         }
     }
 
+    void Refresh()
+    {
+        if(_navigator == null) return;
+        var navstack = _navigator.ToList();
+        var pool = Data.Tracks.Values.ToList();
+        var idx = _currentStepIndex;
+        _currentStepIndex = 0;
+        foreach (var presenter in navstack)
+        {
+            if (pool == null) break;
+            presenter.TracksPool = pool;
+            _currentStepIndex++;
+            pool = presenter.SelectedTracks;
+        }
+        _currentStepIndex = idx;
+    }
+
     void OrderingStepChanged()
     {
-        List<Track> pool = Navigator?.Current?.SelectedTracks ?? Data.Tracks.Values.ToList();
         var capsule = DataPresenter?.GetCapsule();
-        switch (CurrentStep.Type)
+        lock (_dataLock)
         {
-            case OrderGroupingType.Album:
-                DataPresenter = new AlbumsListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Disc :
-                DataPresenter = new DiscsListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Artist:
-                DataPresenter = new ArtistsListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Playlist: 
-                DataPresenter = new PlaylistsListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Track:
-                var list = new TracksListViewModel(this, pool);
-                list.UpdateCollection();
-                list.SetCapsule(DataPresenter?.GetCapsule());
-                DataPresenter = list;
-                break;
-            case OrderGroupingType.Year:
-                DataPresenter = new YearsListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Genre:
-                DataPresenter = new GenresListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Publisher:
-                DataPresenter = new PublishersListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Remixer:
-                DataPresenter = new RemixersListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Composer:
-                DataPresenter = new ComposersListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Conductor:
-                DataPresenter = new ConductorsListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Folder:
-                DataPresenter = new FoldersListViewModel(this, pool);
-                break;
-            case OrderGroupingType.Bitrate_Format:
-                DataPresenter = new AudioFormatsListViewModel(this, pool);
-                break;
+            List<Track> pool = Navigator?.Current?.SelectedTracks ?? Data.Tracks.Values.ToList();
+            switch (CurrentStep.Type)
+            {
+                case OrderGroupingType.Album:
+                    DataPresenter = new AlbumsListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Disc :
+                    DataPresenter = new DiscsListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Artist:
+                    DataPresenter = new ArtistsListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Playlist: 
+                    DataPresenter = new PlaylistsListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Track:
+                    var list = new TracksListViewModel(this, pool);
+                    list.UpdateCollection();
+                    list.SetCapsule(DataPresenter?.GetCapsule());
+                    DataPresenter = list;
+                    break;
+                case OrderGroupingType.Year:
+                    DataPresenter = new YearsListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Genre:
+                    DataPresenter = new GenresListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Publisher:
+                    DataPresenter = new PublishersListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Remixer:
+                    DataPresenter = new RemixersListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Composer:
+                    DataPresenter = new ComposersListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Conductor:
+                    DataPresenter = new ConductorsListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Folder:
+                    DataPresenter = new FoldersListViewModel(this, pool);
+                    break;
+                case OrderGroupingType.Bitrate_Format:
+                    DataPresenter = new AudioFormatsListViewModel(this, pool);
+                    break;
+            }    
         }
-
+        
         if (DataPresenter != null)
         {
-            
             Capsule = capsule ?? new NavCapsuleViewModel()
             {
                 Title = $"{CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Name)}",
@@ -226,8 +262,6 @@ public partial class LibraryViewModel : ViewModelBase
                 Navigator = new NavigatorViewModel<LibraryDataPresenter>(this, DataPresenter);
             else
                 Navigator.Navigate(DataPresenter);
-            
-            
         }
     }
 
@@ -256,12 +290,25 @@ public partial class LibraryViewModel : ViewModelBase
 
     public async Task EditTracks(List<Track>? tracks)
     {
-        if(tracks == null || tracks.Count == 0) return;
-        var dialog = new TagsEditorDialog();
-        var vm = new TagsEditorViewModel(this, tracks, dialog);
-        InputManager.Instance.Attach(dialog);
-        dialog.DataContext = vm;
-        await dialog.ShowDialog(MainWindowViewModel.MainWindow);
+        // wait sync process to finish if running
+        if (DbSyncManager.SyncTask != null) 
+            await DbSyncManager.SyncTask;
+        
+        // set flag in DbSyncManager to delay sync process starting as long as dialog is open
+        await DbSyncManager.SyncLock.WaitAsync();
+        try
+        {
+            if (tracks == null || tracks.Count == 0) return;
+            var dialog = new TagsEditorDialog();
+            var vm = new TagsEditorViewModel(this, tracks, dialog);
+            InputManager.Instance.Attach(dialog);
+            dialog.DataContext = vm;
+            await dialog.ShowDialog(MainWindowViewModel.MainWindow);
+        }
+        finally
+        {
+            DbSyncManager.SyncLock.Release();
+        }
     }
 }
 

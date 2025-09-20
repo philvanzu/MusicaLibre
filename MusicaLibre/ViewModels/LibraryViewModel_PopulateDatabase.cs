@@ -34,7 +34,7 @@ public partial class LibraryViewModel
             
         
             progress.Counter = progress.Counter + 1;
-            progress.Progress.Report(($"Loaded Directories : {progress.Counter}", -1.0, false));
+                                                                                                                                                                                                                                                                                      
             var dirInfo = new DirectoryInfo(path);
             addFolder?.Invoke(dirInfo.FullName);
             var subDirs = dirInfo.GetDirectories();
@@ -102,6 +102,7 @@ public partial class LibraryViewModel
         Dictionary<uint, Year> years = new Dictionary<uint, Year>();
         Dictionary<string, Folder> folders = new Dictionary<string, Folder>();
         List<Artwork> artworkFiles = new List<Artwork>();
+        HashSet<string> discards = new HashSet<string>();
         using var throttler = new SemaphoreSlim(4);
         try
         {
@@ -203,9 +204,19 @@ public partial class LibraryViewModel
                         (double)progress.Counter / total, false));
                     
                     artwork.Folder = folders[artwork.FolderPathstr];
-                    artwork.ProcessImage();
-                    
-                    if (string.IsNullOrEmpty(artwork.Hash) ) continue;
+                    var error = artwork.ProcessImage();
+
+                    if (string.IsNullOrEmpty(artwork.Hash) && discards.Add(artwork.SourcePath))
+                    {
+                        var discarded = new DiscardedFile(artwork.SourcePath, error);
+                        try
+                        {
+                            discarded.DbInsert(Database);    
+                        }
+                        catch (Exception ex) {Console.WriteLine(ex);}
+                        
+                        continue;
+                    }
                     if (!artworks.ContainsKey(artwork.Hash))
                     {
                         artwork.FindRole();
@@ -259,9 +270,6 @@ public partial class LibraryViewModel
                         
                         using var file = TagLib.File.Create(track.FilePath);
                         track.Title = file.Tag.Title??"";
-                        
-
-
                         track.TrackNumber = file.Tag.Track;
                         track.DiscNumber = file.Tag.Disc;
                         track.Comment = file.Tag.Comment??String.Empty;
@@ -314,9 +322,22 @@ public partial class LibraryViewModel
                         track.AudioFormat = audioFormat;
                         track.AudioFormatId = audioFormat.DatabaseIndex;
                         
-                        var performers = file.Tag.Performers?? Array.Empty<string>();
+                        if (!artists.TryGetValue(_unknownArtistStr, out var unknownArtist))
+                        {
+                            try
+                            {
+                                unknownArtist = new Artist(_unknownArtistStr);
+                                artists.Add(_unknownArtistStr, unknownArtist);
+                                unknownArtist.DbInsert(Database);    
+                                Debug.Assert(unknownArtist.DatabaseIndex > 0);
+                            }
+                            catch (Exception ex){Console.WriteLine(ex);}
+                            
+                        }
                         
-                        var composers = file.Tag.Composers?? Array.Empty<string>();
+                        var performers = file.Tag.Performers?? [];
+                        
+                        var composers = file.Tag.Composers?? [];
                         performers = performers.Concat(composers).ToArray();
                         
                         var albumPerformer = string.Join(" & ", file.Tag.AlbumArtists).Trim();
@@ -336,27 +357,14 @@ public partial class LibraryViewModel
                             performers = performers.Concat(new[] { remixer }).ToArray();
                         }
 
-                        if (!artists.TryGetValue(_unknownArtistStr, out var unknownArtist))
-                        {
-                            try
-                            {
-                                unknownArtist = new Artist(_unknownArtistStr);
-                                artists.Add(_unknownArtistStr, unknownArtist);
-                                unknownArtist.DbInsert(Database);    
-                                Debug.Assert(unknownArtist.DatabaseIndex > 0);
-                            }
-                            catch (Exception ex){Console.WriteLine(ex);}
-                            
-                        }
+                        
                         Artist albumArtist = unknownArtist!;
                         
-                        foreach (var str in performers)
+                        foreach (var str in performers.Distinct())
                         {
                             var performer = str.Trim();
                             if (string.IsNullOrWhiteSpace(performer))
-                                performer = _unknownArtistStr;
-                            if(string.IsNullOrWhiteSpace(albumPerformer))
-                                albumPerformer = performer;
+                                continue;
                             if (!artists.TryGetValue(performer, out var artist))
                             {
                                 try
@@ -382,19 +390,23 @@ public partial class LibraryViewModel
                                     track.Composers.Add(artist);
                             }
                         }
-                        
-                        if (file.Tag.Album != null)
+                        if(track.Artists.Count == 0)
+                            track.Artists.Add(unknownArtist!);
+
+                        var albumName = file.Tag.Album.Trim();
+                    
+                        if (albumName != null)
                         {
                             if (albumArtist == unknownArtist 
                                 && artists.TryGetValue(albumPerformer, out var artist))
                                 albumArtist = artist;
     
-                            albums.TryGetValue((file.Tag.Album, albumPerformer), out var album);
+                            albums.TryGetValue((albumName, albumArtist.Name), out var album);
                             if (album == null)
                             {
-                                album = new Album(file.Tag.Album, albumArtist, track.Year);
+                                album = new Album(albumName, albumArtist, track.Year);
                                 album.Folder = track.Folder;
-                                albums.Add((file.Tag.Album, albumPerformer), album);
+                                albums.Add((albumName, albumArtist.Name), album);
                                 try
                                 {
                                     album.DbInsert(Database);
@@ -607,7 +619,13 @@ public partial class LibraryViewModel
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Could not open {track.FilePath} with Taglib. {ex}");
+                        if (discards.Add(track.FilePath))
+                        {
+                            var discard = new DiscardedFile(track.FilePath,
+                                $"Could not open {track.FilePath} with Taglib. {ex}");
+                            try { discard.DbInsert(Database); }
+                            catch (Exception exx) {Console.WriteLine(exx);}    
+                        }
                     }
                     if (Database.TransactionCounter > 1000)
                     {
@@ -642,48 +660,25 @@ public partial class LibraryViewModel
 
                     DateTime modified = DateTime.MinValue;
                     DateTime created = DateTime.MaxValue;
-                    HashSet<string> albumartists = new HashSet<string>();
+
                     foreach (var track in albumtracks)
                     {
                         albumfolders.Add(track.FolderPathstr);
                         if (modified < track.Modified) modified = track.Modified;
                         if (created > track.Created) created = track.Created;
-                        if (album.AlbumArtist == null)
-                            foreach (var artist in track.Artists)
-                                albumartists.Add(artist.Name);
+
                     }
 
-                    if (album.AlbumArtist == null && albumartists.Count > 0)
-                    {
-                        if (albumartists.Count > 2)
-                        {
-                            if (artists.TryGetValue("Various Artists", out var various))
-                                album.AlbumArtist = various;
-                            else
-                            {
-                                various = new Artist("Various Artists");
-                                artists.Add("Various Artists", various);
-                                album.AlbumArtist = various;
-                            }
-                        }
-                        else
-                        {
-                            string artistName = string.Join(" & ", albumartists);
-                            if (artists.TryGetValue(artistName, out var artist))
-                                album.AlbumArtist = artist;
-                            else
-                            {
-                                artist = new Artist(artistName);
-                                album.AlbumArtist = artist;
-                                artists.Add(artistName, artist);
-                            }
-                        }
-                    }
-
-                    album.Added = DateTime.Now;
                     album.Modified = modified;
                     album.Created = created;
-
+                    album.Added = Settings.LibCreationAddedDateSource switch
+                    {
+                        LibrarySettingsViewModel.LibCreationAddedDateSources.fromCreated
+                            => album.Created,
+                        LibrarySettingsViewModel.LibCreationAddedDateSources.fromModified
+                            => album.Modified,
+                        _ => DateTime.Now
+                    }; 
                     
                     var rootFolder = albumfolders.Count switch
                     {
@@ -799,7 +794,7 @@ public partial class LibraryViewModel
                                 Folder = playlist.Folder,
                                 Title = sheet.Title,
                                 AlbumArtist = artists[sheet.Performer],
-                                Cover = Data.Artworks.Values.FirstOrDefault(x=>x.Folder == playlist.Folder)
+                                Cover = artworks.Values.FirstOrDefault(x=>x.Folder == playlist.Folder)
                             };
                             createdAlbum = true;
                         }
@@ -830,7 +825,16 @@ public partial class LibraryViewModel
                                 track.End = times.end;
                                 sheetTracks.Add(track);
                             }
-                            else return;
+                            else 
+                            {
+                                if (discards.Add(playlist.FilePath))
+                                {
+                                    var discard = new DiscardedFile(playlist.FilePath, "Cue Sheet contains missing files");
+                                    try { discard.DbInsert(Database); }
+                                    catch (Exception ex) { Console.WriteLine(ex); }
+                                }
+                                return;
+                            }
                         }
                         
 
@@ -850,6 +854,7 @@ public partial class LibraryViewModel
                             }
                             catch (Exception ex){Console.WriteLine(ex);}
                         }
+                        
                         
                         foreach (var t in sheetTracks)
                         {
@@ -876,7 +881,7 @@ public partial class LibraryViewModel
 
                             }
                         }
-
+                        
                         foreach (var track in sheetMultiTracks)
                         {
                             try
@@ -887,19 +892,21 @@ public partial class LibraryViewModel
                         }
                     });
                     // End Cue Sheets Handler
-                    if (gotsheetback || list.Count == 0)
-                        continue;
-                    try
+                    if (gotsheetback || list.Count > 0)
                     {
-                        playlist.DatabaseInsert(Database);
-                        Debug.Assert(playlist.DatabaseIndex > 0);
+                        try
+                        {
+                            playlist.DatabaseInsert(Database);
+                            Debug.Assert(playlist.DatabaseIndex > 0);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                            continue;
+                        }    
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex);
+                    if (gotsheetback )
                         continue;
-                    }
-                    
                     
                     const string insertTrackSql =
                         @"INSERT OR IGNORE INTO PlaylistTracks (PlaylistId, TrackId, Position) VALUES ($playlistid, $trackid, $position);

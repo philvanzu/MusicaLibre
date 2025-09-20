@@ -11,7 +11,7 @@
     <UserControl.Resources>
         
     </UserControl.Resources>
-    <ScrollViewer>
+    <ScrollViewer x:Name="Scroller" ScrollChanged="OnScrollChanged" >
             <controls:VirtualizedItemsRepeater
                 ItemsSource="{Binding Items}"
                 SelectedItem="{Binding SelectedItem}"

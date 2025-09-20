@@ -51,7 +51,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
         PoolGenres = Library.Data.Genres.Values.Where(x=> genres.Contains(x)).ToList();
         
         InputManager.IsDragSelecting = true;
-        foreach (var track in _tracks)
+        foreach (var track in _items)
             track.IsSelected = true;
         InputManager.IsDragSelecting = false;
         
@@ -96,104 +96,104 @@ public partial class TagsEditorViewModel:TracksListViewModel
     }
 
 #region TrackTags 
-    public string FilePath=>IsMultiple ? CoalescedFilePath : SelectedTrack?.Model.FilePath??"";
+    public string FilePath=>IsMultiple ? CoalescedFilePath : SelectedItem?.Model.FilePath??"";
     public string CoalescedFilePath => 
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.FilePath).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Model.FilePath).ToArray())
         ??_mult;
     
-    public string Duration=>IsMultiple ? CoalescedDuration : SelectedTrack?.Duration??"";
+    public string Duration=>IsMultiple ? CoalescedDuration : SelectedItem?.Duration??"";
     public string CoalescedDuration=>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Duration).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Duration).ToArray())
         ??_mult;
-    public string Codec=> IsMultiple ? CoalescedCodec : $"{SelectedTrack?.Model.Codec}";
+    public string Codec=> IsMultiple ? CoalescedCodec : $"{SelectedItem?.Model.Codec}";
     public string CoalescedCodec =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.Codec).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Model.Codec).ToArray())
         ??_mult;
-    public string Bitrate=>IsMultiple ? CoalescedBitrate:$"{SelectedTrack?.Model.BitrateKbps}Kbps";
+    public string Bitrate=>IsMultiple ? CoalescedBitrate:$"{SelectedItem?.Model.BitrateKbps}Kbps";
     public string CoalescedBitrate =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>$"{x.Bitrate}Kbps").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Bitrate}Kbps").ToArray())
         ??_mult;
-    public string Channels=>IsMultiple? CoalescedChannels : $"{SelectedTrack?.Model.Channels}";
+    public string Channels=>IsMultiple? CoalescedChannels : $"{SelectedItem?.Model.Channels}";
     public string CoalescedChannels =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>$"{x.Model.Channels}").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Channels}").ToArray())
         ??_mult;
-    public string SampleRate=>IsMultiple?CoalescedSampleRate:$"{SelectedTrack?.Model.SampleRate??0}Khz";
+    public string SampleRate=>IsMultiple?CoalescedSampleRate:$"{SelectedItem?.Model.SampleRate??0}Khz";
     public string CoalescedSampleRate =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>$"{x.Model.SampleRate}Khz").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.SampleRate}Khz").ToArray())
         ??_mult;
 
     [ObservableProperty] private string _addedBinding = string.Empty;
-    public string Added => IsMultiple? CoalescedAdded : $"{SelectedTrack?.Model.DateAdded}";
+    public string Added => IsMultiple? CoalescedAdded : $"{SelectedItem?.Model.DateAdded}";
     public string CoalescedAdded =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.DateAdded.ToString()).ToArray()) 
+        Utils.Coalesce(SelectedItems.Select(x=>x.Model.DateAdded.ToString()).ToArray()) 
         ?? _mult;
     [ObservableProperty] private string _modifiedBinding = string.Empty;
-    public string Modified => IsMultiple ? CoalescedModified : $"{SelectedTrack?.Model.Modified}";
+    public string Modified => IsMultiple ? CoalescedModified : $"{SelectedItem?.Model.Modified}";
 
     public string CoalescedModified =>
-        TagUtils.Coalesce(SelectedVms.Select(x => x.Model.Modified.ToString()).ToArray()) 
+        Utils.Coalesce(SelectedItems.Select(x => x.Model.Modified.ToString()).ToArray()) 
         ??_mult;
 
     [ObservableProperty] private string _createdBinding = string.Empty;
-    public string Created => IsMultiple ? CoalescedCreated : $"{SelectedTrack?.Model.Created}";
+    public string Created => IsMultiple ? CoalescedCreated : $"{SelectedItem?.Model.Created}";
     public string CoalescedCreated =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.Created.ToString()).ToArray()) 
+        Utils.Coalesce(SelectedItems.Select(x=>x.Model.Created.ToString()).ToArray()) 
         ?? _mult;
 
     [ObservableProperty] private string _playedBinding = string.Empty;
-    public string Played => IsMultiple? CoalescedPlayed : $"{SelectedTrack?.Model.LastPlayed}";
+    public string Played => IsMultiple? CoalescedPlayed : $"{SelectedItem?.Model.LastPlayed}";
     public string CoalescedPlayed =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.LastPlayed).ToArray()).ToString()
+        Utils.Coalesce(SelectedItems.Select(x=>x.Model.LastPlayed).ToArray()).ToString()
         ??_mult;
     //Rating
     [ObservableProperty] private double _ratingBinding;
-    public double? Rating => SelectedTrack?.Model.Rating??0;
+    public double? Rating => SelectedItem?.Model.Rating??0;
     
     
     //Title
     [ObservableProperty] private string _titleBinding = string.Empty;
-    public string Title => IsMultiple ? CoalescedTitle : $"{SelectedTrack?.Model.Title}";
+    public string Title => IsMultiple ? CoalescedTitle : $"{SelectedItem?.Model.Title}";
     public string CoalescedTitle =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>$"{x.Model.Title}").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Title}").ToArray())
         ??_mult;
 
     [RelayCommand]
     async Task TitleUpdated()
     {
         if(string.IsNullOrWhiteSpace(TitleBinding) )return;
-        if(SelectedTrack is null) return;
+        if(SelectedItem is null) return;
         
-        SelectedTrack.Model.Title = TitleBinding;
-        await SelectedTrack.Model.DbUpdateAsync(Library.Database);
-        TagUtils.EnqueueFileUpdate(SelectedTrack.Model);
+        SelectedItem.Model.Title = TitleBinding;
+        await SelectedItem.Model.DbUpdateAsync(Library.Database);
+        TagWriter.EnqueueFileUpdate(SelectedItem.Model);
     }
 
 
     //Track Number
     [ObservableProperty] private string _trackNumberBinding = string.Empty;
-    public string TrackNumber => IsMultiple ? CoalescedTrackNumber : $"{SelectedTrack?.Model.TrackNumber}";
+    public string TrackNumber => IsMultiple ? CoalescedTrackNumber : $"{SelectedItem?.Model.TrackNumber}";
     public string CoalescedTrackNumber =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>$"{x.Model.TrackNumber}").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.TrackNumber}").ToArray())
         ??_mult;
 
     [RelayCommand] void UpdateTrackNumber()
     {
-        if (uint.TryParse(TrackNumberBinding, out uint number) && SelectedTrack != null)
+        if (uint.TryParse(TrackNumberBinding, out uint number) && SelectedItem != null)
         {
-            foreach (var track in SelectedVms.Select(x => x.Model))
+            foreach (var track in SelectedItems.Select(x => x.Model))
             {
                 track.TrackNumber = number;
                 _ = track.DbUpdateAsync(Library.Database);
-                TagUtils.EnqueueFileUpdate(track);
+                TagWriter.EnqueueFileUpdate(track);
             }
         }
     }
     
     //AlbumDisc 
     [ObservableProperty] private string _discBinding = string.Empty;
-    public string DiscNumber => IsMultiple ? CoalescedDisc : $"{SelectedTrack?.Model.DiscNumber}";
+    public string DiscNumber => IsMultiple ? CoalescedDisc : $"{SelectedItem?.Model.DiscNumber}";
     public string CoalescedDisc =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>$"{x.Model.DiscNumber}").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.DiscNumber}").ToArray())
         ??_mult;
 
     [RelayCommand] void UpdateDiscNumber()
@@ -206,7 +206,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
             {
                 track.DiscNumber = number;
                 _ = track.DbUpdateAsync(Library.Database);
-                TagUtils.EnqueueFileUpdate(track);
+                TagWriter.EnqueueFileUpdate(track);
             }
         }
 
@@ -232,9 +232,9 @@ public partial class TagsEditorViewModel:TracksListViewModel
     //Album
     [ObservableProperty] private string _albumBinding = string.Empty;
     [ObservableProperty] private IEnumerable<string> _albumOptions;
-    public string Album => IsMultiple ? CoalescedAlbum : $"{SelectedTrack?.Model.Album?.Title}";
+    public string Album => IsMultiple ? CoalescedAlbum : $"{SelectedItem?.Model.Album?.Title}";
     public string CoalescedAlbum =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.Album?.Title).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Model.Album?.Title).ToArray())
         ??_mult;
     partial void OnAlbumBindingChanged(string value)
     {
@@ -250,12 +250,12 @@ public partial class TagsEditorViewModel:TracksListViewModel
 
         if (album is null || album.DatabaseIndex == 0) // new title doesn't exist yet
         {
-            album = SelectedTrack?.Model.Album;
+            album = SelectedItem?.Model.Album;
             if (album is not null)
             {
                 album.Title = title; //rename selected track's album to title input
-                album.Year = SelectedTrack?.Model.Year;
-                album.Folder = SelectedTrack?.Model.Folder??Library.Data.Folders[0];
+                album.Year = SelectedItem?.Model.Year;
+                album.Folder = SelectedItem?.Model.Folder??Library.Data.Folders[0];
                 await  album.DbUpdateAsync(Library.Database);
             }
         }
@@ -268,7 +268,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
                 track.AlbumId = album.DatabaseIndex;
                 track.Album = album;
                 _ = track.DbUpdateAsync(Library.Database);
-                TagUtils.EnqueueFileUpdate(track);    
+                TagWriter.EnqueueFileUpdate(track);    
             }
         }
         
@@ -281,9 +281,9 @@ public partial class TagsEditorViewModel:TracksListViewModel
     
     //Year
     [ObservableProperty] private string _yearBinding = string.Empty;
-    public string Year => IsMultiple ? CoalescedYear : $"{SelectedTrack?.Model.Year?.Number}";
+    public string Year => IsMultiple ? CoalescedYear : $"{SelectedItem?.Model.Year?.Number}";
     public string CoalescedYear =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>$"{x.Model.Year?.Number}").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Year?.Number}").ToArray())
         ??_mult;
 
     [RelayCommand]
@@ -305,7 +305,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
                 {
                     track.Year = year;
                     await track.DbUpdateAsync(Library.Database);
-                    TagUtils.EnqueueFileUpdate(track);
+                    TagWriter.EnqueueFileUpdate(track);
                 }
             }
         }
@@ -315,9 +315,9 @@ public partial class TagsEditorViewModel:TracksListViewModel
     //Publisher
     [ObservableProperty] private string _publisherBinding = string.Empty;
     [ObservableProperty] private IEnumerable<string> _publisherOptions;
-    public string Publisher => IsMultiple ? CoalescedPublisher : $"{SelectedTrack?.Model.Publisher?.Name}";
+    public string Publisher => IsMultiple ? CoalescedPublisher : $"{SelectedItem?.Model.Publisher?.Name}";
     public string CoalescedPublisher =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.Publisher?.Name).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Model.Publisher?.Name).ToArray())
         ??_mult;
     partial void OnPublisherBindingChanged(string value)
     {
@@ -345,7 +345,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
             {
                 track.Publisher = publisher;
                 await track.DbUpdateAsync(Library.Database);
-                TagUtils.EnqueueFileUpdate(track);
+                TagWriter.EnqueueFileUpdate(track);
             }
         }
     }
@@ -353,9 +353,9 @@ public partial class TagsEditorViewModel:TracksListViewModel
     //Artists
     [ObservableProperty] private string _artistsBinding = string.Empty;
     [ObservableProperty] private IEnumerable<string> _artistsOptions;
-    public string Artists => IsMultiple ? CoalescedArtists : $"{SelectedTrack?.Artists}";    
+    public string Artists => IsMultiple ? CoalescedArtists : $"{SelectedItem?.Artists}";    
     public string CoalescedArtists =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Artists).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Artists).ToArray())
         ??_mult;
 
     partial void OnArtistsBindingChanged(string value)
@@ -402,9 +402,9 @@ public partial class TagsEditorViewModel:TracksListViewModel
     //Genres
     [ObservableProperty] private string _genresBinding = string.Empty;
     [ObservableProperty] private IEnumerable<string>? _genreOptions;
-    public string Genres => IsMultiple ? CoalescedGenres : $"{SelectedTrack?.Genres}";
+    public string Genres => IsMultiple ? CoalescedGenres : $"{SelectedItem?.Genres}";
     public string CoalescedGenres =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Genres).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Genres).ToArray())
         ??_mult;
     partial void OnGenresBindingChanged(string value)
     {
@@ -445,21 +445,21 @@ public partial class TagsEditorViewModel:TracksListViewModel
     
     //Composers
     [ObservableProperty] private string _composersBinding = string.Empty;
-    public string Composers => IsMultiple? CoalescedComposers : $"{SelectedTrack?.Composers}";
+    public string Composers => IsMultiple? CoalescedComposers : $"{SelectedItem?.Composers}";
     public string CoalescedComposers =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Composers).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Composers).ToArray())
         ??_mult;
     
     [ObservableProperty] private string _remixerBinding = string.Empty;
-    public string Remixer => IsMultiple? CoalescedRemixer : $"{SelectedTrack?.Model.Remixer?.Name}";
+    public string Remixer => IsMultiple? CoalescedRemixer : $"{SelectedItem?.Model.Remixer?.Name}";
     public string CoalescedRemixer =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>x.Model.Remixer?.Name).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Model.Remixer?.Name).ToArray())
         ??_mult;
 
     [ObservableProperty] private string _conductorBinding = string.Empty;
-    public string Conductor => IsMultiple ? CoalescedConductor : $"{SelectedTrack?.Model.Conductor?.Name}";
+    public string Conductor => IsMultiple ? CoalescedConductor : $"{SelectedItem?.Model.Conductor?.Name}";
     public string CoalescedConductor =>
-        TagUtils.Coalesce(SelectedVms.Select(x=>$"{x.Model.Conductor?.Name}").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Conductor?.Name}").ToArray())
         ??_mult;
  #endregion   
  

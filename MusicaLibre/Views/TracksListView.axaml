@@ -16,12 +16,14 @@
     <!-- Horizontal scroll container -->
     <ScrollViewer Grid.Row="0" Grid.RowSpan="2"
                   HorizontalScrollBarVisibility="Auto"
-                  VerticalScrollBarVisibility="Disabled">
+                  VerticalScrollBarVisibility="Disabled"
+                  x:Name="Scroller"
+                  ScrollChanged="OnScrollChanged">
       
       <ctrl:TrackGrid 
-        ItemsSource="{Binding Tracks}"
+        ItemsSource="{Binding Items}"
         Columns="{Binding Columns}"
-        SelectedItem="{Binding SelectedTrack}" >
+        SelectedItem="{Binding SelectedItem}" >
         <ctrl:TrackGrid.Template>
           <ControlTemplate>
           <!-- Template Start -->

@@ -15,18 +15,18 @@ namespace MusicaLibre.ViewModels;
 
 public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualizableItems
 {
-    protected List<TrackViewModel> _tracks = new();
-    protected ObservableCollection<TrackViewModel> _tracksMutable = new();
-    public ReadOnlyObservableCollection<TrackViewModel> Tracks { get; init; }
+    protected List<TrackViewModel> _items = new();
+    protected ObservableCollection<TrackViewModel> _itemsMutable = new();
+    public ReadOnlyObservableCollection<TrackViewModel> Items { get; init; }
 
     TrackViewModel? _shiftSelectionAnchor;
-    [ObservableProperty] protected List<TrackViewModel> _selectedVms;
-    [ObservableProperty] protected TrackViewModel? _selectedTrack;
-    partial void OnSelectedTrackChanged(TrackViewModel? value)
+    [ObservableProperty] protected List<TrackViewModel> _selectedItems;
+    [ObservableProperty] protected TrackViewModel? _selectedItem;
+    partial void OnSelectedItemChanged(TrackViewModel? value)
     {
         if (!InputManager.CtrlPressed && !InputManager.IsDragSelecting && !InputManager.ShiftPressed)
         {
-            foreach (var item in _tracks)
+            foreach (var item in _items)
             {
                 item.IsSelected = item == value;
             }    
@@ -38,14 +38,14 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
             var endIdx = GetItemIndex(value);
             var step = startIdx <= endIdx ? 1 : -1;
             for (var i = startIdx; i != endIdx + step; i += step)
-                Tracks[i].IsSelected = true;
+                Items[i].IsSelected = true;
         }
         
         if(!InputManager.ShiftPressed) 
             _shiftSelectionAnchor = value;
         
-        SelectedVms = Tracks.Where(x => x.IsSelected).ToList();
-        SelectedTracks = SelectedVms.Select(x=>x.Model).ToList();
+        SelectedItems = Items.Where(x => x.IsSelected).ToList();
+        SelectedTracks = SelectedItems.Select(x=>x.Model).ToList();
         
         SelectedTrackChanged();
     }
@@ -66,10 +66,12 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
     public event EventHandler<SelectedItemChangedEventArgs>? SelectionChanged;
     public event EventHandler? SortOrderChanged;
     public event EventHandler<int>? ScrollToIndexRequested;
+    public Action<double>? ScrollToOffset;
+    public double ScrollOffset {get; set;}
     
     public TracksListViewModel(LibraryViewModel library, List<Track> tracksPool, List<TrackViewColumn>? columns=null) : base(library, tracksPool)
     {
-        Tracks = new ReadOnlyObservableCollection<TrackViewModel>(_tracksMutable);
+        Items = new ReadOnlyObservableCollection<TrackViewModel>(_itemsMutable);
 
         _columns = columns != null ? columns : new List<TrackViewColumn>() 
         {
@@ -101,9 +103,45 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
 
     public void UpdateCollection()
     {
-        _tracks = TracksPool.Select(x => new TrackViewModel(x, this)).ToList();
+        _items = TracksPool.Select(x => new TrackViewModel(x, this)).ToList();
         Sort();
+        _initialized = true;
     }
+    protected override void OnTracksPoolChanged()
+    {
+        long? selectedId=null;
+        if (SelectedItem != null)
+            selectedId = SelectedItem.Model.DatabaseIndex;
+
+        List<long> selectedIds = new List<long>();
+        if (SelectedItems != null)
+            foreach (var item in SelectedItems)
+                selectedIds.Add(item.Model.DatabaseIndex);
+
+        var offset = ScrollOffset;
+        UpdateCollection();
+        TrackViewModel? selected = null;
+        if (Items != null)
+        {
+            foreach (var item in Items)
+            {
+                if (selectedIds.Contains(item.Model.DatabaseIndex))
+                    item.IsSelected = true;
+                
+                if(selectedId.HasValue && item.Model.DatabaseIndex.Equals(selectedId.Value))
+                    selected = item;
+            }
+
+            if (selected != null)
+            {
+                InputManager.IsDragSelecting = true;
+                SelectedItem = selected;
+                InputManager.IsDragSelecting = false;
+            }
+        }
+        ScrollToOffset?.Invoke(offset);
+    }
+    
     public static IComparer<TrackViewModel> GetComparer(TrackSortKeys sort, bool ascending)
     {
         return sort switch
@@ -191,7 +229,7 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
 
     public void ShufflePages()
     {
-        foreach (var track in _tracks)
+        foreach (var track in _items)
             track.RandomIndex = CryptoRandom.NextInt();
     }
 
@@ -203,17 +241,17 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
             return;
         }
 
-        var weights = SearchUtils.FilterTracks( searchString, _tracks.Select(x => x.Model).ToList(), Library);
+        var weights = SearchUtils.FilterTracks( searchString, _items.Select(x => x.Model).ToList(), Library);
 
-        var ordered = _tracks.Where(x => weights.GetValueOrDefault(x.Model) > 0)
+        var ordered = _items.Where(x => weights.GetValueOrDefault(x.Model) > 0)
             .OrderByDescending(x => weights.GetValueOrDefault(x.Model))
             .ThenBy(x => x.Model.Title);
             
         
-        _tracksMutable.Clear();
-        _tracksMutable.AddRange(ordered);
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(ordered);
 
-        OnPropertyChanged(nameof(Tracks));
+        OnPropertyChanged(nameof(Items));
     }
 
     public void Sort()
@@ -234,33 +272,33 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
             .ToList();
 
         Ascending = Library.CurrentStep.SortingKeys.First().Asc;
-        var sorted = _tracks.OrderBy(x => x, new CompositeComparer<TrackViewModel>(comparers));
+        var sorted = _items.OrderBy(x => x, new CompositeComparer<TrackViewModel>(comparers));
 
-        _tracksMutable.Clear();
-        _tracksMutable.AddRange(sorted);
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(sorted);
 
-        OnPropertyChanged(nameof(Tracks));
+        OnPropertyChanged(nameof(Items));
         //InvokeSortOrderChanged();
     }
 
     void Sort(IComparer<TrackViewModel> comparer)
     {
-        var sorted = _tracks.OrderBy(x => x, comparer);
-        _tracksMutable.Clear();
-        _tracksMutable.AddRange(sorted);
-        OnPropertyChanged(nameof(Tracks));
+        var sorted = _items.OrderBy(x => x, comparer);
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(sorted);
+        OnPropertyChanged(nameof(Items));
     }
 
     public override void Reverse()
     {
-        var reversed =_tracksMutable.Reverse().ToList();
-        _tracksMutable.Clear();
-        _tracksMutable.AddRange(reversed);
+        var reversed =_itemsMutable.Reverse().ToList();
+        _itemsMutable.Clear();
+        _itemsMutable.AddRange(reversed);
         Ascending = !Ascending;
     }
     
-    public int GetItemIndex(TrackViewModel track) => Tracks.IndexOf(track);
-    public int GetSelectedIndex() => SelectedTrack != null ? Tracks.IndexOf(SelectedTrack) : -1;
+    public int GetItemIndex(TrackViewModel track) => Items.IndexOf(track);
+    public int GetSelectedIndex() => SelectedItem != null ? Items.IndexOf(SelectedItem) : -1;
 
     public int GetColumnIndex(TrackViewColumn column)=>Columns.IndexOf(column);
     private NavCapsuleViewModel? _capsule;

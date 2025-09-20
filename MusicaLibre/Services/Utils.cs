@@ -14,6 +14,28 @@ using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.Services;
 
+public static class Utils
+{
+    public static  T? Coalesce<T>(T[] values)
+    {
+        if (values == null || values.Length == 0)
+            return default;
+
+        // take first value as reference
+        var first = values[0];
+
+        // use EqualityComparer<T> to handle nulls & custom equality
+        var comparer = EqualityComparer<T>.Default;
+
+        for (int i = 1; i < values.Length; i++)
+        {
+            if (!comparer.Equals(first, values[i]))
+                return default; // mismatch -> return null/default
+        }
+
+        return first;
+    }
+}
 public static class PathUtils
 {
     static readonly HashSet<string> AudioFileExtensions = new(StringComparer.OrdinalIgnoreCase)

@@ -136,6 +136,7 @@ public class Artwork:IDisposable
         VALUES ($hash, $width, $height, $thumb, $mime, $sourcePath, $sourceFolder, $sourceType, $role, $embedIdx,  $bookletPage);
         SELECT last_insert_rowid();";
     const string selectSql = "SELECT * FROM Artworks;";
+    const string deleteSql = "DELETE FROM Artworks WHERE Id=$id;";
     private Dictionary<string, object?> Parameters => new()
     {
         ["$id"] = DatabaseIndex,
@@ -158,12 +159,14 @@ public class Artwork:IDisposable
         DatabaseIndex =  Convert.ToInt64(id);
     }
 
-    public async Task DbInsertAsync(Database db)
+    public async Task DbInsertAsync(Database db, Action<long>? callback=null)
     {
         var id = await db.ExecuteScalarAsync(insertSql, Parameters );
         DatabaseIndex =  Convert.ToInt64(id);
+        callback?.Invoke(DatabaseIndex);
     }
-    
+    public async Task DbDeleteAsync(Database db)
+        => await db.ExecuteNonQueryAsync(deleteSql, Parameters );
     public static Dictionary<long, Artwork> FromDatabase(Database db)
         => ProcessReaderResult(db.ExecuteReader(selectSql), db);
     
@@ -197,17 +200,17 @@ public class Artwork:IDisposable
         return artworks;
     }
 
-    public void ProcessImage()
+    public string? ProcessImage()
     {
         try
         {
-            if (SourcePath == null) return;
+            if (SourcePath == null) return "Null SourcePath";
             using var fileStream = new FileStream(SourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            ProcessImage(fileStream);
+            return ProcessImage(fileStream);
         }
-        catch(Exception e){Console.WriteLine(e);}
+        catch(Exception e){return e.ToString();}
     }
-    public void ProcessImage(Stream stream)
+    public string? ProcessImage(Stream stream)
     {
         try
         {
@@ -232,6 +235,7 @@ public class Artwork:IDisposable
                 using var data = image.Encode(SKEncodedImageFormat.Jpeg, 90);
                 ThumbnailData = data.ToArray();
             }
+            return null;
         }
         catch (Exception e)
         {
@@ -239,11 +243,11 @@ public class Artwork:IDisposable
             Height = 0;
             ThumbnailData = null;
             stream.Seek(0, SeekOrigin.Begin);
-            ProcessImageFallback(stream);
+            return ProcessImageFallback(stream);
         }
     }
 
-    public void ProcessImageFallback(Stream stream)
+    public string? ProcessImageFallback(Stream stream)
     {
         try
         {
@@ -261,6 +265,7 @@ public class Artwork:IDisposable
             img.Resize(targetWidth, targetHeight);
             img.Format = MagickFormat.Jpeg;
             ThumbnailData = img.ToByteArray();
+            return null;
         }
         catch (Exception e)
         {
@@ -268,7 +273,7 @@ public class Artwork:IDisposable
             Width = 0;
             Height = 0;
             ThumbnailData = null;
-            Console.WriteLine($"Failed to decode image in {SourcePath}");
+            return $"Failed to decode image in {SourcePath}";
         }
     }
 
