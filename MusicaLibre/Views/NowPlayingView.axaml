@@ -9,30 +9,42 @@
              x:DataType="vm:TrackViewModel">
     <UserControl.Resources>
         <c:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <c:InverseBooleanConverter x:Key="InverseBoolean" />
     </UserControl.Resources>
-    <Border BorderBrush="White" BorderThickness="0">
+    <Border BorderBrush="#444" BorderThickness="0">
         <Grid  ColumnDefinitions="150,*">
-            <Image Height="144" Width="144" Source="{Binding Thumbnail}"/>
-            <StackPanel Grid.Column="1" Margin="8">
-                <TextBlock Text="{Binding Title}" 
-                           TextWrapping="Wrap"
-                           FontSize="16"
-                           FontWeight="DemiBold"/>
-                <TextBlock Text="{Binding Artists}"
-                           TextWrapping="Wrap"/>
-                <TextBlock Text="{Binding ComposersText}"
-                           IsVisible="{Binding ComposersText, Converter={StaticResource NullToBoolean}}"/>
-                <TextBlock Text="{Binding Conductor}"
-                           IsVisible="{Binding Conductor, Converter={StaticResource NullToBoolean}}"/>
-                <TextBlock Text="{Binding Remixer}"
-                           IsVisible="{Binding Remixer, Converter={StaticResource NullToBoolean}}"/>
-                <TextBlock Text="{Binding Album_Year}"/>
-                <TextBlock Text="{Binding Publisher}" 
-                           IsVisible="{Binding Publisher, Converter={StaticResource NullToBoolean}}"/>
-                <TextBlock Text="{Binding Genres}"/>
-                <TextBlock Text="{Binding TechInfo}"/>
-                
+            <StackPanel VerticalAlignment="Top">
+                <Image Height="144" Width="144" Source="{Binding Thumbnail}"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="8">
+                    <Button Content="Info" Command="{Binding ShowInfoCommand}"/>
+                    <Button Content="Comments" Command="{Binding ShowCommentsCommand}"/>
+                </StackPanel>
             </StackPanel>
+            <Grid Grid.Column="1" Margin="8">
+                <StackPanel IsVisible="{Binding CommentsToggle, Converter={StaticResource InverseBoolean}}">
+                    <TextBlock Text="{Binding Title}" 
+                               TextWrapping="Wrap"
+                               FontSize="16"
+                               FontWeight="DemiBold"/>
+                    <TextBlock Text="{Binding Artists}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding ComposersText}"
+                               IsVisible="{Binding ComposersText, Converter={StaticResource NullToBoolean}}"/>
+                    <TextBlock Text="{Binding Conductor}"
+                               IsVisible="{Binding Conductor, Converter={StaticResource NullToBoolean}}"/>
+                    <TextBlock Text="{Binding Remixer}"
+                               IsVisible="{Binding Remixer, Converter={StaticResource NullToBoolean}}"/>
+                    <TextBlock Text="{Binding Album_Year}"/>
+                    <TextBlock Text="{Binding Publisher}" 
+                               IsVisible="{Binding Publisher, Converter={StaticResource NullToBoolean}}"/>
+                    <TextBlock Text="{Binding Genres}"/>
+                    <TextBlock Text="{Binding TechInfo}"/>
+                </StackPanel>
+                <Border IsVisible="{Binding CommentsToggle}" VerticalAlignment="Stretch">
+                    <TextBlock Text="{Binding Model.Comment}" TextWrapping="Wrap"/>
+                </Border>
+            </Grid>
+            
         </Grid>    
     </Border>
 </UserControl>

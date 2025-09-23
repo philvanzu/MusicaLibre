@@ -10,6 +10,7 @@ public class VlcAudioPlayer
     private MediaPlayer _mediaPlayer;
     private readonly Action _trackEnded;
     private LibVLC _libVLC;
+    private Media _media;
 
     public bool IsPlaying => _mediaPlayer.IsPlaying;
     public VlcAudioPlayer(LibVLC lib, TrackViewModel track, Action trackEnded)
@@ -17,8 +18,8 @@ public class VlcAudioPlayer
         _libVLC = lib;
         Track = track;
         _trackEnded = trackEnded;
-        var media = new Media(_libVLC, track.Model.FilePath!, FromType.FromPath);
-        _mediaPlayer = new MediaPlayer(media);
+        _media = new Media(_libVLC, track.Model.FilePath!, FromType.FromPath);
+        _mediaPlayer = new MediaPlayer(_media);
 
         _mediaPlayer.EndReached += (_, _) => _trackEnded.Invoke();
     }
@@ -32,6 +33,12 @@ public class VlcAudioPlayer
     {
         if (!_mediaPlayer.IsPlaying) _mediaPlayer.Play();
         _mediaPlayer.SetPause(true);
+    }
+    public void Restart()
+    {
+        _mediaPlayer = new MediaPlayer(_media);
+        _mediaPlayer.EndReached += (_, _) => _trackEnded.Invoke();
+        _mediaPlayer.Play();
     }
 
     public void Stop()=>_mediaPlayer.Stop();

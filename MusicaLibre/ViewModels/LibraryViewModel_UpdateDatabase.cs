@@ -8,8 +8,10 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.Input;
 using MusicaLibre.Models;
 using MusicaLibre.Services;
+using MusicaLibre.Views;
 
 namespace MusicaLibre.ViewModels;
 
@@ -1103,4 +1105,105 @@ public partial class LibraryViewModel
       _ = folder.DbInsertAsync(Database);
       Data.Folders.Add(folder.DatabaseIndex, folder);
    }
+
+   [RelayCommand]
+   public void FixUnknownArtistAlbums()
+   {
+
+      var progress = new ProgressDialogViewModel();
+      progress.CancellationTokenSource = new CancellationTokenSource();
+      
+      Dispatcher.UIThread.Post(() => _ = progress.Show(), DispatcherPriority.Render);
+      
+      _ = Task.Run(async () =>
+      {
+         try
+         {
+            await progress.DialogShown;
+            await Task.Delay(1);
+            await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
+            
+            // wait sync process to finish if running
+            if (DbSyncManager.SyncTask != null) 
+               await DbSyncManager.SyncTask;
+        
+            // set flag in DbSyncManager to delay sync process starting as long as dialog is open
+            await DbSyncManager.SyncLock.WaitAsync();
+            try
+            {
+               var fixables = Data.Albums.Values.Where(x => x.AlbumArtist.DatabaseIndex == 1).ToList();
+               if (fixables.Count == 0) return;
+
+               var tracksByAlbum = Data.Tracks.Values
+                  .Where(x => x.Album != null)
+                  .GroupBy(t => t.Album!)
+                  .ToDictionary(g => g.Key, g => g.ToList());
+
+               var albumsByArtist = Data.Albums.Values
+                  .GroupBy(x => x.AlbumArtist)
+                  .ToDictionary(g => g.Key, g => g.ToList());
+
+               var total = fixables.Count;
+               progress.Counter = 0;
+               foreach (var unknownArtistAlbum in fixables)
+               {
+                  progress.Counter++;
+                  progress.Progress.Report(($"Processing Albums : {progress.Counter}/{total}",
+                     (double)progress.Counter / total, false));
+
+                  if (tracksByAlbum.TryGetValue(unknownArtistAlbum, out var tracks))
+                  {
+                     var artists = tracks.SelectMany(x => x.Artists).Distinct().ToList();
+                     if (artists.Count != 1) continue;
+                     var artist = artists[0];
+
+                     if (!albumsByArtist.TryGetValue(artist, out var albumCandidates))
+                        albumCandidates = new List<Album>();
+
+                     var albumTitle = unknownArtistAlbum!.Title;
+
+                     List<Task> batch = new();
+                     foreach (var track in tracks)
+                     {
+                        if (track.Album is null) continue;
+
+                        var existing = albumCandidates?.FirstOrDefault(x => x.Title == albumTitle);
+                        if (existing is null)
+                        {
+                           track.Album!.AlbumArtist = artist;
+                           batch.Add(track.Album.DbUpdateAsync(Database));
+                           albumCandidates!.Add(track.Album!);
+                        }
+                        else
+                        {
+                           track.Album = existing;
+                           batch.Add(track.DbUpdateAsync(Database));
+                        }
+
+                        TagWriter.EnqueueFileUpdate(track);
+                     }
+
+                     await Task.WhenAll(batch);
+                     batch.Clear();
+                  }
+               }
+            }
+            finally
+            {
+               progress.Progress.Report(($"Done",-1, true));
+               DbSyncManager.SyncLock.Release();
+            }
+         }
+         catch (Exception ex)
+         {
+            Console.WriteLine(ex);
+         }
+      });
+   }
+
+   public async Task<Album> CreateAlbum(string? title, List<Track> tracks)
+   {
+      await Task.CompletedTask;
+      return null;
+   } 
 }

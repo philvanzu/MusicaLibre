@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,13 +21,16 @@ public partial class TagsEditorViewModel:TracksListViewModel
     public TagsEditorDialog Window { get; set; }
     [ObservableProperty] private GenresEditorViewModel _genresEditor;
     [ObservableProperty] private AlbumsEditorViewModel _albumsEditor;
-
+    
+    [ObservableProperty] private TrackArtworkManagerViewModel _selectedTrackArtwork;
     
     //Constructor
     public TagsEditorViewModel(LibraryViewModel library, List<Track> tracksPool, TagsEditorDialog window) : base(library, tracksPool)
     {
         Window = window;
         window.Closing += OnWindowClosing;
+
+        _selectedTrackArtwork = new(library, window);
         _columns = new List<TrackViewColumn>()
         {
             new("Path", TrackSortKeys.FilePath, t => t.Model.FileName, this)
@@ -56,12 +61,17 @@ public partial class TagsEditorViewModel:TracksListViewModel
         InputManager.IsDragSelecting = false;
         
         GenresEditor = new GenresEditorViewModel(Library);
-        AlbumsEditor = new AlbumsEditorViewModel(this, PoolAlbums);
+        if(PoolAlbums.Any())
+            AlbumsEditor = new AlbumsEditorViewModel(this, PoolAlbums);
     }
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
-        GenresEditor.Dispose();
-        AlbumsEditor.Dispose();
+        try
+        {
+            GenresEditor.Dispose();
+            AlbumsEditor.Dispose();    
+        }
+        catch (Exception ex) {Console.WriteLine(ex);}
     }
 
 
@@ -85,6 +95,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
         DiscBinding = DiscNumber;
         TrackNumberBinding = TrackNumber;
         AlbumBinding = Album;
+        AlbumArtistBinding = AlbumArtist??string.Empty;
         YearBinding = Year;
         PublisherBinding = Publisher;
         ComposersBinding = Composers;
@@ -92,7 +103,9 @@ public partial class TagsEditorViewModel:TracksListViewModel
         GenresBinding = Genres;
         ConductorBinding = Conductor;
         RemixerBinding = Remixer;
-        
+        CommentsBinding = Comments;
+
+        SelectedTrackArtwork.SelectedTrack = SelectedItem;
     }
 
 #region TrackTags 
@@ -165,7 +178,6 @@ public partial class TagsEditorViewModel:TracksListViewModel
         
         SelectedItem.Model.Title = TitleBinding;
         await SelectedItem.Model.DbUpdateAsync(Library.Database);
-        TagWriter.EnqueueFileUpdate(SelectedItem.Model);
     }
 
 
@@ -184,7 +196,6 @@ public partial class TagsEditorViewModel:TracksListViewModel
             {
                 track.TrackNumber = number;
                 _ = track.DbUpdateAsync(Library.Database);
-                TagWriter.EnqueueFileUpdate(track);
             }
         }
     }
@@ -199,18 +210,16 @@ public partial class TagsEditorViewModel:TracksListViewModel
     [RelayCommand] void UpdateDiscNumber()
     {
         if (!uint.TryParse(DiscBinding, out uint number)) return;
-        if (SelectedTracks == null) return;
-        foreach (var track in SelectedTracks)
+        foreach (var track in SelectedItems)
         {
-            if (track.DiscNumber != number)
+            if (track.Model.DiscNumber != number)
             {
-                track.DiscNumber = number;
-                _ = track.DbUpdateAsync(Library.Database);
-                TagWriter.EnqueueFileUpdate(track);
+                track.Model.DiscNumber = number;
+                _ = track.Model.DbUpdateAsync(Library.Database);
             }
         }
 
-        foreach (var album in SelectedTracks.Select(x => x.Album).Distinct())
+        foreach (var album in SelectedItems.Select(x => x.Model.Album).Distinct())
         {
             if (album == null) continue;
             var albumDiscs = Library.Data.Discs.Values.Where(x => x.AlbumId == album.DatabaseIndex).ToList();
@@ -244,39 +253,224 @@ public partial class TagsEditorViewModel:TracksListViewModel
 
     [RelayCommand] async Task AlbumUpdated()
     {
+        if(SelectedItems == null || SelectedItems.Count == 0) return;
+        
         var title = AlbumBinding;
-        var oldAlbums = SelectedTracks?.Select(x=> x.Album).Distinct().ToList();
-        var album = Library.Data.Albums.Values.FirstOrDefault(x => x.Title == title);
-
-        if (album is null || album.DatabaseIndex == 0) // new title doesn't exist yet
+        
+        var oldAlbums = SelectedItems?.Select(x=> x.Model.Album).Distinct().ToList();
+        ObservableCollection<string>? renames = null;
+        try
         {
-            album = SelectedItem?.Model.Album;
-            if (album is not null)
+            renames = new ObservableCollection<string>(
+                oldAlbums.Select(x => $"{x.Title} : {x.AlbumArtist.Name} : {x.Year.Name}").ToArray());    
+        }
+        catch(Exception ex){Console.WriteLine(ex);}
+        
+        
+        
+        var existingAlbums = Library.Data.Albums.Values.Where(x => x.Title.Equals(title)).ToList();
+        var existings = new ObservableCollection<string>(
+            existingAlbums.Select(x => $"{x.Title} : {x.AlbumArtist.Name} : {x.Year.Name}") .ToArray());
+        
+        
+        Album? album = null;
+
+        var selectionArtist = SelectedItems!.SelectMany(x=>x.Model.Artists).GroupBy(a=> a)
+            .Select(g => new { Artist = g.Key, Count = g.Count() })
+            .OrderBy(x=>x.Count).FirstOrDefault() ?.Artist;
+        
+        var selectionYear = SelectedItems!.GroupBy(x=>x.Model.Year)
+            .Select(g => new { Year = g.Key, Count = g.Count() })
+            .OrderBy(x=>x.Count).FirstOrDefault()?.Year;
+        
+        var selectionDirectories = SelectedItems!.Select(x=>x.Model.Folder.Name).Distinct().ToList();
+        var selectionFolderRoot = PathUtils.GetCommonRoot(selectionDirectories);
+        
+
+        var dlgvm = new AlbumUpdatedDialogViewModel()
+        {
+            Title = "Select Album",
+            Content = "Choose Existing Album or Create a new one",
+            Existings = existings.Count > 0 ? existings : null,
+            Renames = renames?.Count > 0 ? renames : null,
+            NewAlbumTitle = title,
+            NewAlbumArtist = selectionArtist?.Name?? string.Empty,
+            NewAlbumYear = selectionYear?.Name??string.Empty,
+            NewAlbumFolder = selectionFolderRoot??string.Empty,
+        };
+       
+        var dlg = new AlbumUpdatedDialog();
+        dlg.DataContext = dlgvm;
+        if (await dlg.ShowDialog<bool>(Window))
+        {
+            if (dlgvm.RenameButtonChecked)
             {
-                album.Title = title; //rename selected track's album to title input
-                album.Year = SelectedItem?.Model.Year;
-                album.Folder = SelectedItem?.Model.Folder??Library.Data.Folders[0];
-                await  album.DbUpdateAsync(Library.Database);
+                var idx = dlgvm.SelectedRenameIndex;
+                if (renames.Count == 1) idx = 0;
+                
+                if (idx >= 0 && idx < renames.Count)
+                {
+                    album = oldAlbums[idx];
+                    if (album != null)
+                    {
+                        album.Title = title;
+                        await album.DbUpdateAsync(Library.Database);
+                    }
+                }
+                else
+                {
+                    await DialogUtils.MessageBox(Window,  "Error","selected album index out of range" );
+                    return;
+                }
+            }
+            else if (dlgvm.SelectButtonChecked)
+            {
+                var idx = dlgvm.SelectedExistingIndex;
+                if(existingAlbums.Count == 1) idx = 0;
+
+                if (idx >= 0 && idx < existingAlbums.Count)
+                {
+                    album = existingAlbums[idx];
+                }
+                else
+                {
+                    await DialogUtils.MessageBox(Window,  "Error","selected album index out of range" );
+                    return;
+                }
+            }
+            else if (dlgvm.CreateButtonChecked)
+            {
+                var artist = Library.Data.Artists.Values.FirstOrDefault(x => x.Name.Equals(dlgvm.NewAlbumArtist, StringComparison.OrdinalIgnoreCase));
+                if (artist == null)
+                {
+                    artist = new Artist(dlgvm.NewAlbumArtist);
+                    await artist.DbInsertAsync(Library.Database);
+                    Library.Data.Artists.Add(artist.DatabaseIndex, artist);
+                }
+
+                if (!UInt32.TryParse(dlgvm.NewAlbumYear, out uint y))
+                {
+                    await DialogUtils.MessageBox(Window,  "Error","Invalid Year" );
+                    return;
+                }
+                
+                var year = Library.Data.Years.Values.FirstOrDefault(x=> x.Number == y);
+                if (year == null)
+                {
+                    year = new Year(y);
+                    await year.DbInsertAsync(Library.Database);
+                    Library.Data.Years.Add(year.DatabaseIndex, year);
+                }
+                
+                var folder = Library.Data.Folders.Values.FirstOrDefault(x => x.Name.Equals(dlgvm.NewAlbumFolder));
+                if (folder == null)
+                {
+                    folder = new Folder(dlgvm.NewAlbumFolder);
+                    await folder.DbInsertAsync(Library.Database);
+                    Library.Data.Folders.Add(folder.DatabaseIndex, folder);
+                }
+
+                album = new Album(title, artist, year );
+                album.ArtistId = album.AlbumArtist.DatabaseIndex;
+                album.YearId = album.Year.DatabaseIndex;
+                album.Folder =  folder;
+                album.FolderId = album.Folder.DatabaseIndex;
+                album.Created = TimeUtils.Earliest(SelectedItems.Select(x=> x.Model.Created));
+                album.Modified = TimeUtils.Latest(SelectedItems.Select(x=> x.Model.Modified));
+                album.Added = TimeUtils.Earliest(SelectedItems.Select(x=> x.Model.Created));
+                album.LastPlayed = null;
+                await album.DbInsertAsync(Library.Database);
+                Library.Data.Albums.Add(album.DatabaseIndex, album);
+            }
+            else
+            {
+                await DialogUtils.MessageBox(Window,  "Error","Invalid Choice, make sure you check one radio button" );
+                return;
             }
         }
-        
-        //assign album to all selected tracks
-        if ( album is not null && SelectedTracks is not null)
+        else return;        
+
+        if ( album is not null && SelectedItems is not null)
         {
-            foreach (var track in SelectedTracks.Where(x => x.Album != album))
+            //assign album to all selected tracks
+            foreach (var track in SelectedItems.Where(x => x.Model.Album != album))
             {
-                track.AlbumId = album.DatabaseIndex;
-                track.Album = album;
-                _ = track.DbUpdateAsync(Library.Database);
-                TagWriter.EnqueueFileUpdate(track);    
+                track.Model.AlbumId = album.DatabaseIndex;
+                track.Model.Album = album;
+                await track.Model.DbUpdateAsync(Library.Database);
+                if(! Library.Data.Discs.TryGetValue((track.Model.DiscNumber, album.DatabaseIndex), out var disc))
+                {
+                    disc = new Disc(track.Model.DiscNumber, album);
+                    disc.AlbumId = album.DatabaseIndex;
+                    await disc.DbInsertAsync(Library.Database);
+                    Library.Data.Discs.Add((disc.Number, disc.AlbumId), disc);
+                }
             }
         }
         
         //Remove empty albums
-        if(oldAlbums != null )
-            foreach(var oldAlbum in oldAlbums
-                        .Where(x => x!= null && Library.IsAlbumEmpty(x)))
-                Library.RemoveEmptyAlbum(oldAlbum!);
+        foreach (var oldAlbum in oldAlbums.Where(x => x != null && Library.IsAlbumEmpty(x)))
+        {
+            Library.RemoveEmptyAlbum(oldAlbum!);
+        }
+                
+    }
+    
+    // AlbumArtist
+    [ObservableProperty] private string _albumArtistBinding = string.Empty;
+    public string? AlbumArtist => IsMultiple ? CoalescedAlbumArtist : SelectedItem?.Model.Album?.AlbumArtist.Name;
+    public string CoalescedAlbumArtist =>
+        Utils.Coalesce(SelectedItems.Select(x => $"{x.Model.Album?.AlbumArtist.Name}").ToArray())
+        ??_mult;
+
+    [RelayCommand]
+    async Task AlbumArtistUpdated()
+    {
+        var artistName = AlbumArtistBinding;
+        if (string.IsNullOrWhiteSpace(artistName) || SelectedItems is null) return;
+        
+        var artist = Library.Data.Artists.Values.FirstOrDefault(x => x.Name == artistName);
+        if (artist is null)
+        {
+            artist = new Artist(artistName);
+            await artist.DbInsertAsync(Library.Database);
+            Library.Data.Artists.Add(artist.DatabaseIndex, artist);
+        }
+
+        var albumCandidates = Library.Data.Albums.Values
+            .Where(x => x.AlbumArtist.Name.Equals(artistName)).ToList();
+
+        List<Task> batch = new();
+        foreach (var track in SelectedItems)
+        {
+            if (track.Model.Album is null) continue;
+            var albumTitle = track.Model.Album!.Title;
+
+            var existing = albumCandidates.FirstOrDefault(x => x.Title == albumTitle);
+            if (existing is null)
+            {
+                track.Model.Album!.AlbumArtist = artist;
+                track.Model.Album!.ArtistId = artist.DatabaseIndex;
+                batch.Add(track.Model.Album.DbUpdateAsync(Library.Database));
+                albumCandidates.Add(track.Model.Album!);
+            }
+            else
+            {
+                track.Model.Album = existing;
+                batch.Add(track.Model.DbUpdateAsync(Library.Database));
+            }
+        }    
+        await Task.WhenAll(batch);
+        batch.Clear();
+    }
+
+    [RelayCommand]
+    void AlbumArtistFromTrack()
+    {
+        if(SelectedItem is null) return;
+        var selectedArtist = SelectedItem.Model.Artists.FirstOrDefault();
+        if (selectedArtist is not null)
+            AlbumArtistBinding = selectedArtist.Name;
     }
     
     //Year
@@ -299,13 +493,12 @@ public partial class TagsEditorViewModel:TracksListViewModel
                 await year.DbInsertAsync(Library.Database);
                 Library.Data.Years.Add(year.DatabaseIndex, year);
             }
-            if(SelectedTracks is not null)
+            if(SelectedItems is not null)
             {
-                foreach (var track in SelectedTracks.Where(x=>x.Year != year))
+                foreach (var track in SelectedItems.Where(x=>x.Model.Year != year))
                 {
-                    track.Year = year;
-                    await track.DbUpdateAsync(Library.Database);
-                    TagWriter.EnqueueFileUpdate(track);
+                    track.Model.Year = year;
+                    await track.Model.DbUpdateAsync(Library.Database);
                 }
             }
         }
@@ -339,13 +532,12 @@ public partial class TagsEditorViewModel:TracksListViewModel
             await publisher.DbInsertAsync(Library.Database);
             Library.Data.Publishers.Add(publisher.DatabaseIndex, publisher);
         }
-        if(SelectedTracks is not null)
+        if(SelectedItems is not null)
         {
-            foreach (var track in SelectedTracks.Where(x => x.Publisher != publisher))
+            foreach (var track in SelectedItems.Where(x => x.Model.Publisher != publisher))
             {
-                track.Publisher = publisher;
-                await track.DbUpdateAsync(Library.Database);
-                TagWriter.EnqueueFileUpdate(track);
+                track.Model.Publisher = publisher;
+                await track.Model.DbUpdateAsync(Library.Database);
             }
         }
     }
@@ -388,13 +580,13 @@ public partial class TagsEditorViewModel:TracksListViewModel
             }
             artists.Add(artist);
         }
-        if(SelectedTracks is not null)
+        if(SelectedItems is not null)
         {
-            foreach (var track in SelectedTracks)
+            foreach (var track in SelectedItems)
             {
-                track.Artists.Clear();
-                track.Artists.AddRange(artists);
-                await track.UpdateArtistsAsync(Library);
+                track.Model.Artists.Clear();
+                track.Model.Artists.AddRange(artists);
+                await track.Model.UpdateArtistsAsync(Library);
             }
         }
     }
@@ -421,7 +613,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
     [RelayCommand]
     async Task GenreUpdated()
     {
-        if(string.IsNullOrWhiteSpace(GenresBinding) || SelectedTracks == null) return;
+        if(string.IsNullOrWhiteSpace(GenresBinding)) return;
         var splits = GenresBinding.Split(',').Select(x=>x.Trim());
         var genres = new List<Genre>();
         foreach (var split in splits)
@@ -435,11 +627,11 @@ public partial class TagsEditorViewModel:TracksListViewModel
             }
             genres.Add(genre);
         }
-        foreach ( var track in SelectedTracks)
+        foreach ( var track in SelectedItems)
         {
-            track.Genres.Clear();
-            track.Genres.AddRange(genres);
-            await track.UpdateGenresAsync(Library);
+            track.Model.Genres.Clear();
+            track.Model.Genres.AddRange(genres);
+            await track.Model.UpdateGenresAsync(Library);
         }
     }
     
@@ -461,6 +653,22 @@ public partial class TagsEditorViewModel:TracksListViewModel
     public string CoalescedConductor =>
         Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Conductor?.Name}").ToArray())
         ??_mult;
+    
+    [ObservableProperty]private string _commentsBinding = string.Empty;
+    public string Comments => IsMultiple ? CoalescedComments : $"{SelectedItem?.Model.Comment}";
+    public string CoalescedComments =>
+        Utils.Coalesce(SelectedItems.Select(x=> x.Model.Comment).ToArray())
+        ?? _mult;
+
+    [RelayCommand]
+    async Task CommentsUpdated()
+    {
+        foreach (var item in SelectedItems)
+        {
+            item.Model.Comment = CommentsBinding;
+            await item.Model.DbUpdateAsync(Library.Database);
+        }
+    }
  #endregion   
  
     public List<Album> PoolAlbums; 
@@ -530,8 +738,14 @@ public partial class TagsEditorViewModel:TracksListViewModel
         }
     }
 
-
-
-    
+    [RelayCommand]
+    void UpdateFilesTags()
+    {
+        List<Task> batch = new List<Task>();
+        foreach (var item in SelectedItems)
+        {
+            TagWriter.EnqueueFileUpdate(item.Model);
+        }
+    }
 }
 

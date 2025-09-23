@@ -1,0 +1,87 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:conv="clr-namespace:MusicaLibre.Converters"
+             xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+             xmlns:v="clr-namespace:MusicaLibre.Views"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Views.ArtworkListManagerView"
+             x:DataType="vm:TrackArtworkManagerViewModel">
+    <UserControl.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:NullToInverseBooleanConverter x:Key="InverseNullToBoolean"/>
+        <conv:InverseBooleanConverter x:Key="InverseBoolean"/>
+    </UserControl.Resources>
+    
+    <Grid RowDefinitions="32,*,64">
+        <Border Grid.Row="0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock>Selection :</TextBlock>
+                <TextBlock Text="{Binding SelectionStr}"/>
+            </StackPanel>
+        </Border>
+        <Grid Grid.Row="1">
+            <ScrollViewer>
+                <ctrl:VirtualizedItemsRepeater 
+                    ItemsSource="{Binding Artworks}"
+                    SelectedItem="{Binding SelectedArtwork}"
+                    ElementWidth="148" ElementHeight="148">
+                    <ctrl:VirtualizedItemsRepeater.Layout>
+                        <UniformGridLayout MaximumRowsOrColumns="0"/>
+                    </ctrl:VirtualizedItemsRepeater.Layout>
+                    <ctrl:VirtualizedItemsRepeater.ItemTemplate>
+                        <DataTemplate>
+                            <Border 
+                                Width="132" Height="132" Margin="8"
+                                CornerRadius="5"
+                                Tag="{Binding IsSelected}"
+                                Tapped="ArtworkTapped">
+                                <Border.Styles>
+                                    <!-- default style -->
+                                    <Style Selector="Border[Tag=False]">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderBrush" Value="White"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                    </Style>
+                                    <!-- selected style -->
+                                    <Style Selector="Border[Tag=True]">
+                                        <Setter Property="Background" Value="#5050FF33" />
+                                        <Setter Property="BorderBrush" Value="DodgerBlue"/>
+                                        <Setter Property="BorderThickness" Value="1"/>
+                                    </Style>
+                                </Border.Styles>
+                                <Canvas Height="100" Width="100">
+                                    <Image Height="100" Width="100" Source="{Binding Thumbnail}"/>
+                                    <Border Background="#DD999999" BorderBrush="White" BorderThickness="1"
+                                            IsVisible="{Binding IsEmbedded}" 
+                                            Padding="8" Canvas.Left="16" Canvas.Top="16">
+                                        <TextBlock Text="Embed" Foreground="Red"/>    
+                                    </Border>
+                                </Canvas>
+                            </Border>
+                        </DataTemplate>
+                    </ctrl:VirtualizedItemsRepeater.ItemTemplate>
+                </ctrl:VirtualizedItemsRepeater>
+                
+            </ScrollViewer>
+        </Grid>
+        <Grid Grid.Row="2" >
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Add" 
+                        Command="{Binding AddCommand}"/>
+                <Button Content="Remove" 
+                        IsEnabled="{Binding SelectedArtwork, Converter={StaticResource NullToBoolean}}"
+                        Command="{Binding RemoveCommand}"/>
+            </StackPanel>
+            <Border BorderBrush="White" BorderThickness="1" Background="#505050"
+                    IsVisible="{Binding Progress.IsBusy}"
+                    HorizontalAlignment="Right" Width="600">
+                <ContentControl  >
+                    <v:ProgressView DataContext="{Binding Progress}"/>
+                </ContentControl>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -36,29 +36,26 @@
                           Width="16"
                           VerticalAlignment="Stretch"
                           Background="Transparent"
-                          BorderBrush="DarkGray"
-                          BorderThickness="1"
+                          BorderBrush="#444"
+                          BorderThickness="1 0"
                           ShowsPreview="True" />
             <!--Now Playing -->
-            <Grid Grid.Column="2" RowDefinitions="1*, 5, 0*">
-                <Grid  RowDefinitions="150,16, *" DataContext="{Binding Library}">
-                    <ContentControl >
-                        <v:NowPlayingView DataContext="{Binding NowPlayingList.PlayingTrack}"/>
-                    </ContentControl>
-                    <Border Grid.Row="1" BorderBrush="White" BorderThickness="0" Height="16"/>
-                    <Grid Grid.Row="2">
-                        <ContentControl>
-                            <v:NowPlayingListView DataContext="{Binding NowPlayingList}"/>
-                        </ContentControl> 
-                    </Grid>
+            <Grid Grid.Column="2"  RowDefinitions="Auto,8, *" DataContext="{Binding Library}">
+                <Grid>
+                    <v:NowPlayingView DataContext="{Binding NowPlayingList.PlayingTrack}"/>
                 </Grid>
                 <GridSplitter Grid.Row="1"
-                    Height="5"
-                    HorizontalAlignment="Stretch"
-                    Background="DarkGray"
-                    ShowsPreview="True"/>
+                              Height="8" 
+                              HorizontalAlignment="Stretch"
+                              Background="Transparent"
+                              BorderBrush="#444"
+                              BorderThickness="0 0"
+                              ShowsPreview="True"/>
+
                 <Grid Grid.Row="2">
-                    <TextBlock>Selected item details</TextBlock>
+                    <ContentControl>
+                        <v:NowPlayingListView DataContext="{Binding NowPlayingList}"/>
+                    </ContentControl> 
                 </Grid>
             </Grid>
         </Grid>

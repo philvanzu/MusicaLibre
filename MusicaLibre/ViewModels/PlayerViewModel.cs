@@ -79,6 +79,7 @@ public partial class PlayerViewModel : ViewModelBase
             var filepos = CurrentPlayer.GetPosition();
             var trackpos = CurrentTrack.FileToTrackPosition(filepos);
             var elapsed = trackpos * CurrentTrack.TrackDuration.Value;
+            _nowPlayingList?.OnPlayerTimerTick(elapsed);
             Elapsed = TimeUtils.FormatDuration(elapsed);
             var remaining = CurrentTrack.TrackDuration.Value - elapsed;
             Remaining = TimeUtils.FormatDuration(remaining);
@@ -108,6 +109,8 @@ public partial class PlayerViewModel : ViewModelBase
     {
         if(value) _positionTimer.Start();
         else _positionTimer.Stop();
+        if(CurrentPlayer != null)
+            CurrentPlayer.Track.PlayStatus = value;
     }
     public void SetTrackPosition(double trackPosition)
     {
@@ -180,6 +183,15 @@ public partial class PlayerViewModel : ViewModelBase
         try{
             if (CurrentPlayer != null)
             {
+                if (_nowPlayingList?.RepeatStateIdx == 1)
+                {
+                    CurrentPlayer?.Restart();
+                    if(CurrentTrack.FileIsMultitrack)
+                        CurrentPlayer.SetPosition( (float)CurrentTrack.TrackToFilePosition(0) );
+                    
+                    IsPlaying = true;
+                    return;
+                }
                 ReleasePlayer(CurrentPlayer);
                 CurrentPlayer = null;  
             }
@@ -258,12 +270,6 @@ public partial class PlayerViewModel : ViewModelBase
         PlayToggle();
     }
 
-    [RelayCommand]
-    void Shuffle()
-    {
-        
-    }
 
-    [RelayCommand] void Repeat(){}
 
 }

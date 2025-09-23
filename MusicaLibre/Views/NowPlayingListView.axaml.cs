@@ -18,8 +18,9 @@ public partial class NowPlayingListView : UserControl
         if (e.Handled) return;
         if (sender is Border border && border.DataContext is TrackViewModel track)
         {
-            track.IsPlaying = true;
-            
+            if(!track.IsPlaying)
+                track.IsPlaying = true;
+            else track.Presenter.Library.MainWindowViewModel.Player.PlayToggleCommand.Execute(null);
         }
     }
 }

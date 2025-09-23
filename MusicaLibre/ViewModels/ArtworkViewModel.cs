@@ -16,19 +16,19 @@ public partial class ArtworkViewModel:ViewModelBase, IDisposable, IVirtualizable
     string SourcePath => _artwork.SourcePath;
     string Type=>EnumUtils.GetDisplayName(Artwork.SourceType);
     public Bitmap? Thumbnail => _artwork.Thumbnail;
-    private ArtworkPickerViewModel _picker;
-    public ArtworkViewModel(ArtworkPickerViewModel picker, Artwork model)
+    private ArtworkListManagerViewModel _manager;
+    public ArtworkViewModel(ArtworkListManagerViewModel manager, Artwork model)
     {
-        _picker = picker;
+        _manager = manager;
         _artwork = model;
     }
 
     partial void OnIsSelectedChanged(bool oldValue, bool newValue)
     {
-        if(oldValue && _picker.SelectedArtwork == this)
-            _picker.SelectedArtwork = null;
-        if(newValue && _picker.SelectedArtwork != this)
-            _picker.SelectedArtwork = this;
+        if(oldValue && _manager.SelectedArtwork == this)
+            _manager.SelectedArtwork = null;
+        if(newValue && _manager.SelectedArtwork != this)
+            _manager.SelectedArtwork = this;
     }
 
     public void Dispose()
@@ -36,7 +36,7 @@ public partial class ArtworkViewModel:ViewModelBase, IDisposable, IVirtualizable
         _artwork?.ReleaseThumbnail(this);
     }
     [RelayCommand]void Update(){}
-    public bool IsFirst => _picker.Artworks.IndexOf(this) == 0;
+    public bool IsFirst => _manager.Artworks.IndexOf(this) == 0;
     public bool IsPrepared { get; set; }
     public void OnPrepared()
     {

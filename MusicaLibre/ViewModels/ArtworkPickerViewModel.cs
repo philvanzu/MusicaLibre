@@ -17,17 +17,12 @@ using System.Threading;
 
 namespace MusicaLibre.ViewModels;
 
-public partial class ArtworkPickerViewModel:ViewModelBase, IDisposable, ISelectVirtualizableItems
+public partial class ArtworkPickerViewModel:ArtworkListManagerViewModel
 {
     private ArtworkPickerDialog _window;
-    [ObservableProperty] private ObservableCollection<ArtworkViewModel> _artworks=new();
-    [ObservableProperty] private string? _filePath;
-    [ObservableProperty] private ArtworkViewModel? _selectedArtwork;
-    [ObservableProperty] string _rootDirectory;
     
-    public event EventHandler<SelectedItemChangedEventArgs>? SelectionChanged;
-    public event EventHandler? SortOrderChanged;
-    public event EventHandler<int>? ScrollToIndexRequested;
+    [ObservableProperty] private string? _filePath;
+    [ObservableProperty] string _rootDirectory;
     
     public List<Track> _tracks;
     LibraryViewModel _library;
@@ -51,12 +46,6 @@ public partial class ArtworkPickerViewModel:ViewModelBase, IDisposable, ISelectV
     }
 
 
-    public void Dispose()
-    {
-        foreach (var item in _artworks)
-            item.Dispose();
-    }
-
     partial void OnRootDirectoryChanged(string value)
     {
         Dispose();
@@ -70,9 +59,9 @@ public partial class ArtworkPickerViewModel:ViewModelBase, IDisposable, ISelectV
     }
 
     
-    partial void OnSelectedArtworkChanged(ArtworkViewModel? value)
+    protected override void SelectedArtworkChanged(ArtworkViewModel? value)
     {
-        foreach (var item in _artworks)
+        foreach (var item in Artworks)
             if(value != item)item.IsSelected = false;
 
         FilePath = value?.Artwork.SourcePath;
@@ -143,6 +132,6 @@ public partial class ArtworkPickerViewModel:ViewModelBase, IDisposable, ISelectV
     }
 
 
-    public int GetItemIndex(ArtworkViewModel artwork)=>Artworks.IndexOf(artwork);
-    public int GetSelectedIndex() => SelectedArtwork != null ? Artworks.IndexOf(SelectedArtwork) : -1;
+    
+    
 }

@@ -15,6 +15,23 @@ namespace MusicaLibre.ViewModels;
 
 public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
 {
+    private const string playString = "▶️";
+    private const string pauseString = "⏸";
+        
+    [ObservableProperty] private bool _commentsToggle;
+
+    private bool _playStatus; // true:playing, false:paused
+    public bool PlayStatus
+    {
+        get => _playStatus;
+        set
+        {
+            SetProperty(ref _playStatus, value);
+            OnPropertyChanged(nameof(PlayStatusString));
+        } 
+    }
+
+    public string PlayStatusString => IsPlaying ? PlayStatus ? playString : pauseString : string.Empty;
     [ObservableProperty] private Track _model; 
     Artwork? _artwork;
     
@@ -23,6 +40,15 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     public string? Album => Model.Album?.Title;
     public string? Year => Model.Year?.Name??"";
     public string? Album_Year => $"{Album} - {Year}";
+    public string? AlbumPosition
+    {
+        get
+        {
+            var disc = Model.DiscNumber > 0? $"{Model.DiscNumber} - ": string.Empty;
+            return $"{disc}{Model.TrackNumber}";
+        }
+    }
+
     public string Artists => string.Join(", ", Model.Artists.Select((x) => x.Name));
     public int RandomIndex {get; set;}
     public string? ComposersText=> string.IsNullOrWhiteSpace(Composers)?  null: $"Composers: {Composers}";
@@ -67,6 +93,8 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
                 nowPlayingListVM.PlayingTrack = this;
             else if(oldValue && nowPlayingListVM.PlayingTrack == this)
                 nowPlayingListVM.PlayingTrack = null;
+            
+            OnPropertyChanged(nameof(PlayStatusString));
         }
         
     }
@@ -158,4 +186,9 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     [RelayCommand] void InsertNext()=> Presenter.Library.NowPlayingList.Insert(Presenter.SelectedTracks);
     [RelayCommand] void EditTags()=>Presenter.Library.EditTracks(Presenter.SelectedTracks);
     [RelayCommand] void OpenInExplorer(){PathUtils.OpenInExplorer(Model.FilePath);}
+
+    [RelayCommand] void ShowInfo() => CommentsToggle = false;
+    [RelayCommand] void ShowComments()=> CommentsToggle = true;
+
+
 }

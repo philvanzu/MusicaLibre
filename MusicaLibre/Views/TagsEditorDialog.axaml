@@ -74,83 +74,81 @@
                             Should we do ID3vx editing in separate tabs ?
                        
         -->
-
-                               <ScrollViewer>
+                         <TabControl>
+                             <TabItem Header="Track Info">
+                                <ScrollViewer>
                                    <StackPanel>
-                                       <TextBlock  FontWeight="Bold" FontSize="16" Margin="16">File Info</TextBlock>
-                                       <Grid ColumnDefinitions="Auto, 32, *, 150" RowDefinitions="
-                                       Auto, Auto, Auto, Auto, Auto,
-                                       Auto, Auto, Auto, Auto
-                                       " >
-                                           <!--File info-->
-                                           <TextBlock Grid.Row="0" Grid.Column="0"
-                                                      Margin="0 12" VerticalAlignment="Top"
+                                       <Grid ColumnDefinitions="Auto, 32, *, 32" Margin="0 12">
+                                           <TextBlock Grid.Column="0"
+                                                      VerticalAlignment="Top"
                                                       Text="Path"/>
-                                           <SelectableTextBlock Grid.Row="0" Grid.Column="2" 
-                                                      Text="{Binding FilePath}"
-                                                      TextWrapping="Wrap"/>
-                                           
-                                           <TextBlock Grid.Row="1" Grid.Column="0">Duration</TextBlock>
-                                           <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Duration}"/>
-                                           
-                                           <TextBlock Grid.Row="2" Grid.Column="0">Codec</TextBlock>
-                                           <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Codec}"/>
-                                           
-                                           <TextBlock Grid.Row="3" Grid.Column="0">Sample Rate</TextBlock>
-                                           <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding SampleRate}"/>
-                                           
-                                           <TextBlock Grid.Row="4" Grid.Column="0">Channels</TextBlock>
-                                           <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Channels}"
-                                                      Margin="0 0 0 16"/>
-                                           
-                                           <!-- Time Stamps-->
-                                           <TextBlock Grid.Row="5" Grid.Column="0">Date Modified</TextBlock>
-                                           <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding ModifiedBinding}"/>
-                                           <Button Grid.Row="5" Grid.Column="3" Content="Refresh from files TimeStamps" 
-                                                   Command="{Binding RefreshTimeStampsCommand}"/>
-                                           
-                                           <TextBlock Grid.Row="6" Grid.Column="0">Date Created</TextBlock>
-                                           <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding CreatedBinding}"/>
-
-                                           
-
-                                           
+                                           <SelectableTextBlock Grid.Column="2" 
+                                                                Text="{Binding FilePath}"
+                                                                TextWrapping="Wrap"/>
                                        </Grid>
+                                       <Grid ColumnDefinitions="*, Auto">
+                                           <Grid ColumnDefinitions="Auto, 32, *, 32" 
+                                                 RowDefinitions="Auto, Auto, Auto, Auto, Auto" >
+                                               <!--File info-->
+                                               <TextBlock Grid.Row="0" Grid.Column="0">Duration</TextBlock>
+                                               <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Duration}"/>
+                                               
+                                               <TextBlock Grid.Row="1" Grid.Column="0">Codec</TextBlock>
+                                               <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Codec}"/>
+                                               
+                                               <TextBlock Grid.Row="2" Grid.Column="0">Sample Rate</TextBlock>
+                                               <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding SampleRate}"/>
+                                               
+                                               <TextBlock Grid.Row="3" Grid.Column="0">Channels</TextBlock>
+                                               <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Channels}"
+                                                          Margin="0 0 0 16"/>
+                                               
+                                               <TextBlock Grid.Row="4"  Grid.Column="0" VerticalAlignment="Top" 
+                                                          Margin="0 0 0 64" 
+                                                           Text="Rating"/>
+                                               <Slider  Grid.Row="4" Grid.Column="2"
+                                                        IsVisible="{Binding IsMultiple, Converter={StaticResource InverseBoolean}}"
+                                                        Minimum="0" Maximum="1"
+                                                        Value="{Binding RatingBinding}"/>
+                                               <TextBlock Grid.Row="4" Grid.Column="2"
+                                                          IsVisible="{Binding IsMultiple}"
+                                                          Text="Multiple Values"/>
+                                           </Grid>
+                                           
+                                           <Grid Grid.Column="1" ColumnDefinitions="Auto, 32, 200, 32, 350" 
+                                                 RowDefinitions=" Auto, Auto, Auto, 32, Auto" >
+                                               <!-- Time Stamps-->
+                                               <TextBlock Grid.Row="0" Grid.Column="0">Date Modified</TextBlock>
+                                               <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding ModifiedBinding}"/>
+                                               
+                                               <TextBlock Grid.Row="1" Grid.Column="0">Date Created</TextBlock>
+                                               <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding CreatedBinding}"/>
+
+                                               <TextBlock Grid.Row="2" Grid.Column="0">Date Added</TextBlock>
+                                               <TextBox Grid.Row="2" Grid.Column="2"  Text="{Binding AddedBinding}"/>
+                                               <StackPanel Grid.Row="2" Grid.Column="4" Orientation="Horizontal">
+                                                   <Button Content="From Modified"/>
+                                                   <Button Content="From Created"/>
+                                                   <Button Content="Now"/>
+                                               </StackPanel>
+                                               
+                                               <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">Last Played</TextBlock>
+                                               <TextBlock Grid.Row="3" Grid.Column="2"  Text="{Binding PlayedBinding}"
+                                                          VerticalAlignment="Center"/>  
+                                               
+                                               
+                                           </Grid>
+                                       </Grid>
+                                       
                                        <Separator Height="1"/>
-                                       <TextBlock FontWeight="Bold" FontSize="16" Margin="16">MusicaLibre metadata</TextBlock>
-                                       <Grid ColumnDefinitions="Auto, 32, *" RowDefinitions="Auto, Auto, Auto">
+                                       <Grid ColumnDefinitions="Auto, 32, *">
                                            
-                                           <TextBlock Grid.Row="0" Grid.Column="0">Last Played</TextBlock>
-                                           <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
-                                               <TextBox Text="{Binding PlayedBinding}"/>   
-                                               <Button Content="From Modified"/>
-                                               <Button Content="From Created"/>
-                                               <Button Content="Now"/>
-                                           </StackPanel>
-                                           <TextBlock Grid.Row="1" Grid.Column="0">Date Added</TextBlock>
-                                           <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Margin="0 8">
-                                               <TextBox Text="{Binding AddedBinding}"/>
-                                               <Button Content="From Modified"/>
-                                               <Button Content="From Created"/>
-                                               <Button Content="Now"/>
-                                           </StackPanel>
-                                           
-                                           <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Top" Margin="0 0 0 64" 
-                                                      
-                                                      Text="Rating"/>
-                                           <Slider Grid.Row="2" Grid.Column="2"
-                                                   IsVisible="{Binding IsMultiple, Converter={StaticResource InverseBoolean}}"
-                                                   Minimum="0" Maximum="1"
-                                                   Value="{Binding RatingBinding}"/>
-                                           <TextBlock Grid.Row="2" Grid.Column="2"
-                                                    IsVisible="{Binding IsMultiple}"
-                                                    Text="Multiple Values"/>
                                        </Grid>
                                        
                                        <Separator Height="1"/>
                                        <TextBlock FontWeight="Bold" FontSize="16" Margin="16">Standard Tags</TextBlock>
                                        <Grid ColumnDefinitions="Auto, 32, *, 32, 200" 
-                                             RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto">
+                                             RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto">
                                            <!--Disc-->
                                            <TextBlock Grid.Row="0" Grid.Column="0">Disc Number</TextBlock>
                                            <TextBox Grid.Row="0" Grid.Column="2"  Text="{Binding DiscBinding}"/>   
@@ -178,53 +176,86 @@
                                            <Button Grid.Row="3" Grid.Column="4"
                                                    Command="{Binding AlbumUpdatedCommand}"
                                                    Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           
+                                           <!--AlbumArtist-->
+                                           <TextBlock Grid.Row="4" Grid.Column="0" >Album Artist</TextBlock>
+                                           
+                                           <Grid Grid.Row="4" Grid.Column="2" ColumnDefinitions="*,16, Auto">
+                                               <ctrl:TagBox Grid.Column="0" IsMultiValue="False" 
+                                                            Text="{Binding AlbumArtistBinding}"
+                                                            Options="{Binding ArtistsOptions}"
+                                                            EnterPressedCommand="{Binding AlbumArtistUpdatedCommand}" />
+                                               <Button  Grid.Column="2" 
+                                                        Content="From track"
+                                                        Command="{Binding AlbumArtistFromTrackCommand}"
+                                                        ToolTip.Tip ="CopiedFrom Track Artist"/>
+                                           </Grid>
+                                           <Button Grid.Row="4" Grid.Column="4" 
+                                                   Command="{Binding AlbumArtistUpdatedCommand}"
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           
+                                           
+                                           
+
                                            <!--Publisher-->
-                                           <TextBlock Grid.Row="4" Grid.Column="0" >Publisher</TextBlock>
-                                           <ctrl:TagBox Grid.Row="4" Grid.Column="2" IsMultiValue="False" 
+                                           <TextBlock Grid.Row="5" Grid.Column="0" >Publisher</TextBlock>
+                                           <ctrl:TagBox Grid.Row="5" Grid.Column="2" IsMultiValue="False" 
                                                         Text="{Binding PublisherBinding}"
                                                         Options="{Binding PublisherOptions}"
                                                         EnterPressedCommand="{Binding PublisherUpdatedCommand}" />
-                                           <Button Grid.Row="4" Grid.Column="4"
+                                           <Button Grid.Row="5" Grid.Column="4"
                                                    Command="{Binding PublisherUpdatedCommand}"
                                                    Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Year-->
-                                           <TextBlock Grid.Row="5" Grid.Column="0" >Year</TextBlock>
-                                           <TextBox  Grid.Row="5" Grid.Column="2" Text="{Binding YearBinding}"/>
-                                           <Button Grid.Row="5" Grid.Column="4"
+                                           <TextBlock Grid.Row="6" Grid.Column="0" >Year</TextBlock>
+                                           <TextBox  Grid.Row="6" Grid.Column="2" Text="{Binding YearBinding}"/>
+                                           <Button Grid.Row="6" Grid.Column="4"
                                                    Command ="{Binding YearUpdatedCommand}"
                                                    Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Artists-->
-                                           <TextBlock Grid.Row="6" Grid.Column="0" >Artists</TextBlock>
-                                           <TextBox  Grid.Row="6" Grid.Column="2" Text="{Binding ArtistsBinding}"/>
-                                           <Button Grid.Row="6" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <TextBlock Grid.Row="7" Grid.Column="0" >Artists</TextBlock>
+                                           <TextBox  Grid.Row="7" Grid.Column="2" Text="{Binding ArtistsBinding}"/>
+                                           <Button Grid.Row="7" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Genres-->
-                                           <TextBlock Grid.Row="7" Grid.Column="0" >Genres</TextBlock>
-                                           <ctrl:TagBox   Grid.Row="7" Grid.Column="2" 
+                                           <TextBlock Grid.Row="8" Grid.Column="0" >Genres</TextBlock>
+                                           <ctrl:TagBox   Grid.Row="8" Grid.Column="2" 
                                                           Text="{Binding GenresBinding}"
                                                           Options="{Binding GenreOptions}"
                                                           IsMultiValue="True"
                                                           EnterPressedCommand="{Binding GenreUpdatedCommand}" />
-                                           <Button Grid.Row="7" Grid.Column="4"
+                                           <Button Grid.Row="8" Grid.Column="4"
                                                    Command="{Binding GenreUpdatedCommand}"
                                                    Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Composers-->
-                                           <TextBlock Grid.Row="8" Grid.Column="0" >Composers</TextBlock>
-                                           <TextBox  Grid.Row="8" Grid.Column="2" Text="{Binding ComposersBinding}"/>
-                                           <Button Grid.Row="8" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
-                                           <!--Remixer-->
-                                           <TextBlock Grid.Row="9" Grid.Column="0" >Remixer</TextBlock>
-                                           <TextBox  Grid.Row="9" Grid.Column="2" Text="{Binding RemixerBinding}"/>
+                                           <TextBlock Grid.Row="9" Grid.Column="0" >Composers</TextBlock>
+                                           <TextBox  Grid.Row="9" Grid.Column="2" Text="{Binding ComposersBinding}"/>
                                            <Button Grid.Row="9" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
-                                           <!--Conductor-->
-                                           <TextBlock Grid.Row="10" Grid.Column="0" >Conductor</TextBlock>
-                                           <TextBox  Grid.Row="10" Grid.Column="2" Text="{Binding ConductorBinding}"/>
+                                           <!--Remixer-->
+                                           <TextBlock Grid.Row="10" Grid.Column="0" >Remixer</TextBlock>
+                                           <TextBox  Grid.Row="10" Grid.Column="2" Text="{Binding RemixerBinding}"/>
                                            <Button Grid.Row="10" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <!--Conductor-->
+                                           <TextBlock Grid.Row="11" Grid.Column="0" >Conductor</TextBlock>
+                                           <TextBox  Grid.Row="11" Grid.Column="2" Text="{Binding ConductorBinding}"/>
+                                           <Button Grid.Row="11" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           
+                                           <!--Comments-->
+                                           <TextBlock Grid.Row="12" Grid.Column="0" >Comments</TextBlock>
+                                           <TextBox  Grid.Row="12" Grid.Column="2" Text="{Binding CommentsBinding}" Height="64"/>
+                                           <Button Grid.Row="12" Grid.Column="4" 
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"
+                                                   Command="{Binding CommentsUpdatedCommand}"/>
+
                                        </Grid>
+                                       <Button Content="Update Selected Files Metadata Tags" Command="{Binding UpdateFilesTagsCommand}"/>
                                    </StackPanel>    
-                               </ScrollViewer>
+                                </ScrollViewer>                                 
+                             </TabItem>
+                             <TabItem Header="Embedded Images">
+                                 <v:ArtworkListManagerView DataContext="{Binding SelectedTrackArtwork}" />
+                             </TabItem>
+                         </TabControl>    
                                
-                               
-                           
                     </Grid>
                 </Border>
             </Grid>

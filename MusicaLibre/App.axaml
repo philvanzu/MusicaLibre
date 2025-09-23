@@ -31,5 +31,17 @@
             </Setter>
 
         </Style>
+        
+        <Style Selector="ctrl|MultiStateToggle">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ctrl:MultiStateToggle">
+                        <Border Background="Transparent" IsHitTestVisible="True">
+                            <Path x:Name="PART_path" Stretch="Uniform" IsHitTestVisible="False"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>  
+        </Style>
     </Application.Styles>
 </Application>

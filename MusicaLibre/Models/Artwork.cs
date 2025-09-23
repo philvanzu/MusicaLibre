@@ -59,7 +59,7 @@ public class Artwork:IDisposable
     }
     public void RequestThumbnail(object sender, Action notifyThumbnailChanged)
     {
-
+        if(DatabaseIndex == 0 || string.IsNullOrEmpty(Hash)) return;
         if (_thumbnailWatchers.TryAdd(sender, notifyThumbnailChanged))
             Interlocked.Increment(ref _thmbRefCount);
 

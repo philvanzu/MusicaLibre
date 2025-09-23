@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MusicaLibre.Services;
@@ -261,6 +262,24 @@ public class Track
             }
         }
         catch(Exception e){Console.WriteLine(e);}
+    }
+
+
+    public async Task ReloadFileDataAsync(LibraryViewModel library)
+    {
+
+        if (Start != 0 || End != 1)
+        {
+            // Cue sheet track, must ensure no concurrent use
+            return;
+        }
+
+        if (!File.Exists(FilePath)) return;
+
+        Created = File.GetCreationTime(FilePath);
+        Modified = File.GetLastWriteTime(FilePath);
+        
+        var file = TagLib.File.Create(FilePath);
     }
 
     /*
