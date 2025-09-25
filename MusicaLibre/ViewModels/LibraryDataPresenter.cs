@@ -20,11 +20,11 @@ public abstract partial class LibraryDataPresenter:ViewModelBase
         {
             _tracksPool = value;
             if(_initialized)
-                OnTracksPoolChanged();
+                Refresh();
         }
     }
-    
-    protected abstract void OnTracksPoolChanged();
+
+    public abstract void Refresh();
     
     public virtual List<Track>? SelectedTracks
     {

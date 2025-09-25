@@ -500,7 +500,7 @@ CREATE TABLE IF NOT EXISTS Tracks (
     Created INTEGER NOT NULL, -- Unix timestamp
     LastPlayed INTEGER, -- Unix timestamp
     HasEmbeddedCover INTEGER DEFAULT 0, -- 0=false, 1=true
-    AlbumId INTEGER,
+    AlbumId INTEGER NOT NULL,
     PublisherId INTEGER,
     ConductorId INTEGER,
     RemixerId INTEGER,
@@ -508,7 +508,7 @@ CREATE TABLE IF NOT EXISTS Tracks (
     Comments TEXT NOT NULL,
     Rating REAL,
     PlayCount INTEGER,
-    FOREIGN KEY (AlbumId) REFERENCES Albums(Id) ON DELETE SET NULL,
+    FOREIGN KEY (AlbumId) REFERENCES Albums(Id) ON DELETE RESTRICT,
     FOREIGN KEY (PublisherId) REFERENCES Publishers(Id) ON DELETE SET NULL,
     FOREIGN KEY (ConductorId) REFERENCES Artists(Id) ON DELETE SET NULL,
     FOREIGN KEY (RemixerId) REFERENCES Artists(Id) ON DELETE SET NULL,

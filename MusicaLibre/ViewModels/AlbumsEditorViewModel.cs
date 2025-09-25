@@ -107,14 +107,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
 
         if (!string.IsNullOrEmpty(Title))
         {
-            var album = Library.Data.Albums.Values.FirstOrDefault(x => x.Title.Equals(Title));
-            if (album != null)
-            {
-                await DialogUtils.MessageBox(_tagsEditor.Window, "Error", "An Album with that Title already exists!");
-                //Transfer all album tracks to existing album?
-                return;
-            }
-            else SelectedAlbum.Title = Title;
+            SelectedAlbum.Title = Title;
         }
         if (!string.IsNullOrEmpty(Artist))
         {
@@ -166,8 +159,11 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
         var artwork = await DialogUtils.ArtworkPicker(_tagsEditor.Window, Library, tracks, ArtworkRole.CoverFront);
         if (artwork != null)
         {
+            _oldArtwork?.ReleaseThumbnail(this);
             SelectedAlbum.Cover = artwork;
-            await SelectedAlbum.DbUpdateAsync(Library.Database);    
+            artwork.RequestThumbnail(this,()=>OnPropertyChanged(nameof(Thumbnail)));
+            await SelectedAlbum.DbUpdateAsync(Library.Database);  
+            _oldArtwork = artwork;
         }
     }
 

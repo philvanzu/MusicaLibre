@@ -47,6 +47,8 @@
                                     <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"/>
                                     <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
                                     <MenuItem Header="Edit Tags" Command="{Binding EditTagsCommand}" />
+                                    <MenuItem Header="Transcode" Command="{Binding TranscodeCommand}"/>
+                                    <MenuItem Header="Pick Artwork" />
                                 </ContextMenu>
                             </Border.ContextMenu>
 

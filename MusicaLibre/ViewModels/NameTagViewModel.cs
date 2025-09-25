@@ -105,6 +105,24 @@ public abstract partial class NameTagViewModelBase : ViewModelBase, IVirtualizab
     [RelayCommand]private void Play()=>Presenter.Library.NowPlayingList.Replace(Tracks);
     [RelayCommand]private void InsertNext()=>Presenter.Library.NowPlayingList.Insert(Tracks);
     [RelayCommand]private void Append()=>Presenter.Library.NowPlayingList.Append(Tracks);
+    [RelayCommand]
+    void EditTags()
+    {
+        if (Presenter.SelectedTracks != null && Presenter.SelectedTracks.Count > 0)
+            _ = Presenter.Library.EditTracks(Presenter.SelectedTracks);
+        else
+            _ = Presenter.Library.EditTracks(Tracks);
+
+    }
+
+    [RelayCommand]
+    void Transcode()
+    {
+        if (Presenter.SelectedTracks != null && Presenter.SelectedTracks.Count > 0)
+            _ = Presenter.Library.TranscodeTracks(Presenter.SelectedTracks);
+        else
+            _ = Presenter.Library.TranscodeTracks(Tracks);
+    }
 }
 public partial class NameTagViewModel<T>:NameTagViewModelBase where T:NameTag
 {

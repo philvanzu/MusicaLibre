@@ -32,6 +32,7 @@ public class Playlist
 
     private Dictionary<string, object?> Parameters => new()
     {
+        ["$id"] = DatabaseIndex,
         ["$filepath"] = FilePath,
         ["$filename"] = FileName,
         ["$folderpath"] = Folder?.DatabaseIndex,
@@ -127,81 +128,7 @@ public class Playlist
             .ToList();
     }
 
-    private static List<string> ParseCUE(string filePath, Action<CueSheet> cueSheetHandler)
-    {
-        var baseDir = Path.GetDirectoryName(filePath)!;
-        var lines = File.ReadAllLines(filePath);
 
-        string currentFile = "";
-        string currentPerformer = "";
-        string currentTitle = "";
-        var sheet = new CueSheet(){Path = filePath};
-        CueSheet.CueTrack? previousTrack = null;
-        bool trackLevel = false;
-        uint trackNumber = 0;
-        List<string> files = new();
-        
-        foreach (var raw in lines)
-        {
-            var line = raw.Trim();
-            if (line.StartsWith("FILE", StringComparison.OrdinalIgnoreCase))
-            {
-                trackLevel = false;
-
-                // Match FILE "...." TYPE
-                var match = Regex.Match(line, @"^FILE\s+""(.+?)""", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    currentFile = NormalizePath(baseDir, match.Groups[1].Value);
-                    files.Add(currentFile);
-                }
-            }
-            else if (line.StartsWith("PERFORMER", StringComparison.OrdinalIgnoreCase))
-            {
-                currentPerformer = line.Substring(9).Trim().Trim('"');
-                if(!trackLevel) sheet.Performer = currentPerformer;
-            }
-            else if (line.StartsWith("TITLE", StringComparison.OrdinalIgnoreCase))
-            {
-                currentTitle = line.Substring(5).Trim().Trim('"');
-                if(!trackLevel) sheet.Title = currentTitle;
-            }
-            else if (line.StartsWith("TRACK", StringComparison.OrdinalIgnoreCase))
-            {
-                // reset track-level metadata (will be overridden by later lines)
-                currentTitle = "";
-                currentPerformer = "";
-                trackLevel = true;
-                trackNumber++;
-            }
-            else if (line.StartsWith("INDEX 01", StringComparison.OrdinalIgnoreCase))
-            {
-                var timecode = line.Substring(8).Trim();
-                var start = TimeUtils.ParseCueTime(timecode);
-
-                var ctrack = new CueSheet.CueTrack
-                {
-                    File = currentFile,
-                    Performer = currentPerformer,
-                    Title = currentTitle,
-                    Start = start,
-                    Number = trackNumber,
-                };
-                sheet.Tracks.Add(ctrack);
-                
-                if(previousTrack is not null ) 
-                    previousTrack.End = ctrack.Start;
-                
-                previousTrack = ctrack; 
-            }
-        }
-
-        if (sheet.Tracks.Count > files.Count)
-        {
-            cueSheetHandler.Invoke(sheet);
-        }
-        return files;
-    }
 
     private static List<string> LoadXSPF(string filePath)
     {
@@ -221,6 +148,74 @@ public class Playlist
             .ToList();
     }
 
+    private static List<string> ParseCUE(string filePath, Action<CueSheet> cueSheetHandler)
+    {
+        var baseDir = Path.GetDirectoryName(filePath)!;
+        var lines = File.ReadAllLines(filePath);
+
+        var sheet = new CueSheet(){Path = filePath};
+        string? currentFile = null;
+        CueObject? current = sheet;
+        CueIndex? previousIndex = null;
+        uint trackId = 0;
+        uint fileCount = 0;
+        
+        foreach (var raw in lines)
+        {
+            var line = raw.Trim();
+            if (line.StartsWith("FILE", StringComparison.OrdinalIgnoreCase))
+            {
+                // Match FILE "...." TYPE
+                var match = Regex.Match(line, @"^FILE\s+""(.+?)""", RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    var path = NormalizePath(baseDir, match.Groups[1].Value);
+                    currentFile = path;
+                    trackId = 0;
+                    previousIndex = null;
+                }
+                fileCount++;
+            }
+            else if (line.StartsWith("PERFORMER", StringComparison.OrdinalIgnoreCase))
+            {
+                current.Performer = line.Substring(9).Trim().Trim('"');
+            }
+            else if (line.StartsWith("TITLE", StringComparison.OrdinalIgnoreCase))
+            {
+                current.Title = line.Substring(5).Trim().Trim('"');
+            }
+            else if (line.StartsWith("TRACK", StringComparison.OrdinalIgnoreCase))
+            {
+                if (currentFile is null)
+                {
+                    Console.Error.WriteLine($"Inconsistent cue file {sheet.Path} // Couldnt determine Track File");
+                    return new List<string>();
+                }
+                current = new CueTrack(currentFile) { Number = ++trackId, };
+                sheet.Tracks.Add((CueTrack)current);
+            }
+            else if (line.StartsWith("INDEX", StringComparison.OrdinalIgnoreCase))
+            {
+                var timecode = line.Substring(8).Trim();
+                var start = TimeUtils.ParseCueTime(timecode);
+                if (current is CueTrack cueTrack)
+                {
+                    var index = new CueIndex(start);
+                    cueTrack.Indexes.Add(index);
+                    if(previousIndex is not null ) 
+                        previousIndex.End = start;
+                
+                    previousIndex = index; 
+                }
+            }
+        }
+
+        if (sheet.Tracks.Count > fileCount)
+        {
+            cueSheetHandler.Invoke(sheet);
+        }
+        return sheet.Tracks.Select(t => t.File).Distinct().ToList();
+    }
     private static string NormalizePath(string baseDir, string path)
     {
         return Path.IsPathRooted(path)
@@ -229,20 +224,40 @@ public class Playlist
     }
 }
 
-public class CueSheet
+
+
+public class CueSheet:CueObject
 {
     public string Path { get; set; }
-    public string Title { get; set; }
-    public string Performer { get; set; }
-    
     public List<CueTrack> Tracks { get; set; } = new List<CueTrack>();
-    public class CueTrack
+
+}
+
+public abstract class CueObject
+{
+    public uint Number { get; set; }
+    public string Title { get; set; } = "";
+    public string Performer { get; set; } = "";
+}
+
+public class CueTrack: CueObject
+{
+    public string File { get; init; }
+    public List<CueIndex> Indexes { get; set; } = new List<CueIndex>();
+
+    public CueTrack(string file)
     {
-        public string File { get; set; } = "";
-        public uint Number { get; set; }
-        public string Title { get; set; } = "";
-        public string Performer { get; set; } = "";
-        public TimeSpan Start { get; set; }
-        public TimeSpan? End { get; set; }
+        File = file;
+    }
+}
+
+public class CueIndex
+{
+    public TimeSpan Start { get; init; }
+    public TimeSpan? End { get; set; }
+
+    public CueIndex(TimeSpan start)
+    {
+        Start = start;
     }
 }

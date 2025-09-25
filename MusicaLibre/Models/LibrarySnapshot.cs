@@ -41,8 +41,7 @@ public class LibrarySnapshot
             //Resolve all foreign keys
             foreach (var track in Tracks.Values)
             {
-                if(track.AlbumId != null) 
-                    track.Album = Albums[track.AlbumId.Value];
+                track.Album = Albums[track.AlbumId];
                 
                 if(track.PublisherId != null) 
                     track.Publisher = Publishers[track.PublisherId.Value];
@@ -157,8 +156,7 @@ public class LibrarySnapshot
             //Resolve all foreign keys
             foreach (var track in Tracks.Values)
             {
-                if(track.AlbumId != null) 
-                    track.Album = Albums[track.AlbumId.Value];
+                track.Album = Albums[track.AlbumId];
                 
                 if(track.PublisherId != null) 
                     track.Publisher = Publishers[track.PublisherId.Value];

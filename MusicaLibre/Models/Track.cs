@@ -22,8 +22,8 @@ public class Track
 
     // Core tags
     public string? Title { get; set; }
-    public Album? Album { get; set; }
-    public long? AlbumId { get; set; }
+    public Album Album { get; set; }
+    public long AlbumId { get; set; }
     public List<Artist> Artists { get; set; } = new ();
     public List<Artist> Composers { get; set; } = new();
     public Artist? Conductor { get; set; }
@@ -134,7 +134,7 @@ public class Track
         ["$modified"] = TimeUtils.ToUnixTime(Modified),
         ["$created"] = TimeUtils.ToUnixTime(Created),
         ["$played"] = LastPlayed.HasValue ? TimeUtils.ToUnixTime(LastPlayed.Value):null, 
-        ["$albumId"] = Album?.DatabaseIndex, 
+        ["$albumId"] = Album.DatabaseIndex, 
         ["$publisherId"] = Publisher?.DatabaseIndex, 
         ["$conductorId"] = Conductor?.DatabaseIndex,
         ["$remixerId"] = Remixer?.DatabaseIndex,
@@ -190,7 +190,7 @@ public class Track
             Track track = new Track()
             {
                 DatabaseIndex = Convert.ToInt64(row["Id"]),
-                AlbumId = Database.GetValue<long>(row, "AlbumId"),
+                AlbumId = Convert.ToInt64(row["AlbumId"]),
                 PublisherId = Database.GetValue<long>(row, "PublisherId"),
                 RemixerId = Database.GetValue<long>(row, "RemixerId"),
                 ConductorId = Database.GetValue<long>(row, "ConductorId"),

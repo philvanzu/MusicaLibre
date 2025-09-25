@@ -35,6 +35,16 @@ public static class Utils
 
         return first;
     }
+    
+    public static string Escape(string? s)
+    {
+        if (string.IsNullOrEmpty(s))
+            return string.Empty;
+        // Replace inner double quotes with single quotes
+        return s.Replace("\"", "\\\"");
+        
+    }
+
 }
 public static class PathUtils
 {
@@ -264,7 +274,7 @@ public static class TimeUtils
 
     public static string FormatDate(DateTime? dt)
     {
-        return dt?.ToString("yy-MM-dd") ?? string.Empty;
+        return dt?.ToString("yyyy-MM-dd") ?? string.Empty;
     }
     public static DateTime? FromDateString(string? s)
     {

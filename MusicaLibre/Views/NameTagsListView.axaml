@@ -43,7 +43,9 @@
                             </Border.Styles>
                             <Border.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Open in Explorer" Command="{Binding EditCommand}"/>
+                                    <MenuItem Header="Edit Tags" Command="{Binding EditTagsCommand}"/>
+                                    <MenuItem Header="Transcode" Command="{Binding TranscodeCommand}"/>
+                                    <MenuItem Header="Pick Artwork" />
                                 </ContextMenu>
                             </Border.ContextMenu>
 

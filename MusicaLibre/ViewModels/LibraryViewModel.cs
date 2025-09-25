@@ -304,11 +304,33 @@ public partial class LibraryViewModel : ViewModelBase
             InputManager.Instance.Attach(dialog);
             dialog.DataContext = vm;
             await dialog.ShowDialog(MainWindowViewModel.MainWindow);
+            DataPresenter?.Refresh();
         }
         finally
         {
             DbSyncManager.SyncLock.Release();
         }
+    }
+
+    public async Task TranscodeTracks(List<Track>? tracks)
+    {
+        if (DbSyncManager.SyncTask != null)
+            await DbSyncManager.SyncTask;
+        await DbSyncManager.SyncLock.WaitAsync();
+        try
+        {
+            if (tracks == null || tracks.Count == 0) return;
+            var dialog = new TracksListTranscoderDialog();
+            var vm = new TracksListTranscoderViewModel(this, tracks, dialog);
+            InputManager.Instance.Attach(dialog);
+            dialog.DataContext = vm;
+            await dialog.ShowDialog(MainWindowViewModel.MainWindow);
+            DataPresenter?.Refresh();
+        }
+        finally
+        {
+            DbSyncManager.SyncLock.Release();
+        } 
     }
 }
 

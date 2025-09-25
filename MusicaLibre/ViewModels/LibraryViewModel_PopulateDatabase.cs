@@ -393,10 +393,11 @@ public partial class LibraryViewModel
                         if(track.Artists.Count == 0)
                             track.Artists.Add(unknownArtist!);
 
-                        var albumName = file.Tag.Album.Trim();
-                    
-                        if (albumName != null)
+                        var albumName = file.Tag.Album?? 
+                                        System.IO.Path.GetFileName(track.FolderPathstr);
+                        albumName = albumName.Trim();
                         {
+                            
                             if (albumArtist == unknownArtist 
                                 && artists.TryGetValue(albumPerformer, out var artist))
                                 albumArtist = artist;
@@ -799,6 +800,11 @@ public partial class LibraryViewModel
                             createdAlbum = true;
                         }
                         
+                        if (!audioFormats.TryGetValue("Cue Pseudo Track", out var cueFormat))
+                        {
+                            cueFormat = new AudioFormat("Cue Pseudo Track");
+                            cueFormat.DbInsert(Database);
+                        }
                         
                         List<Track> sheetTracks = new List<Track>();
                         HashSet<Track> sheetMultiTracks = new HashSet<Track>();
@@ -813,6 +819,8 @@ public partial class LibraryViewModel
                                 track.Title = cuetrack.Title;
                                 track.TrackNumber = cuetrack.Number;
                                 track.Album = album;
+                                track.AudioFormatId = cueFormat.DatabaseIndex;
+                                track.AudioFormat =  cueFormat;
                                 
                                 if (!string.IsNullOrWhiteSpace(cuetrack.Performer) &&
                                     artists.TryGetValue(cuetrack.Performer, out var artist))
@@ -820,7 +828,10 @@ public partial class LibraryViewModel
                                     if(!track.Artists.Contains(artist))
                                         track.Artists.Add( artist);    
                                 }
-                                var times = TimeUtils.GetCueTrackTimes(cuetrack.Start,  cuetrack.End, track.Duration);
+
+                                var start = cuetrack.Indexes.First().Start;
+                                var end = cuetrack.Indexes.Last().End;
+                                var times = TimeUtils.GetCueTrackTimes(start,  end, track.Duration);
                                 track.Start = times.start;
                                 track.End = times.end;
                                 sheetTracks.Add(track);
@@ -962,8 +973,6 @@ public partial class LibraryViewModel
         
     }
 
-    
-    
     #endregion
 
 }

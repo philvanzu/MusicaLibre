@@ -63,9 +63,13 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     
     
     public string Added => TimeUtils.FormatDate(Model.DateAdded);
+    public string AddedFull => TimeUtils.FormatDateTime(Model.DateAdded);
     public string Modified => TimeUtils.FormatDate(Model.Modified);
+    public string ModifiedFull => TimeUtils.FormatDateTime(Model.Modified);
     public string Created => TimeUtils.FormatDate(Model.Created);
+    public string CreatedFull => TimeUtils.FormatDateTime(Model.Created);
     public string Played => TimeUtils.FormatDate(Model.LastPlayed);
+    public string PlayedFull => TimeUtils.FormatDateTime(Model.LastPlayed);
     public string? Publisher => Model.Publisher!= null? $"Publisher : {Model.Publisher.Name}":null;
     public string Bitrate => $"{Model.BitrateKbps}Kbps";
     
@@ -184,7 +188,8 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     [RelayCommand] void DoubleTapped() => Presenter.Library.NowPlayingList.Replace(Presenter.SelectedTracks);
     [RelayCommand] void Append() => Presenter.Library.NowPlayingList.Append(Presenter.SelectedTracks);
     [RelayCommand] void InsertNext()=> Presenter.Library.NowPlayingList.Insert(Presenter.SelectedTracks);
-    [RelayCommand] void EditTags()=>Presenter.Library.EditTracks(Presenter.SelectedTracks);
+    [RelayCommand] void EditTags()=>_ = Presenter.Library.EditTracks(Presenter.SelectedTracks);
+    [RelayCommand] void Transcode()=>_ = Presenter.Library.TranscodeTracks(Presenter.SelectedTracks);
     [RelayCommand] void OpenInExplorer(){PathUtils.OpenInExplorer(Model.FilePath);}
 
     [RelayCommand] void ShowInfo() => CommentsToggle = false;

@@ -163,7 +163,7 @@ public partial class NameTagsListViewModel<T> : NameTagsPresenterViewModelBase, 
         OnPropertyChanged(nameof(Items));
     }
 
-    protected override void OnTracksPoolChanged()
+    public override void Refresh()
     {
         long? selectedId=null;
         if (SelectedItem != null)

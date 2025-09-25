@@ -56,26 +56,24 @@
         </Style>
     </Window.Styles>
     
-    <Grid RowDefinitions=" *, 32, 48" Margin="16">
-        <StackPanel Grid.Row="0">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock>Current Directory : </TextBlock>
-                <TextBlock Text="{Binding RootDirectory}"/>
-            </StackPanel>
-            <ScrollViewer >
-                <ctrl:VirtualizedItemsRepeater ItemsSource="{Binding Artworks}"
-                                               SelectedItem="{Binding SelectedArtwork}"
-                                               ElementWidth="148" ElementHeight="148"/>
-            </ScrollViewer>
+    <Grid RowDefinitions="32, *, 32, 48" Margin="16">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock>Current Directory : </TextBlock>
+            <TextBlock Text="{Binding RootDirectory}"/>
         </StackPanel>
+        <ScrollViewer Grid.Row="1">
+            <ctrl:VirtualizedItemsRepeater ItemsSource="{Binding Artworks}"
+                                           SelectedItem="{Binding SelectedArtwork}"
+                                           ElementWidth="148" ElementHeight="148"/>
+        </ScrollViewer>
         
-        <Grid Grid.Row="1" ColumnDefinitions="*, Auto">
+        <Grid Grid.Row="2" ColumnDefinitions="*, Auto">
             <TextBox Text="{Binding FilePath}"/>
             <Button Grid.Column="1" Content = "Browse" Margin="16 0"
                     Command="{Binding BrowseCommand}"/>
         </Grid>
         
-        <Grid Grid.Row="2" ColumnDefinitions="*, *">
+        <Grid Grid.Row="3" ColumnDefinitions="*, *">
             <Button Grid.Column="0" Content = "Ok" HorizontalAlignment="Center" Margin="16 0"
                     Command="{Binding OkCommand}"
                     IsEnabled="{Binding SelectedArtwork, Converter={StaticResource NullToBoolean}}"

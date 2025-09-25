@@ -107,7 +107,8 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
         Sort();
         _initialized = true;
     }
-    protected override void OnTracksPoolChanged()
+
+    public override void Refresh()
     {
         long? selectedId=null;
         if (SelectedItem != null)

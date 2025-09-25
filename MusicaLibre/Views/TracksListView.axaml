@@ -68,6 +68,8 @@
                                     <MenuItem Header="Insert Next" Command="{Binding InsertNextCommand}"/>
                                     <MenuItem Header="Edit Tags" Command="{Binding EditTagsCommand}"/>
                                     <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"/>
+                                    <MenuItem Header="Transcode" Command="{Binding TranscodeCommand}"/>
+                                    <MenuItem Header="Pick Artwork" />
                                   </ContextMenu>
                                 </Border.ContextMenu>
                                 <!-- row grid -->

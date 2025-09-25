@@ -323,9 +323,12 @@ public partial class LibraryViewModel
                   if(track.Artists.Count == 0)
                      track.Artists.Add(unknownArtist!);
 
-                  var albumName = file.Tag.Album.Trim();
-                  if (albumName != null)
+                  var albumName = file.Tag.Album ?? 
+                                  System.IO.Path.GetFileName(track.FolderPathstr);
+                  albumName = albumName.Trim();
+
                   {
+                     
                      if (albumArtist == unknownArtist 
                         && artistsByName.TryGetValue(albumPerformer, out var artist))
                         albumArtist = artist;
@@ -749,7 +752,12 @@ public partial class LibraryViewModel
                             };
                             createdAlbum = true;
                         }
-                        
+
+                        if (!audioformatsByName.TryGetValue("Cue Pseudo Track", out var cueFormat))
+                        {
+                           cueFormat = new AudioFormat("Cue Pseudo Track");
+                           cueFormat.DbInsertAsync(Database).GetAwaiter().GetResult();
+                        }
                         
                         List<Track> sheetTracks = new List<Track>();
                         HashSet<Track> sheetMultiTracks = new HashSet<Track>();
@@ -765,6 +773,8 @@ public partial class LibraryViewModel
                                 track.TrackNumber = cuetrack.Number;
                                 track.Album = album;
                                 track.AlbumId = album.DatabaseIndex;
+                                track.AudioFormatId = cueFormat.DatabaseIndex;
+                                track.AudioFormat =  cueFormat;
                                 
                                 if (!string.IsNullOrWhiteSpace(cuetrack.Performer) &&
                                     artistsByName.TryGetValue(cuetrack.Performer, out var artist))
@@ -772,7 +782,9 @@ public partial class LibraryViewModel
                                     if(!track.Artists.Contains(artist))
                                         track.Artists.Add( artist);    
                                 }
-                                var times = TimeUtils.GetCueTrackTimes(cuetrack.Start,  cuetrack.End, track.Duration);
+                                var start = cuetrack.Indexes.First().Start;
+                                var end = cuetrack.Indexes.Last().End;
+                                var times = TimeUtils.GetCueTrackTimes(start,  end, track.Duration);
                                 track.Start = times.start;
                                 track.End = times.end;
                                 sheetTracks.Add(track);
@@ -811,7 +823,7 @@ public partial class LibraryViewModel
                         
                         foreach (var t in sheetTracks)
                         {
-                            t.AlbumId = t.Album?.DatabaseIndex;
+                            t.AlbumId = t.Album.DatabaseIndex;
                             try
                             {
                                 t.DbInsertAsync(Database).GetAwaiter().GetResult();
@@ -842,6 +854,7 @@ public partial class LibraryViewModel
                             try
                             {
                                 track.DbDeleteAsync(Database).GetAwaiter().GetResult();
+                                snapshot.Tracks.Remove(track.DatabaseIndex);
                             }
                             catch (Exception ex){Console.WriteLine(ex);}
                         }
@@ -944,8 +957,7 @@ public partial class LibraryViewModel
       
       //remove albums with zero tracks
       var trackCounts = snapshot.Tracks.Values
-         .Where(x=>x.AlbumId.HasValue)
-         .GroupBy(t => t.AlbumId!.Value)
+         .GroupBy(t => t.AlbumId)
          .ToDictionary(g => g.Key, g => g.Count());
 
       foreach(var album in snapshot.Albums.Values.ToList())

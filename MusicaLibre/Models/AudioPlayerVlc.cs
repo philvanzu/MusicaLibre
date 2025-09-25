@@ -4,7 +4,7 @@ using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.Models;
 
-public class VlcAudioPlayer
+public class AudioPlayerVlc
 {
     public TrackViewModel Track { get; set; }
     private MediaPlayer _mediaPlayer;
@@ -13,7 +13,7 @@ public class VlcAudioPlayer
     private Media _media;
 
     public bool IsPlaying => _mediaPlayer.IsPlaying;
-    public VlcAudioPlayer(LibVLC lib, TrackViewModel track, Action trackEnded)
+    public AudioPlayerVlc(LibVLC lib, TrackViewModel track, Action trackEnded)
     {
         _libVLC = lib;
         Track = track;

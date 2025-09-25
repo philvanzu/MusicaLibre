@@ -70,6 +70,7 @@ public static class DialogUtils
         ArtworkPickerViewModel vm = new ArtworkPickerViewModel(library, dlg, tracks, role);
         dlg.DataContext = vm;
         return await dlg.ShowDialog<Artwork?>(owner);
+        
     }
 
     public static async Task MessageBox(Window owner, string title, string message)

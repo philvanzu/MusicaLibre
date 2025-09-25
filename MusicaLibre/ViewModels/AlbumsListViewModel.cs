@@ -77,7 +77,7 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
         _items.Clear();
 
         
-        var albumIds = TracksPool.Select(x => x.AlbumId).Where(albumId => albumId.HasValue).Distinct().ToList();
+        var albumIds = TracksPool.Select(x => x.AlbumId).Distinct().ToList();
 
         var albumsPool = Library.Data.Albums.Values.AsEnumerable();
         if (albumIds.Count > 0) albumsPool = albumsPool.Where(x => albumIds.Contains(x.DatabaseIndex));
@@ -87,7 +87,7 @@ public partial class AlbumsListViewModel:LibraryDataPresenter, ISelectVirtualiza
         Sort();
     }
 
-    protected override void OnTracksPoolChanged()
+    public override void Refresh()
     {
         long? selectedId=null;
         if (SelectedItem != null)

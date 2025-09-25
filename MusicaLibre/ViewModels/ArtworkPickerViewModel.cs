@@ -77,8 +77,12 @@ public partial class ArtworkPickerViewModel:ArtworkListManagerViewModel
         } );
         if (!string.IsNullOrEmpty(selectedPath))
         {
-            var artwork = _library.Data.Artworks.Values.FirstOrDefault(x => x.SourcePath?.Equals(selectedPath)??false);
-            Folder? folder=null;
+            string? folderPath = Path.GetDirectoryName(selectedPath);
+            string? ext = Path.GetExtension(selectedPath);
+            if(folderPath == null) return;
+            
+            var folder = _library.Data.Folders.Values.FirstOrDefault(x=>x.Name.Equals(folderPath));
+            var artwork = _library.Data.Artworks.Values.FirstOrDefault(x => x.SourcePath.Equals(selectedPath));
             if (artwork == null && File.Exists(selectedPath))
             {
                 if (!PathUtils.IsDescendantPath(_rootDirectory, selectedPath))
@@ -100,13 +104,21 @@ public partial class ArtworkPickerViewModel:ArtworkListManagerViewModel
                 {
                     SourcePath = selectedPath,
                     SourceType = ArtworkSourceType.External,
-                    MimeType = PathUtils.GetMimeType(selectedPath),
+                    MimeType = PathUtils.GetMimeType(ext),
                     Folder = folder,
                 };
                 
                 artwork.ProcessImage();
                 if (artwork.Hash == null) throw new Exception("Could not process image");
-                await artwork.DbInsertAsync(_library.Database);
+                var existing = _library.Data.Artworks.Values.FirstOrDefault(x => x.Hash.Equals(artwork.Hash));
+                if (existing is null)
+                {
+                    await artwork.DbInsertAsync(_library.Database);
+                }
+                else
+                {
+                    artwork = existing;
+                }
             }
             
             Debug.Assert(artwork is not null);

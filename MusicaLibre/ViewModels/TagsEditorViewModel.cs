@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -135,24 +134,87 @@ public partial class TagsEditorViewModel:TracksListViewModel
         Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.SampleRate}Khz").ToArray())
         ??_mult;
 
+    //Added time
     [ObservableProperty] private string _addedBinding = string.Empty;
-    public string Added => IsMultiple? CoalescedAdded : $"{SelectedItem?.Model.DateAdded}";
+    public string Added => IsMultiple? CoalescedAdded : $"{SelectedItem?.AddedFull}";
     public string CoalescedAdded =>
-        Utils.Coalesce(SelectedItems.Select(x=>x.Model.DateAdded.ToString()).ToArray()) 
+        Utils.Coalesce(SelectedItems.Select(x=>x.AddedFull).ToArray()) 
         ?? _mult;
+
+    [RelayCommand]
+    async Task UpdateAdded()
+    {
+        var added = TimeUtils.FromDateTimeString(AddedBinding);
+        if (added is null)
+        {
+            DialogUtils.MessageBox(Window, "Error",
+                "Could not parse time format. Correct format is yyyy-MM-dd HH:mm:ss");
+            return;
+        }
+        foreach (var vm in SelectedItems)
+        {
+            vm.Model.DateAdded = added.Value;
+            await vm.Model.DbUpdateAsync(Library.Database);
+        }
+        DialogUtils.MessageBox(Window, "Success",
+            $"{SelectedItems.Count} file(s) updated successfully");
+        SelectedTrackChanged();
+    }
+    
+    //Modified Time
     [ObservableProperty] private string _modifiedBinding = string.Empty;
-    public string Modified => IsMultiple ? CoalescedModified : $"{SelectedItem?.Model.Modified}";
+    public string Modified => IsMultiple ? CoalescedModified : $"{SelectedItem?.ModifiedFull}";
 
     public string CoalescedModified =>
-        Utils.Coalesce(SelectedItems.Select(x => x.Model.Modified.ToString()).ToArray()) 
+        Utils.Coalesce(SelectedItems.Select(x => x.ModifiedFull).ToArray()) 
         ??_mult;
 
+    [RelayCommand] async Task UpdateModified()
+    {
+        var modified = TimeUtils.FromDateTimeString(ModifiedBinding);
+        if (modified is null)
+        {
+            DialogUtils.MessageBox(Window, "Error",
+                "Could not parse time format. Correct format is yyyy-MM-dd HH:mm:ss");
+            return;
+        }
+        foreach (var vm in SelectedItems)
+        {
+            File.SetLastWriteTime(vm.Model.FilePath, modified!.Value);
+            vm.Model.Modified = modified.Value;
+            await vm.Model.DbUpdateAsync(Library.Database);
+        }
+        DialogUtils.MessageBox(Window, "Success",
+            $"{SelectedItems.Count} file(s) updated successfully");
+        
+        SelectedTrackChanged();
+    }
+    //Created Time
     [ObservableProperty] private string _createdBinding = string.Empty;
-    public string Created => IsMultiple ? CoalescedCreated : $"{SelectedItem?.Model.Created}";
+    public string Created => IsMultiple ? CoalescedCreated : $"{SelectedItem?.CreatedFull}";
     public string CoalescedCreated =>
-        Utils.Coalesce(SelectedItems.Select(x=>x.Model.Created.ToString()).ToArray()) 
+        Utils.Coalesce(SelectedItems.Select(x=>x.CreatedFull).ToArray()) 
         ?? _mult;
-
+    [RelayCommand] async Task UpdateCreated()
+    {
+        var created = TimeUtils.FromDateTimeString(CreatedBinding);
+        if (created is null)
+        {
+            DialogUtils.MessageBox(Window, "Error",
+                "Could not parse time format. Correct format is yyyy-MM-dd HH:mm:ss");
+            return;
+        }
+        foreach (var vm in SelectedItems)
+        {
+            File.SetCreationTime(vm.Model.FilePath, created!.Value);
+            vm.Model.Created = created.Value;
+            await vm.Model.DbUpdateAsync(Library.Database);
+        }
+        DialogUtils.MessageBox(Window, "Success",
+            $"{SelectedItems.Count} file(s) updated successfully");
+        SelectedTrackChanged();
+    }
+    //Last Played
     [ObservableProperty] private string _playedBinding = string.Empty;
     public string Played => IsMultiple? CoalescedPlayed : $"{SelectedItem?.Model.LastPlayed}";
     public string CoalescedPlayed =>

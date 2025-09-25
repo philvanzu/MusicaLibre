@@ -36,6 +36,7 @@
         <entry key="MusicaLibre/Views/ProgressDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ProgressView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/TagsEditorDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/TracksListTranscoderDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/TracksListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/YearPresenterView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
       </map>

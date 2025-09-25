@@ -101,6 +101,15 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
     }
 
     [RelayCommand]
+    void Transcode()
+    {
+        if (Presenter.SelectedTracks != null && Presenter.SelectedTracks.Count > 0)
+            _ = Presenter.Library.TranscodeTracks(Presenter.SelectedTracks);
+        else
+            _ = Presenter.Library.TranscodeTracks(Tracks);
+    }
+
+    [RelayCommand]
     void DoubleTapped()
     {
         Presenter.Library.ChangeOrderingStep(Presenter);

@@ -7,7 +7,7 @@ using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.ViewModels;
 
-public partial class ProgressViewModel: ViewModelBase
+public partial class ProgressViewModel: ViewModelBase, IDisposable
 {
     [ObservableProperty]private string _message = "";
     [ObservableProperty]private double _progressValue=0;
@@ -78,7 +78,14 @@ public partial class ProgressViewModel: ViewModelBase
         ProgressValue = 0;
         Counter = 0;
         IsBusy = false;
+        _cancellationTokenSource?.Dispose();
         CancellationTokenSource = null;
     }
 
+
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
+    }
 }

@@ -120,17 +120,15 @@
                                                <!-- Time Stamps-->
                                                <TextBlock Grid.Row="0" Grid.Column="0">Date Modified</TextBlock>
                                                <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding ModifiedBinding}"/>
+                                               <Button Grid.Row="0" Grid.Column="4" Content="Update" Command="{Binding UpdateModifiedCommand}"/>
                                                
                                                <TextBlock Grid.Row="1" Grid.Column="0">Date Created</TextBlock>
                                                <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding CreatedBinding}"/>
-
+                                               <Button Grid.Row="1" Grid.Column="4" Content="Update" Command="{Binding UpdateCreatedCommand}"/>
+                                               
                                                <TextBlock Grid.Row="2" Grid.Column="0">Date Added</TextBlock>
                                                <TextBox Grid.Row="2" Grid.Column="2"  Text="{Binding AddedBinding}"/>
-                                               <StackPanel Grid.Row="2" Grid.Column="4" Orientation="Horizontal">
-                                                   <Button Content="From Modified"/>
-                                                   <Button Content="From Created"/>
-                                                   <Button Content="Now"/>
-                                               </StackPanel>
+                                               <Button Grid.Row="2" Grid.Column="4" Content="Update" Command="{Binding UpdateAddedCommand}"/>
                                                
                                                <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">Last Played</TextBlock>
                                                <TextBlock Grid.Row="3" Grid.Column="2"  Text="{Binding PlayedBinding}"

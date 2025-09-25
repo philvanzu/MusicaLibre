@@ -15,8 +15,8 @@ public partial class PlayerViewModel : ViewModelBase
 {
     private readonly LibVLC _libVLC;
     
-    public VlcAudioPlayer? CurrentPlayer { get; set; }
-    public VlcAudioPlayer? NextPlayer { get; set; }
+    public AudioPlayerVlc? CurrentPlayer { get; set; }
+    public AudioPlayerVlc? NextPlayer { get; set; }
     
     [ObservableProperty] private bool _isSeeking;
     [ObservableProperty] private bool _isLoaded;
@@ -135,7 +135,7 @@ public partial class PlayerViewModel : ViewModelBase
             }
             if (CurrentTrack != null)
             {
-                CurrentPlayer = new VlcAudioPlayer(_libVLC, CurrentTrack, TrackEnded);
+                CurrentPlayer = new AudioPlayerVlc(_libVLC, CurrentTrack, TrackEnded);
                 CurrentPlayer.SetVolume(Volume);
 
                 IsLoaded = true;
@@ -165,7 +165,7 @@ public partial class PlayerViewModel : ViewModelBase
             
             if (NextTrack != null)
             {
-                NextPlayer=new VlcAudioPlayer(_libVLC, NextTrack,  TrackEnded);
+                NextPlayer=new AudioPlayerVlc(_libVLC, NextTrack,  TrackEnded);
 
                 NextPlayer.Pause();
                 if(NextTrack.FileIsMultitrack)
@@ -218,7 +218,7 @@ public partial class PlayerViewModel : ViewModelBase
         }
     }
 
-    public void ReleasePlayer(VlcAudioPlayer player)
+    public void ReleasePlayer(AudioPlayerVlc player)
     {
         Dispatcher.UIThread.Post(player.Dispose);
     }
