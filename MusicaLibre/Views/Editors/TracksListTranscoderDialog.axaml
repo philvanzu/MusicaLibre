@@ -1,0 +1,108 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+        xmlns:conv="clr-namespace:MusicaLibre.Converters"
+        xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+        xmlns:v="clr-namespace:MusicaLibre.Views"
+        Width="1200" Height="800"
+        x:Class="MusicaLibre.Views.TracksListTranscoderDialog"
+        x:DataType="vm:TracksListTranscoderViewModel"
+        Title="TracksListTranscoderDialog"
+        WindowStartupLocation="CenterOwner">
+    
+    <Window.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:InverseBooleanConverter x:Key="InverseBoolean"/>
+        <conv:BoolToUpdateTextConverter x:Key="MultipleUpdateWarning"></conv:BoolToUpdateTextConverter>
+    </Window.Resources>
+    
+    <Grid ColumnDefinitions="400, 6, *">
+        <!-- Tracks list -->
+        <Border BorderBrush="White" BorderThickness="1">
+            <Grid ColumnDefinitions="*">
+                <ctrl:TrackGrid 
+                    ItemsSource="{Binding Items}"
+                    Columns="{Binding Columns}"
+                    SelectedItem="{Binding SelectedItem}" >
+                    <ctrl:TrackGrid.Template>
+                        <ControlTemplate>
+                            <ScrollViewer >
+                                  <!--repeater-->
+                                  <ItemsRepeater ItemsSource="{TemplateBinding ItemsSource}"  x:Name="PART_Repeater">
+                                      <ItemsRepeater.Layout>
+                                          <StackLayout Orientation="Vertical"/>
+                                      </ItemsRepeater.Layout>
+
+                                      <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate DataType="vm:TrackViewModel">
+                                          <!-- row border-->
+                                          <Border Height="24" Margin="0 " Padding="0 0 16 0"
+                                                  BorderBrush="DodgerBlue"  x:Name="PART_RowBorder"
+                                                  Tag="{Binding IsSelected}"
+                                                  PropertyChanged="TrackItemPropertyChanged">
+                                            <!-- row grid -->
+                                            <Grid VerticalAlignment="Center" x:Name="PART_RowGrid" Margin="10 0 0 0" />
+                                          </Border>
+                                        </DataTemplate>
+                                      </ItemsRepeater.ItemTemplate>
+                                  </ItemsRepeater>
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </ctrl:TrackGrid.Template>
+                </ctrl:TrackGrid>
+            </Grid>
+        </Border>
+        <!--GridSplitter-->
+        <GridSplitter Grid.Column="1" Width="6" Background="Transparent"/>
+        
+            <Border Grid.Column="2"  BorderBrush="White" BorderThickness="1" Padding="16">
+                <Grid RowDefinitions="Auto, *">
+                    <Grid ColumnDefinitions="200,32,*,32" RowDefinitions="Auto, Auto,Auto, Auto, Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0">Prefix</TextBlock>
+                        <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding Prefix}"/>
+                    
+                        <TextBlock Grid.Row="1" Grid.Column="0">Suffix</TextBlock>
+                        <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Suffix}"/>
+                    
+                        <TextBlock Grid.Row="2" Grid.Column="0">SubDirectory</TextBlock>
+                        <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding SubDirectory}"/>
+                        
+                        <TextBlock Grid.Column="0" Grid.Row="3">Output Format</TextBlock>
+                        <ComboBox Grid.Column="2" Grid.Row="3" ItemsSource="{Binding OutputFormats}" 
+                                                 SelectedIndex="{Binding SelectedOutputFormatIdx}"/>
+                        
+                        <Button Grid.Row="4" Grid.Column="0" Content="Open Common root in Explorer"
+                                IsEnabled="{Binding CommonRoot, Converter={StaticResource NullToBoolean}}"
+                                Command="{Binding OpenInExplorerCommand}"/>
+                        
+                        <Button Grid.Row="4" Grid.Column="2" Content="{Binding ExecuteButtonText}" 
+                                IsEnabled="{Binding CanExecute}"
+                                Command="{Binding ExecuteCommand}"/>
+                    </Grid>
+                    <ScrollViewer Grid.Row="1">
+                        <ItemsRepeater ItemsSource="{Binding Progresses}">
+                            <ItemsRepeater.Layout>
+                                <StackLayout />
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Grid ColumnDefinitions="500, 300">
+                                            <TextBlock Grid.Column="0" Text="{Binding Message}"/>
+                                            <ProgressBar Grid.Column="1"
+                                                    Minimum="0" Maximum="1"
+                                                    Value="{Binding ProgressValue}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </ScrollViewer>
+                </Grid>
+            </Border>    
+        
+        
+    </Grid>
+</Window>

@@ -1,0 +1,87 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+        xmlns:conv="clr-namespace:MusicaLibre.Converters"
+        xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MusicaLibre.Views.ArtworkPickerDialog"
+        Title="ArtworkPickerWindow"
+        x:DataType="vm:ArtworkPickerViewModel"
+        Height="600" Width="800" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:NullToInverseBooleanConverter x:Key="InverseNullToBoolean"/>
+        <conv:InverseBooleanConverter x:Key="InverseBoolean"/>
+    </Window.Resources>
+    
+    <Window.Styles>
+        <Style Selector="ctrl|VirtualizedItemsRepeater">
+            <Setter Property="Layout">
+                <UniformGridLayout MaximumRowsOrColumns="0" />
+            </Setter>
+            <Setter Property="ItemTemplate">
+                <DataTemplate x:DataType="vm:ArtworkViewModel">
+                    <Border 
+                        Width="132" Height="132" Margin="8"
+                        CornerRadius="5"
+                        Tag="{Binding IsSelected}"
+                        Tapped="ArtworkTapped">
+                        <Border.Styles>
+                            <!-- default style -->
+                            <Style Selector="Border[Tag=False]">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderBrush" Value="White"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                            </Style>
+                            <!-- selected style -->
+                            <Style Selector="Border[Tag=True]">
+                                <Setter Property="Background" Value="#5050FF33" />
+                                <Setter Property="BorderBrush" Value="DodgerBlue"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                            </Style>
+                        </Border.Styles>
+                        <Canvas Height="100" Width="100">
+                            <Image Height="100" Width="100" Source="{Binding Thumbnail}"/>
+                            <Border Background="#DD999999" BorderBrush="White" BorderThickness="1"
+                                    IsVisible="{Binding IsEmbedded}" 
+                                    Padding="8" Canvas.Left="16" Canvas.Top="16">
+                                <TextBlock Text="Embed" Foreground="Red"/>    
+                            </Border>
+                        </Canvas>
+                    </Border>
+                </DataTemplate>
+            </Setter>        
+        </Style>
+    </Window.Styles>
+    
+    <Grid RowDefinitions="32, *, 32, 48" Margin="16">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock>Current Directory : </TextBlock>
+            <TextBlock Text="{Binding RootDirectory}"/>
+        </StackPanel>
+        <ScrollViewer Grid.Row="1">
+            <ctrl:VirtualizedItemsRepeater ItemsSource="{Binding Artworks}"
+                                           SelectedItem="{Binding SelectedArtwork}"
+                                           ElementWidth="148" ElementHeight="148"/>
+        </ScrollViewer>
+        
+        <Grid Grid.Row="2" ColumnDefinitions="*, Auto">
+            <TextBox Text="{Binding FilePath}"/>
+            <Button Grid.Column="1" Content = "Browse" Margin="16 0"
+                    Command="{Binding BrowseCommand}"/>
+        </Grid>
+        
+        <Grid Grid.Row="3" ColumnDefinitions="*, *">
+            <Button Grid.Column="0" Content = "Ok" HorizontalAlignment="Center" Margin="16 0"
+                    Command="{Binding OkCommand}"
+                    IsEnabled="{Binding SelectedArtwork, Converter={StaticResource NullToBoolean}}"
+                    VerticalAlignment="Center"/>
+            <Button Grid.Column="1" Content = "Cancel" HorizontalAlignment="Center" Margin="16 0"
+                    Command="{Binding CancelCommand}"
+                    VerticalAlignment="Center"/>
+        </Grid>
+        
+    </Grid>
+</Window>

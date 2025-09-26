@@ -1,0 +1,91 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+             xmlns:conv="clr-namespace:MusicaLibre.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Views.TracksListView"
+             x:DataType="vm:TracksListViewModel">
+    
+  <UserControl.Resources>
+  </UserControl.Resources>
+  
+  <Grid RowDefinitions="Auto,*" >
+    <!-- Horizontal scroll container -->
+    <ScrollViewer Grid.Row="0" Grid.RowSpan="2"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Disabled"
+                  x:Name="Scroller"
+                  ScrollChanged="OnScrollChanged">
+      
+      <ctrl:TrackGrid 
+        ItemsSource="{Binding Items}"
+        Columns="{Binding Columns}"
+        SelectedItem="{Binding SelectedItem}" >
+        <ctrl:TrackGrid.Template>
+          <ControlTemplate>
+          <!-- Template Start -->
+            <Grid RowDefinitions="Auto,*" >
+            <!-- Horizontal scroll container -->
+              <ScrollViewer Grid.Row="0" Grid.RowSpan="2"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Disabled">
+
+                <!-- Root grid MUST be the SharedSizeScope for header + rows -->
+                <Grid Grid.IsSharedSizeScope="True" Margin="8,4,4,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> <!-- header -->
+                        <RowDefinition Height="*"/>    <!-- body -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Header grid:-->
+                    <Border  Height="32" Margin="0 16 " BorderThickness="1"
+                                       BorderBrush="DodgerBlue" Background="#5050FF33">
+                      <Grid VerticalAlignment="Center" x:Name="PART_Header"/>
+                    </Border>
+                    <!-- Body:  -->
+                    <ScrollViewer Grid.Row="1">
+                      <!--repeater-->
+                      <ItemsRepeater ItemsSource="{TemplateBinding ItemsSource}"  x:Name="PART_Repeater">
+                          <ItemsRepeater.Layout>
+                              <StackLayout Orientation="Vertical"/>
+                          </ItemsRepeater.Layout>
+
+                          <ItemsRepeater.ItemTemplate>
+                            <DataTemplate DataType="vm:TrackViewModel">
+                              <!-- row border-->
+                              <Border Height="32" Margin="0 4 " Padding="0 0 16 0"
+                                      BorderBrush="DodgerBlue"  x:Name="PART_RowBorder"
+                                      Tag="{Binding IsSelected}"
+                                      DoubleTapped="TrackItemDoubleTapped" 
+                                      PropertyChanged="TrackItemPropertyChanged">
+                                <Border.ContextMenu>
+                                  <ContextMenu>
+                                    <MenuItem Header="Play" Command="{Binding DoubleTappedCommand}"/>
+                                    <MenuItem Header="Append" Command="{Binding AppendCommand}"/>
+                                    <MenuItem Header="Insert Next" Command="{Binding InsertNextCommand}"/>
+                                    <MenuItem Header="Edit Tags" Command="{Binding EditTagsCommand}"/>
+                                    <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"/>
+                                    <MenuItem Header="Transcode" Command="{Binding TranscodeCommand}"/>
+                                    <MenuItem Header="Pick Artwork" />
+                                  </ContextMenu>
+                                </Border.ContextMenu>
+                                <!-- row grid -->
+                                <Grid VerticalAlignment="Center" x:Name="PART_RowGrid" Margin="10 0 0 0" />
+                              </Border>
+                            </DataTemplate>
+                          </ItemsRepeater.ItemTemplate>
+                      </ItemsRepeater>
+                    </ScrollViewer>
+                </Grid>
+              </ScrollViewer>
+            </Grid>
+          </ControlTemplate>
+        </ctrl:TrackGrid.Template>
+        
+      </ctrl:TrackGrid>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

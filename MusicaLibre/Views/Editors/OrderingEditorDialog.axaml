@@ -1,0 +1,195 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+        xmlns:conv="clr-namespace:MusicaLibre.Converters"
+        mc:Ignorable="d"
+        x:Class="MusicaLibre.Views.OrderingEditorDialog"
+        Title="Custom Tracks Ordering Editor"
+        Width="1200" Height="800"
+        x:DataType="vm:OrderingEditorViewModel"
+        WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:InverseBooleanConverter x:Key="InverseBoolean"/>
+    </Window.Resources>
+    <Grid RowDefinitions="Auto, *">
+        <TextBlock FontSize="16" FontWeight="Bold">Custom Orderings Editor</TextBlock>
+        <Grid Grid.Row="1" ColumnDefinitions="300, *" ><!-- List orderings -->
+            <Border Grid.Column="0" BorderBrush="White" BorderThickness="1">
+                
+                <ScrollViewer>
+                    <StackPanel>
+                        <Button Content="Create new" 
+                                Command = "{Binding CreateCommand}" Margin="8"/>
+                        <ListBox ItemsSource="{Binding Orderings}"
+                                 SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch">
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}" HorizontalAlignment="Stretch"/>
+                                        <Button  Grid.Column="1" Height="16" Width="16" Padding="0" HorizontalAlignment="Right"
+                                                 Command="{Binding RemoveCommand}"
+                                                 IsVisible="{Binding IsDefault, Converter={StaticResource InverseBoolean}}">
+                                            <Path Stroke="White" StrokeThickness="1" Stretch="Uniform"
+                                                  Data="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6h12zM10 11v6M14 11v6"/>
+                                        </Button>
+                                        <Path Grid.Column="1" Stroke="White" StrokeThickness="1" Stretch="Uniform" Height="16" Width="16"
+                                              IsVisible="{Binding IsDefault}"
+                                              Data="M12 17a2 2 0 1 0 4 0v-2H12v2zm6-6V9a6 6 0 0 0-12 0v2H4v10h16V11h-2zm-8-2a4 4 0 0 1 8 0v2H10V9z"/>
+
+                                    
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>  
+
+                    </StackPanel>
+                    
+                </ScrollViewer>
+            
+            </Border>
+            
+        <!--Editor-->
+        
+        
+                <ContentControl 
+                    Grid.Column="1"  VerticalAlignment="Stretch" 
+                    DataContext="{Binding SelectedItem}"
+                    IsVisible="{Binding ., Converter={StaticResource NullToBoolean}}"
+                    Margin="8">
+                    
+                    <Grid RowDefinitions="Auto, Auto, *, Auto, Auto">
+                        <!--Name box-->
+                        <Grid Grid.Row="0" 
+                            ColumnDefinitions="Auto, *" Margin="0, 8" HorizontalAlignment="Stretch">
+                            <TextBlock VerticalAlignment="Center">Name: </TextBlock>
+                            <TextBox Grid.Column="1" Text="{Binding Name, Mode=TwoWay}" HorizontalAlignment="Stretch"
+                                     IsEnabled="{Binding IsDefault, Converter={StaticResource InverseBoolean}}"/>
+                        </Grid>
+                        <!--Add Button-->
+                        <Button Grid.Row="1" 
+                                IsEnabled="{Binding IsDefault, Converter={StaticResource InverseBoolean}}"
+                                Content="Add Step" Command="{Binding AddStepCommand}"
+                                HorizontalAlignment="Center"/>
+                        <!-- List of Steps-->
+                        <ScrollViewer Grid.Row="2">
+                            <ItemsControl ItemsSource="{Binding Steps}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="White" BorderThickness="1">
+                                            <Grid ColumnDefinitions="Auto, 32, *">
+                                                <!--Group SortingKeys-->
+                                                <StackPanel Grid.Column="0">
+                                                    <StackPanel Orientation="Horizontal"
+                                                                IsEnabled="{Binding IsDefault, Converter={StaticResource InverseBoolean}}">
+                                                        <Button Content="Delete this GroupBy Step"
+                                                                Command="{Binding DeleteCommand}"/>
+                                                        <Button Content="↑"
+                                                                Command ="{Binding MoveUpCommand}"/>
+                                                        <Button Content="↓"
+                                                                Command ="{Binding MoveDownCommand}"/>
+                                                        
+                                                    </StackPanel>
+                                                    <Grid ColumnDefinitions="Auto, Auto, 24, Auto, Auto" Margin="8">
+                                                        <TextBlock VerticalAlignment="Center">Group By :</TextBlock>
+                                                        <ComboBox Grid.Column="1" ItemsSource="{Binding GroupingOptions}"
+                                                                  SelectedIndex="{Binding Type}"
+                                                                  Margin="16 0"/>
+                                                        
+                                                        <Button Grid.Column="3" Content="Add Sort"
+                                                                Command="{Binding AddKeyCommand}"/>
+                                                        <Button Grid.Column="4" Content="Remove Sort"
+                                                                Command="{Binding RemoveKeyCommand}"/>
+                                                        
+                                                    </Grid>
+                                                    <ItemsControl ItemsSource="{Binding SortKeys}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid ColumnDefinitions="75, 150, 100" Margin = "32 8 0 8">
+                                                                    <TextBlock VerticalAlignment="Center">Sort By :</TextBlock>
+                                                                    <ComboBox Grid.Column="1" ItemsSource="{Binding SortingOptions}"
+                                                                              SelectedIndex="{Binding SelectedKey}"/>
+                                                                    <ComboBox Grid.Column="2" ItemsSource="{Binding AscOptions}"
+                                                                              SelectedIndex="{Binding SelectedAsc}"/>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                                
+                                                <!--TrackStep Sorting keys-->
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="When playing group, sort tracks by"/>
+                                                    <Grid ColumnDefinitions="Auto, Auto" Margin="8">
+                                                        
+                                                        
+                                                        <Button Grid.Column="0" Content="Add Sort"
+                                                                Command="{Binding CreateTrackStepCommand}"/>
+                                                        <Button Grid.Column="1" Content="Remove Sort"
+                                                                Command="{Binding RemoveTrackStepCommand}"/>
+                                                        
+                                                    </Grid>
+                                                    <ItemsControl ItemsSource="{Binding SortTracksKeys}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid ColumnDefinitions="75, 150, 100" Margin = "32 8 0 8">
+                                                                    <TextBlock VerticalAlignment="Center">Sort By :</TextBlock>
+                                                                    <ComboBox Grid.Column="1" ItemsSource="{Binding SortingOptions}"
+                                                                              SelectedIndex="{Binding SelectedKey}"/>
+                                                                    <ComboBox Grid.Column="2" ItemsSource="{Binding AscOptions}"
+                                                                              SelectedIndex="{Binding SelectedAsc}"/>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Grid>
+                                            
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>    
+                        </ScrollViewer> 
+                        <!--TracksStep-->   
+                        <Grid Grid.Row="3" RowDefinitions="Auto, Auto, Auto">
+                            <Grid  Grid.Row="0" ColumnDefinitions="Auto, 64, Auto, Auto" Margin="8 8">
+                                <TextBlock>Finally, order Tracks by :</TextBlock>
+                                
+                                <Button Grid.Column="2"  Content="Add"
+                                        Command="{Binding CreateTracksStepCommand}"
+                                        IsVisible="{Binding IsDefault, Converter={StaticResource InverseBoolean}}"/>
+                                <Button Grid.Column="3" Content="Remove"
+                                        Command="{Binding RemoveTracksStepCommand}"
+                                        IsVisible="{Binding IsDefault, Converter={StaticResource InverseBoolean}}"/>
+                            </Grid>
+
+                            <ItemsControl Grid.Row="2" ItemsSource="{Binding TracksStep.SortKeys}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="Auto, 64, Auto, Auto" Margin = "32 8 0 8">
+                                            <TextBlock VerticalAlignment="Center">Sort By :</TextBlock>
+                                            <ComboBox Grid.Column="2" ItemsSource="{Binding SortingOptions}"
+                                                      SelectedIndex="{Binding SelectedKey}"/>
+                                            <ComboBox Grid.Column="3" ItemsSource="{Binding AscOptions}"
+                                                      SelectedIndex="{Binding SelectedAsc}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                        </Grid>
+                        <!-- Save Button -->
+                        <Button Grid.Row="4"  
+                                IsEnabled="{Binding IsDefault, Converter={StaticResource InverseBoolean}}"
+                                Content="Save this Custom Ordering" Command="{Binding SaveCommand}"
+                                HorizontalAlignment="Center"/>
+                    </Grid>
+                    
+                </ContentControl>
+        
+        </Grid>    
+    </Grid>
+    
+</Window>

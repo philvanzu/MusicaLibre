@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:conv="clr-namespace:MusicaLibre.Converters"
+             xmlns:v="clr-namespace:MusicaLibre.Views"
+             xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Views.AlbumsEditorView"
+             x:DataType="vm:AlbumsEditorViewModel">
+
+    <UserControl.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:NullToInverseBooleanConverter x:Key="InverseNullToBoolean"/>
+    </UserControl.Resources>
+    
+    <Grid ColumnDefinitions="400, *" RowDefinitions="Auto, *">
+        <Border BorderBrush="White" BorderThickness="1">
+            <ListBox ItemsSource="{Binding Albums}"
+                     SelectedIndex="{Binding SelectedIndex}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Title}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+        <Border Grid.Column="1" BorderBrush="White" BorderThickness="1"
+                IsVisible="{Binding SelectedAlbum, Converter={StaticResource NullToBoolean}}">
+            <Grid RowDefinitions="Auto, 32,32, *">
+                <Grid ColumnDefinitions="200, 32, 800" Margin="16">
+                    <StackPanel >
+                        <Image Width="200" Height="200" Source="{Binding Thumbnail}"/>
+                        <Button Content="Pick Artwork" Command="{Binding PickArtworkCommand}"/>
+                    </StackPanel>
+                    <Grid Grid.Column="2" ColumnDefinitions="Auto, 32, *, 200" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto, 32, Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" >Folder</TextBlock>
+                        <TextBlock Grid.Row="0" Grid.Column="2"  
+                                   Text="{Binding Folder}" Margin="0 8" TextWrapping="Wrap"/>
+                        
+                        <TextBlock Grid.Row="1" Grid.Column="0">Title</TextBlock>
+                        <TextBox  Grid.Row="1" Grid.Column="2" Text="{Binding Title}"/>
+                        
+                        <TextBlock Grid.Row="2" Grid.Column="0">Album Artist</TextBlock>
+                        <ctrl:TagBox  Grid.Row="2" Grid.Column="2"  Text="{Binding Artist}"
+                                      Options="{Binding ArtistOptions}"/>
+                        
+                        <TextBlock Grid.Row="3" Grid.Column="0" >Year</TextBlock>
+                        <TextBox  Grid.Row="3" Grid.Column="2"  Text="{Binding Year}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0">Added</TextBlock>
+                        <TextBox  Grid.Row="4" Grid.Column="2"  Text="{Binding Added}"/>
+                        <Button Grid.Row="4" Grid.Column="3" Content="Compute from tracks" 
+                                Command="{Binding ComputeAddedCommand}"/>
+                        
+                        <TextBlock Grid.Row="5" Grid.Column="0">Created</TextBlock>
+                        <TextBox  Grid.Row="5" Grid.Column="2"  Text="{Binding Created}"/>
+                        <Button Grid.Row="5" Grid.Column="3" Content="Compute from tracks" 
+                                Command="{Binding ComputeCreatedCommand}"/>
+                        
+                        <TextBlock Grid.Row="6" Grid.Column="0">Modified</TextBlock>
+                        <TextBox  Grid.Row="6" Grid.Column="2"  Text="{Binding Modified}"/>
+                        <Button Grid.Row="6" Grid.Column="3" Content="Compute from tracks" 
+                                Command="{Binding ComputeModifiedCommand}"/>
+                        
+                        <TextBlock Grid.Row="7" Grid.Column="0">Played</TextBlock>
+                        <TextBox  Grid.Row="7" Grid.Column="2"  Text="{Binding Played}"/>
+                        
+                        <Button Grid.Row="9" Grid.Column="0" Content="Update"
+                                IsVisible="{Binding SelectedAlbum, Converter={StaticResource NullToBoolean}}"
+                                Command="{Binding UpdatePressedCommand}"/>
+                    </Grid>
+                </Grid>
+                <TextBlock Grid.Row="2">Album Discs</TextBlock>
+                <ScrollViewer Grid.Row="3">
+                    <ItemsRepeater ItemsSource="{Binding SelectedDiscs}">
+                        <ItemsRepeater.Layout>
+                            <StackLayout />
+                        </ItemsRepeater.Layout>
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate>
+                                <Border Height = "120">
+                                    <Grid ColumnDefinitions="250,32,*">
+                                        <Grid Grid.Column="0" ColumnDefinitions="Auto, 8, Auto">
+                                            <Image Grid.Column="0" Height="120" Width="120" Source="{Binding Thumbnail}"/>
+                                            <Button Grid.Column="2" Content="Pick Artwork"
+                                                    Command="{Binding PickArtworkCommand}"/>
+                                        </Grid>
+                                        <Grid Grid.Column="2" ColumnDefinitions="Auto, 32, 600" RowDefinitions="Auto,Auto,Auto">
+                                            <TextBlock Grid.Row="0" Grid.Column="0">Number</TextBlock>
+                                            <TextBlock  Grid.Row="0" Grid.Column="2" Text="{Binding Disc.Number}"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="0">Title</TextBlock>
+                                            <TextBox  Grid.Row="1" Grid.Column="2" Text="{Binding Disc.Name}"/>
+                                            <Button Grid.Row="2" Grid.Column="0" Content="Update" Command="{Binding UpdateCommand}"/>
+                                        </Grid>    
+                                    </Grid>
+                                    
+                                </Border>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+        <ScrollViewer Grid.Row="1">
+            
+        </ScrollViewer>
+    </Grid>
+</UserControl>

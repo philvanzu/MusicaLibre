@@ -1,0 +1,184 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:controls="clr-namespace:MusicaLibre.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Views.PlaylistsListView"
+             x:DataType="vm:PlaylistsListViewModel">
+     <ScrollViewer x:Name="Scroller" ScrollChanged="OnScrollChanged">
+            <controls:VirtualizedItemsRepeater
+                ItemsSource="{Binding Items}"
+                SelectedItem="{Binding SelectedItem}"
+                ElementWidth="160" ElementHeight="200" > 
+                <controls:VirtualizedItemsRepeater.Layout>
+                    <UniformGridLayout Orientation="Horizontal" MaximumRowsOrColumns="0"/>
+                </controls:VirtualizedItemsRepeater.Layout>
+                <controls:VirtualizedItemsRepeater.ItemTemplate>
+                    <DataTemplate>
+                        <Border 
+                                Width="152" Height="192" Margin="8"
+                                CornerRadius="5"
+                                Tag="{Binding IsSelected}"
+                                Tapped="PlaylistItemTapped"
+                                DoubleTapped="PlaylistItemDoubleTapped"
+                                >
+                            <Border.Styles>
+                                <!-- default style -->
+                                <Style Selector="Border[Tag=False]">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="White"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                </Style>
+                                <!-- selected style -->
+                                <Style Selector="Border[Tag=True]">
+                                    <Setter Property="Background" Value="#5050FF33" />
+                                    <Setter Property="BorderBrush" Value="DodgerBlue"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                </Style>
+                            </Border.Styles>
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"/>
+                                    <MenuItem Header="Edit" Command="{Binding EditCommand}" />
+                                </ContextMenu>
+                            </Border.ContextMenu>
+
+                            <Grid RowDefinitions="144, 24, 24"  >
+                                
+                                <Border Grid.Row="0" BorderThickness="1" CornerRadius="5" Width="144" Height="144"
+                                        Background="Transparent">
+
+                                    <Grid>
+                                        <Image x:Name="ThumbnailImage" 
+                                               Source="{Binding Thumbnail}" 
+                                               Stretch="Uniform"/>
+                                        <Canvas x:Name="PlayButtons" Width="144" Height="144">
+                                            <!--Play-->
+                                            <Button  
+                                                ToolTip.Tip="Play"
+                                                Width="40" Height="40"
+                                                BorderThickness="0" CornerRadius="20"
+                                                Background="Black" Foreground="White"
+                                                Tapped="PlayButton_Click"
+                                                Canvas.Bottom="4" Canvas.Left="4">
+                                                <Border Width="38" Height="38"
+                                                        BorderThickness="1" CornerRadius="19"
+                                                        >
+                                                    <Border.Styles>
+                                                        <Style Selector="Border">
+                                                           <Setter Property="BorderBrush" Value="Transparent"/>
+                                                           <Setter Property="Background" Value="#303030"/>
+                                                        </Style>
+                                                        <Style Selector="Border:pointerover">
+                                                            <Setter Property="BorderBrush" Value="Red"/>
+                                                            <Setter Property="Background" Value="#505050"/>
+                                                        </Style>
+                                                    </Border.Styles>
+                                                    <Path Fill="White"
+                                                          Stroke="Black"
+                                                          StrokeThickness="2"
+                                                          Data="M 12,8 L 20,12 L 12,16 Z"
+                                                          Stretch="Uniform"
+                                                          Width="20" Height="20"/>
+                                                </Border>
+                                            </Button>
+                                            <!-- Insert -->
+                                            <Button  
+                                                ToolTip.Tip="Insert Next"
+                                                Width="40" Height="40"
+                                                BorderThickness="0" CornerRadius="20"
+                                                Background="Black" Foreground="White"
+                                                Tapped="InsertButton_Click"
+                                                Canvas.Bottom="4" Canvas.Left="48">
+                                                <Border Width="38" Height="38"
+                                                        BorderThickness="1" CornerRadius="19"
+                                                        >
+                                                    <Border.Styles>
+                                                        <Style Selector="Border">
+                                                           <Setter Property="BorderBrush" Value="Transparent"/>
+                                                           <Setter Property="Background" Value="#303030"/>
+                                                        </Style>
+                                                        <Style Selector="Border:pointerover">
+                                                            <Setter Property="BorderBrush" Value="Red"/>
+                                                            <Setter Property="Background" Value="#505050"/>
+                                                        </Style>
+                                                    </Border.Styles>
+                                                    <Path Fill="White"
+                                                          Stroke="White"
+                                                          StrokeThickness="2"
+                                                          Data="M14.5,10.5556 H10.5 M12.5,12.5 V8.50001 M18.5,5.5 H6.5 M18.5,19.5 H6.5 V15.5 H18.5 Z" 
+                                                          Stretch="Uniform"
+                                                          Width="20" Height="20"/>
+                                                </Border>
+                                            </Button>
+                                            <!-- Append -->
+                                            <Button  
+                                                ToolTip.Tip="Append"
+                                                Width="40" Height="40"
+                                                BorderThickness="0" CornerRadius="20"
+                                                Background="Black" Foreground="White"
+                                                Tapped="AppendButton_Click"
+                                                Canvas.Bottom="4" Canvas.Left="92">
+                                                <Border Width="38" Height="38"
+                                                        BorderThickness="1" CornerRadius="19"
+                                                        >
+                                                    <Border.Styles>
+                                                        <Style Selector="Border">
+                                                           <Setter Property="BorderBrush" Value="Transparent"/>
+                                                           <Setter Property="Background" Value="#303030"/>
+                                                        </Style>
+                                                        <Style Selector="Border:pointerover">
+                                                            <Setter Property="BorderBrush" Value="Red"/>
+                                                            <Setter Property="Background" Value="#505050"/>
+                                                        </Style>
+                                                    </Border.Styles>
+                                                    <Path Fill="White"
+                                                          Stroke="White"
+                                                          StrokeThickness="2"
+                                                          Data="M10.5,14.5 H14.5 M12.5,12.5 V16.5 M6.5,19.5 H18.5 M6.5,5.5 H18.5 V9.5 H6.5 Z"
+                                                          Stretch="Uniform"
+                                                          Width="20" Height="20"/>
+                                                </Border>
+                                            </Button>
+                                        </Canvas>
+                                    </Grid>
+                                    <Border.Styles>
+                                        <Style Selector="Canvas#PlayButtons">
+                                            <Setter Property="Opacity" Value="0"/>  
+                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                        </Style>
+                                        <Style Selector="Border:pointerover Canvas#PlayButtons">
+                                            <Setter Property="Opacity" Value="1"/>
+                                            <Setter Property="IsHitTestVisible" Value="true"/>
+                                        </Style>
+                                    </Border.Styles>
+                                </Border>
+                                
+                                <Border Grid.Row="1" Height="24">
+                                    <TextBlock Text="{Binding FileName}" 
+                                               ToolTip.Tip="{Binding FilePath}"
+                                               FontWeight="Bold"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="NoWrap"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>    
+                                </Border>
+                                <Border  Grid.Row="2" Height="24">
+                                    <TextBlock Text="{Binding Count}"
+                                               FontSize="14"  Foreground="LightGray"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="NoWrap"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>                    
+                        </Border>
+                    </DataTemplate>
+            
+                </controls:VirtualizedItemsRepeater.ItemTemplate>
+        
+            </controls:VirtualizedItemsRepeater>    
+        </ScrollViewer>
+</UserControl>

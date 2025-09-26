@@ -1,0 +1,84 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+        xmlns:conv="clr-namespace:MusicaLibre.Converters"
+        x:Class="MusicaLibre.Views.AlbumUpdatedDialog"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:DataType="vm:AlbumUpdatedDialogViewModel"
+        Title="{Binding Title}"
+        Width="800"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#505050">
+    <Window.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:NullToInverseBooleanConverter x:Key="InverseNullToBoolean"/>
+    </Window.Resources>
+    <Border x:Name="DlgBorder" BorderBrush="White" BorderThickness="1">
+        <StackPanel Margin="16" Spacing="12">
+            <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontSize="14"/>
+            <RadioButton GroupName="group" IsChecked="{Binding RenameButtonChecked}"
+                         IsVisible="{Binding Renames, Converter={StaticResource NullToBoolean}}">
+                <StackPanel>
+                    <TextBlock Text="Rename current album" Margin="16"/>
+                    <ListBox ItemsSource="{Binding Renames}"
+                        SelectedIndex="{Binding SelectedRenameIndex}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </RadioButton>
+            <RadioButton GroupName="group" IsChecked="{Binding SelectButtonChecked}"
+                         IsVisible="{Binding Existings, Converter={StaticResource NullToBoolean}}">
+                <StackPanel>
+                     <TextBlock Text="Select existing album with the same Title" Margin="16"/>
+                     <ListBox ItemsSource="{Binding Existings}"
+                             SelectedIndex="{Binding SelectedExistingIndex}">
+                         <ListBox.ItemTemplate>
+                             <DataTemplate>
+                                 <TextBlock Text="{Binding}"/>
+                             </DataTemplate>
+                         </ListBox.ItemTemplate>
+                     </ListBox>
+                </StackPanel>
+            </RadioButton>
+            <RadioButton GroupName="group" IsChecked="{Binding CreateButtonChecked}">
+                <StackPanel>
+                    <TextBlock Text="Create new Album" Margin="16"/>
+                    <Grid ColumnDefinitions="60, 32, *"
+                          RowDefinitions="Auto, Auto, Auto, Auto">
+                        <TextBlock Grid.Row="0">Title</TextBlock>
+                        <TextBox Grid.Row="0" Grid.Column="2" 
+                                 Text="{Binding NewAlbumTitle}"/>
+                        <TextBlock Grid.Row="1">Artist</TextBlock>
+                        <TextBox Grid.Row="1" Grid.Column="2" 
+                                 Text = '{Binding NewAlbumArtist}'/>
+                        <TextBlock Grid.Row="2">Year</TextBlock>
+                        <TextBox Grid.Row="2" Grid.Column="2" 
+                                 Text="{Binding NewAlbumYear}"/>
+                        <TextBlock Grid.Row="3">Folder</TextBlock>
+                        <TextBox Grid.Row="3" Grid.Column="2" 
+                                 Text="{Binding NewAlbumFolder}"/>
+                    </Grid>
+                </StackPanel>
+            </RadioButton>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button x:Name="OkButton" Width="80" 
+                    Content="{Binding OkText}" 
+                    Command="{Binding OkPressedCommand}" 
+                    IsVisible="{Binding ShowOkButton}" />
+
+                <Button x:Name="CancelButton" Width="80" 
+                        Content="{Binding CancelText}" 
+                        Command="{Binding CancelPressedCommand}" 
+                        IsVisible="{Binding ShowCancelButton}" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
