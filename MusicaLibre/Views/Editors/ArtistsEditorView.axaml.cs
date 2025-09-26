@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace MusicaLibre.Views;
 
-public partial class ProgressView : UserControl
+public partial class ArtistsEditorView : UserControl
 {
-    public ProgressView()
+    public ArtistsEditorView()
     {
         InitializeComponent();
     }

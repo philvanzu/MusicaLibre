@@ -41,4 +41,11 @@
     <ItemGroup>
       <Folder Include="Styles\" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\Editors\ArtistsEditorView.axaml.cs">
+        <DependentUpon>ArtistsEditorView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
 </Project>

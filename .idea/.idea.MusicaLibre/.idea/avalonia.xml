@@ -13,11 +13,13 @@
         <entry key="MusicaLibre/Views/AlbumsListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/AlbumsPresenterView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/AlbumsView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/ArtistsEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ArtistsView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ArtworkEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ArtworkListManagerView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ArtworkPickerDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ArtworkPickerWindow.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/Editors/GenresEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/GenresEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/LibraryView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/ListPickDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
