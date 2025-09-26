@@ -1088,12 +1088,7 @@ public partial class LibraryViewModel
       _ = genre.DbUpdateAsync(Database);
    }
 
-   public void AddDisc(uint number, Album album)
-   {
-      var disc = new Disc(number, album);
-      Data.Discs.Add((number, album.DatabaseIndex), disc);
-      _ = disc.DbInsertAsync(Database);
-   }
+
 
    public bool IsAlbumEmpty(Album album)
    {
@@ -1106,17 +1101,8 @@ public partial class LibraryViewModel
          _ = disc.DbDeleteAsync(Database);  
       _ = album.DbDeleteAsync(Database);
    }
-   public void RemoveDisc(Disc disc)
-   {
-      _ = disc.DbDeleteAsync(Database);
-      Data.Discs.Remove((disc.Number, disc.AlbumId));
-   }
 
-   public void AddFolder(Folder folder)
-   {
-      _ = folder.DbInsertAsync(Database);
-      Data.Folders.Add(folder.DatabaseIndex, folder);
-   }
+
 
    [RelayCommand]
    public void FixUnknownArtistAlbums()

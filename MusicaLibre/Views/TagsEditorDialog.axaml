@@ -206,13 +206,26 @@
                                                    Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Year-->
                                            <TextBlock Grid.Row="6" Grid.Column="0" >Year</TextBlock>
-                                           <TextBox  Grid.Row="6" Grid.Column="2" Text="{Binding YearBinding}"/>
-                                           <Button Grid.Row="6" Grid.Column="4"
-                                                   Command ="{Binding YearUpdatedCommand}"
-                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <Grid   Grid.Row="6" Grid.Column="2"  ColumnDefinitions="150, 32, Auto, 64, *">
+                                               <TextBox Grid.Column="0" Text="{Binding YearBinding}" />
+                                               <Button Grid.Column="2"
+                                                       Command ="{Binding YearUpdatedCommand}"
+                                                       Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                               <StackPanel  Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                                                   <TextBlock VerticalAlignment="Center">Album Year :</TextBlock>
+                                                   <TextBlock Text="{Binding CoalescedAlbumYear}" VerticalAlignment="Center"/>
+                                                   <Border Width="32"></Border>
+                                                   <Button Grid.Column="6" Content="Update Album Year" Command="{Binding UpdateAlbumYearCommand}"/>    
+                                               </StackPanel>
+                                           </Grid>
+                                           
                                            <!--Artists-->
                                            <TextBlock Grid.Row="7" Grid.Column="0" >Artists</TextBlock>
-                                           <TextBox  Grid.Row="7" Grid.Column="2" Text="{Binding ArtistsBinding}"/>
+                                           <ctrl:TagBox  Grid.Row="7" Grid.Column="2" 
+                                                         Text="{Binding ArtistsBinding}"
+                                                         Options="{Binding ArtistsOptions}"
+                                                         IsMultiValue="True"
+                                                         EnterPressedCommand="{Binding ArtistsUpdatedCommand}"/>
                                            <Button Grid.Row="7" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Genres-->
                                            <TextBlock Grid.Row="8" Grid.Column="0" >Genres</TextBlock>

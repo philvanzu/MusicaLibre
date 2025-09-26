@@ -7,6 +7,7 @@
         <entry key="MusicaLibre/Controls/TagBox.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Styles/Buttons.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Themes/Generic.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/ViewModels/ArtistsEditorViewModel.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/AlbumCreationDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/AlbumsEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/AlbumsListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />

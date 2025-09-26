@@ -92,7 +92,7 @@ public partial class TagBox : UserControl
         }
         else _currentValue = PART_Textbox.Text?.Trim();
 
-        //PART_Popup.IsOpen = PART_Textbox.IsFocused && Options?.Count() > 0;
+        PART_Popup.IsOpen = PART_Textbox.IsFocused && Options?.Count() > 0;
     }
 
     private void ListBoxKeyDown(object? sender, KeyEventArgs e)

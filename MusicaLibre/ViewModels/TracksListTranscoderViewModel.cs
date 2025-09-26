@@ -87,12 +87,10 @@ public partial class TracksListTranscoderViewModel:TracksListViewModel
         foreach (var vm in SelectedItems)
         {
             var track = vm.Model;
+
             var filename = $"{Path.GetFileNameWithoutExtension(track.FilePath)}";
             if (track.Start != 0 || track.End != 1)
-            {
                 filename = $"{track.DiscNumber}_{track.TrackNumber}_{track.Title}";
-            }
-
             filename = $"{Prefix}{filename}{Suffix}{outputExtension}";
             
             var directory = Path.GetDirectoryName(track.FilePath);
