@@ -45,7 +45,11 @@ public class Folder:NameTag
         =>ProcessReaderQuery<Folder>(db.ExecuteReader(selectSql));
     public static async Task<Dictionary<long, Folder>> FromDatabaseAsync(Database db)
         =>ProcessReaderQuery<Folder>(await db.ExecuteReaderAsync(selectSql));
-    
+
+    public override async Task DbUpdateAsync(Database db)
+    {
+        await db.ExecuteNonQueryAsync(updateSql, Parameters);
+    }
     
     static Dictionary<long, Folder> ProcessReaderQuery(List<Dictionary<string, object?>> result)
     {

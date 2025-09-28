@@ -2,7 +2,111 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:conv="clr-namespace:MusicaLibre.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="MusicaLibre.Views.ArtistsEditorView">
-    Welcome to Avalonia!
+             x:Class="MusicaLibre.Views.ArtistsEditorView"
+             x:DataType="vm:ArtistsEditorViewModel">
+    <UserControl.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:InverseBooleanConverter x:Key="InverseBoolean"/>
+        <conv:NullToInverseBooleanConverter x:Key="NullToInverseBoolean"/>
+        <conv:RadioConverter x:Key="RadioConverter"/>
+    </UserControl.Resources>
+    <Border  Grid.Column="0"
+             BorderBrush="White" BorderThickness="1">
+        <Grid ColumnDefinitions=" 300, 32, *">
+
+           <Grid Grid.Column="0" RowDefinitions="Auto, *">
+               <Grid ColumnDefinitions="Auto, 32, *">
+                   <TextBlock>Filter:</TextBlock>
+                   <TextBox Grid.Column="2" Text="{Binding PoolFilter}"/>
+               </Grid>
+               <ListBox Grid.Row="1" ItemsSource="{Binding Artists}"
+                        SelectedIndex="{Binding SelectedArtistIndex, Mode=TwoWay}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>                                       
+           </Grid>
+
+           <Border Grid.Column="2">
+               <Grid RowDefinitions="Auto, Auto, *, Auto">
+                   <Grid ColumnDefinitions="Auto, Auto">
+                       <StackPanel>
+                           <Image Width="128" Height="128"
+                               Source="{Binding Thumbnail}"/>
+                           <Button Content="Pick Artwork"
+                                   IsVisible="{Binding SelectedArtist, Converter={StaticResource NullToBoolean}}"
+                                   Command = "{Binding PickArtworkCommand}" />
+                       </StackPanel>
+                       <StackPanel Grid.Column="1" >
+                           <StackPanel Orientation="Horizontal">
+                               <TextBlock Margin="16">Name</TextBlock>
+                               <TextBox Text="{Binding Text, Mode=TwoWay}"
+                                        Width="400" Margin="16"/>    
+                           </StackPanel>
+                           <StackPanel Orientation="Horizontal">
+                               <Button Content="Rename"
+                                       IsVisible="{Binding SelectedArtist, Converter={StaticResource NullToBoolean}}"
+                                       Command="{Binding RenameCommand}"
+                                       Margin="16"/>
+                               <Button Content="Delete"
+                                       IsVisible="{Binding SelectedArtist, Converter={StaticResource NullToBoolean}}"
+                                       Command="{Binding DeleteCommand}"
+                                       Margin="16"/>
+                           </StackPanel>
+                           
+                           
+                       </StackPanel>
+                   </Grid>
+                   
+                   <StackPanel Grid.Row="1" Orientation="Horizontal"
+                               IsVisible="{Binding SelectedArtist, Converter={StaticResource NullToBoolean}}">
+                       <TextBlock VerticalAlignment="Center">Show selected Artist's</TextBlock> 
+                       <RadioButton GroupName="selectedlists" Content="{Binding TracksRadioContent}"
+                                    IsChecked="{Binding SelectedRadioIdx,
+                                    Converter={StaticResource RadioConverter}, ConverterParameter=0}"
+                                    Margin="16 0"/>
+                       <RadioButton GroupName="selectedlists" Content="{Binding ComposersRadioContent}"
+                                    IsChecked="{Binding SelectedRadioIdx, 
+                                    Converter={StaticResource RadioConverter}, ConverterParameter=1}"
+                                    Margin="16 0"/>
+                       <RadioButton GroupName="selectedlists" Content="{Binding RemixersRadioContent}"
+                                    IsChecked="{Binding SelectedRadioIdx, 
+                                    Converter={StaticResource RadioConverter}, ConverterParameter=2}"
+                                    Margin="16 0"/>
+                       <RadioButton GroupName="selectedlists" Content="{Binding ConductorsRadioContent}"
+                                    IsChecked="{Binding SelectedRadioIdx, 
+                                    Converter={StaticResource RadioConverter}, ConverterParameter=3}"
+                                    Margin="16 0"/>
+                       <RadioButton GroupName="selectedlists" Content="{Binding AlbumsRadioContent}"
+                                    IsChecked="{Binding SelectedRadioIdx, 
+                                    Converter={StaticResource RadioConverter}, ConverterParameter=4}"
+                                    Margin="16 0"/>
+                       
+                   </StackPanel>
+                   <ScrollViewer Grid.Row="2">
+                       <ItemsRepeater ItemsSource="{Binding SelectedList}">
+                           <ItemsRepeater.Layout>
+                               <StackLayout/>
+                           </ItemsRepeater.Layout>
+                           <ItemsRepeater.ItemTemplate>
+                               <DataTemplate>
+                                   <TextBlock Text="{Binding .}"/>
+                               </DataTemplate>
+                           </ItemsRepeater.ItemTemplate>
+                       </ItemsRepeater>    
+                   </ScrollViewer>
+                   <StackPanel Grid.Row="3">
+                       <TextBlock >Renaming a genre to an existing genre will assign that genre to all the songs using it, then delete the renamed genre.</TextBlock>
+                       <TextBlock>You can even RenameTo  / Add multiple genres, separating them by a coma</TextBlock>
+                   </StackPanel>
+                   
+               </Grid>
+           </Border>
+        </Grid>
+        </Border>
 </UserControl>

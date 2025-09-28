@@ -45,7 +45,8 @@
                                 <ContextMenu>
                                     <MenuItem Header="Edit Tags" Command="{Binding EditTagsCommand}"/>
                                     <MenuItem Header="Transcode" Command="{Binding TranscodeCommand}"/>
-                                    <MenuItem Header="Pick Artwork" />
+                                    <MenuItem Header="Pick Artwork" Command="{Binding PickArtworkCommand}"
+                                              IsVisible="{Binding CanPickArtwork}"/>
                                 </ContextMenu>
                             </Border.ContextMenu>
 

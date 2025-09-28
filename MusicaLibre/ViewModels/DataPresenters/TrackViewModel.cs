@@ -195,5 +195,23 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     [RelayCommand] void ShowInfo() => CommentsToggle = false;
     [RelayCommand] void ShowComments()=> CommentsToggle = true;
 
+    [RelayCommand] void RemoveSelection()
+    {
+        if (Presenter is NowPlayingListViewModel vm)
+            vm.RemoveSelectionCommand.Execute(null);
+    }
+
+    [RelayCommand] void MoveSelectionUp()
+    {
+        if (Presenter is NowPlayingListViewModel vm)
+            vm.MoveSelectionUpCommand.Execute(null);
+    }
+
+    [RelayCommand] void MoveSelectionDown()
+    {
+        if (Presenter is NowPlayingListViewModel vm)
+            vm.MoveSelectionDownCommand.Execute(null);
+    }
+
 
 }

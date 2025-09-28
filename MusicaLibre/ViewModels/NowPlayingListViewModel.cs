@@ -19,6 +19,7 @@ public partial class NowPlayingListViewModel:TracksListViewModel
     [ObservableProperty] private string? _durationInfo;
     [ObservableProperty] private int _repeatStateIdx;
     [ObservableProperty] private int _shuffleStateIdx;
+    
     private bool _shuffled;
 
     private TimeSpan _totalDuration = TimeSpan.Zero;
@@ -153,6 +154,60 @@ public partial class NowPlayingListViewModel:TracksListViewModel
     }
 
     [RelayCommand] void SavePlaylist(){}
-    
+    [RelayCommand]
+    void RemoveSelection()
+    {
+        foreach (var item in SelectedItems)
+            _items.Remove(item);
+        Update();
+    }
 
+    [RelayCommand]
+    void MoveSelectionUp()
+    {
+        var firstIndex = _items.IndexOf(SelectedItems.First());
+        var lastIndex = _items.IndexOf(SelectedItems.Last());
+        if (firstIndex <= 0)
+            return; // already at top, nothing to do
+
+        // Grab the item just before the block
+        var itemAbove = _items[firstIndex - 1];
+
+        // Remove the block
+        var block = _items.Skip(firstIndex).Take(lastIndex - firstIndex + 1).ToList();
+        for (int i = 0; i < block.Count; i++)
+            _items.RemoveAt(firstIndex);
+
+        // Reinsert before the "itemAbove"
+        int insertIndex = firstIndex - 1;
+        foreach (var track in block)
+            _items.Insert(insertIndex++, track);
+        
+        Update();
+    }
+
+    [RelayCommand]
+    void MoveSelectionDown()
+    {
+        var firstIndex = _items.IndexOf(SelectedItems.First());
+        var lastIndex = _items.IndexOf(SelectedItems.Last());
+        if (lastIndex >= _items.Count - 1)
+            return; // already at bottom, nothing to do
+
+        // Grab the item just after the block
+        var itemBelow = _items[lastIndex + 1];
+
+        // Remove the block
+        var block = _items.Skip(firstIndex).Take(lastIndex - firstIndex + 1).ToList();
+        for (int i = 0; i < block.Count; i++)
+            _items.RemoveAt(firstIndex);
+
+        // Reinsert after the "itemBelow"
+        int insertIndex = firstIndex + 1;
+        foreach (var track in block)
+            _items.Insert(insertIndex++, track);
+        
+        Update();
+    }
+    
 }

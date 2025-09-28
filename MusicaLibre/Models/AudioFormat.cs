@@ -46,6 +46,11 @@ public class AudioFormat:NameTag
         DatabaseIndex =  Convert.ToInt64(id);
     }
 
+    public override async Task DbUpdateAsync(Database db)
+    {
+        await db.ExecuteNonQueryAsync(updateSql, Parameters);
+    }
+
     public static Dictionary<long, AudioFormat> FromDatabase(Database db)
         => ProcessReaderQuery<AudioFormat>(db.ExecuteReader(selectSql));
     public static async Task<Dictionary<long, AudioFormat>> FromDatabaseAsync(Database db)

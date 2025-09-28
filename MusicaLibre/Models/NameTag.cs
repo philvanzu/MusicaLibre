@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MusicaLibre.Services;
 
 namespace MusicaLibre.Models;
@@ -35,6 +36,7 @@ public abstract class NameTag // artist, genre, publisher...
         return items;
     }
 
+    public abstract Task DbUpdateAsync(Database libraryDatabase);
 }
 
 

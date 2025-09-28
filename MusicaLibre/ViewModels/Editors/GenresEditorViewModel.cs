@@ -13,6 +13,7 @@ public partial class GenresEditorViewModel:ViewModelBase, IDisposable
 {
     LibraryViewModel _library;
     [ObservableProperty] ObservableCollection<Genre> _genres;
+    [ObservableProperty] private string _poolFilter;
     [ObservableProperty] int _selectedGenreIndex;
     [ObservableProperty] Genre? _selectedGenre;
     [ObservableProperty] ObservableCollection<Track>? _selectedTracks;
@@ -26,7 +27,12 @@ public partial class GenresEditorViewModel:ViewModelBase, IDisposable
         _genres = new(library.Data.Genres.Values);
     }
 
-    
+    partial void OnPoolFilterChanged(string value)
+    {
+        var filtered = _library.Data.Genres.Values.Where(g => g.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        Genres = new ObservableCollection<Genre>(filtered);
+    }
+
     partial void OnSelectedGenreIndexChanged(int value)
     {
         if(_oldGenre != null)

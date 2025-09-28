@@ -20,6 +20,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
     public TagsEditorDialog Window { get; set; }
     [ObservableProperty] private GenresEditorViewModel _genresEditor;
     [ObservableProperty] private AlbumsEditorViewModel _albumsEditor;
+    [ObservableProperty] private ArtistsEditorViewModel _artistsEditor;
     
     [ObservableProperty] private TrackArtworkManagerViewModel _selectedTrackArtwork;
     
@@ -60,14 +61,17 @@ public partial class TagsEditorViewModel:TracksListViewModel
         InputManager.IsDragSelecting = false;
         
         GenresEditor = new GenresEditorViewModel(Library);
+        ArtistsEditor = new ArtistsEditorViewModel(Library, Window);
         if(PoolAlbums.Any())
-            AlbumsEditor = new AlbumsEditorViewModel(this, PoolAlbums);
+            AlbumsEditor = new AlbumsEditorViewModel(this);
+        
     }
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
         try
         {
             GenresEditor.Dispose();
+            ArtistsEditor.Dispose();
             AlbumsEditor.Dispose();    
         }
         catch (Exception ex) {Console.WriteLine(ex);}

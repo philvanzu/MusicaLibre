@@ -274,7 +274,9 @@
         <TabItem Header="Albums">
             <v:AlbumsEditorView DataContext="{Binding AlbumsEditor}"/>
         </TabItem>
-        <TabItem Header="Artists"></TabItem>
+        <TabItem Header="Artists">
+            <v:ArtistsEditorView DataContext="{Binding ArtistsEditor}"/>
+        </TabItem>
         <TabItem Header="Genres">
            <v:GenresEditorView DataContext="{Binding GenresEditor}"/> 
         </TabItem>

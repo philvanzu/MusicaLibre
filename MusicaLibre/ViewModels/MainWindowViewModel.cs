@@ -60,7 +60,12 @@ public partial class MainWindowViewModel : ViewModelBase
         await  Dispatcher.UIThread.InvokeAsync(async () =>
         {
             string? selectedPath;
-            selectedPath = await DialogUtils.PickDirectoryAsync(MainWindow);
+            var settings = new LibrarySettingsViewModel();
+            var dlg = new LibrarySettingsEditorDialog();
+            settings.Window = dlg;
+            dlg.DataContext = settings;
+            
+            selectedPath = await dlg.ShowDialog<string>(MainWindow);
 
             if (!string.IsNullOrEmpty(selectedPath) && Directory.Exists(selectedPath))
             {
@@ -71,7 +76,7 @@ public partial class MainWindowViewModel : ViewModelBase
                     selectedPath += System.IO.Path.DirectorySeparatorChar;
 
                     DirectoryInfo info = new DirectoryInfo(selectedPath);
-                    var library = LibraryViewModel.Create(info, this);
+                    var library = LibraryViewModel.Create(info, this, settings);
                     if (library == null) return;
                     Dispatcher.UIThread.Post(() => _ = _progressDialog.Show(), DispatcherPriority.Render);
 

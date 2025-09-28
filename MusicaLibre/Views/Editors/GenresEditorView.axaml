@@ -13,21 +13,26 @@
         <conv:InverseBooleanConverter x:Key="InverseBoolean"/>
         <conv:NullToInverseBooleanConverter x:Key="NullToInverseBoolean"/>
     </UserControl.Resources>
-    <Border  Grid.Column="0"
-             BorderBrush="White" BorderThickness="1">
+    <Border  BorderBrush="White" BorderThickness="1">
         <Grid ColumnDefinitions=" 300, 32, *">
-
-           <Border Grid.Column="0">
-                <ListBox ItemsSource="{Binding Genres}"
-                         SelectedIndex="{Binding SelectedGenreIndex, Mode=TwoWay}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>                                       
+            <Border Grid.Column="0">
+                <Grid RowDefinitions="32,*">
+                    <Grid ColumnDefinitions="Auto, 32, *">
+                        <TextBlock>Filter:</TextBlock>
+                        <TextBox Grid.Column="2" Text="{Binding PoolFilter}"/>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <ListBox ItemsSource="{Binding Genres}"
+                                 SelectedIndex="{Binding SelectedGenreIndex, Mode=TwoWay}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>     
+                    </Grid>
+                </Grid>   
            </Border>
-
            <Border Grid.Column="2">
                <Grid RowDefinitions="Auto, Auto, *, Auto">
                    <Grid ColumnDefinitions="Auto, Auto">

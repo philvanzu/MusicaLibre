@@ -100,7 +100,7 @@ public class Database
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex);
+                            Console.WriteLine($"{ex} || query: {work.Sql} || params: {work.Params}");
                             work.Tcs.TrySetException(ex);
                         }
                     }
@@ -118,7 +118,7 @@ public class Database
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex);
+                            Console.WriteLine($"{ex} || query: {workS.Sql} || params: {workS.Params}");
                             workS.Tcs.TrySetException(ex);
                         }
                     }
@@ -136,7 +136,7 @@ public class Database
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex);
+                            Console.WriteLine($"{ex} || query: {workR.Sql} || params: {workR.Params}");
                             workR.Tcs.TrySetException(ex);
                         }
                     }    
@@ -546,7 +546,7 @@ CREATE TABLE IF NOT EXISTS Discs (
     Name TEXT,
     ArtworkId INTEGER,
     FOREIGN KEY (AlbumId) REFERENCES Albums(Id) ON DELETE CASCADE,
-    FOREIGN KEY (ArtworkId) REFERENCES Artworks(Id) ON DELETE CASCADE
+    FOREIGN KEY (ArtworkId) REFERENCES Artworks(Id) ON DELETE SET NULL
 );
 
 -- =========================

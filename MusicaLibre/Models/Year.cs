@@ -42,7 +42,7 @@ public class Year:NameTag
         DatabaseIndex =  Convert.ToInt64(id);
         callback?.Invoke(Convert.ToInt64(id));
     }
-    public async Task DbUpdateAsync(Database db)=> await db.ExecuteNonQueryAsync(updateSql, Parameters );
+    public override async Task DbUpdateAsync(Database db)=> await db.ExecuteNonQueryAsync(updateSql, Parameters );
     public async Task DbDeleteAsync(Database db)=> await db.ExecuteNonQueryAsync(deleteSql, Parameters );
     
     public static Dictionary<long, Year> FromDatabase(Database db)

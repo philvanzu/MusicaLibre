@@ -16,7 +16,7 @@ public class Genre:NameTag
     
     const string updateSql =  @"
         UPDATE Genres SET 
-            Name = $name 
+            Name = $name,
             ArtworkId = $artworkId
         WHERE Id = $id;";
 
@@ -48,7 +48,8 @@ public class Genre:NameTag
     }
 
     public void DbUpdate(Database db)=> db.ExecuteNonQuery(updateSql, Parameters);
-    public async Task DbUpdateAsync(Database db)=>await db.ExecuteNonQueryAsync(updateSql, Parameters);
+    public override async Task DbUpdateAsync(Database db)=>
+        await db.ExecuteNonQueryAsync(updateSql, Parameters);
     public void DbRemove(Database db)=>db.ExecuteNonQuery(deleteSql, Parameters);
     public async Task DbRemoveAsync(Database db)=>await db.ExecuteNonQueryAsync(deleteSql, Parameters);
     

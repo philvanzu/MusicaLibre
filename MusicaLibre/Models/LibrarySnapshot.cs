@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MusicaLibre.Services;
 
@@ -38,45 +39,7 @@ public class LibrarySnapshot
             Folders = Folder.FromDatabase(db);
             DiscardedFiles = DiscardedFile.DbSelect(db);
 
-            //Resolve all foreign keys
-            foreach (var track in Tracks.Values)
-            {
-                track.Album = Albums[track.AlbumId];
-                
-                if(track.PublisherId != null) 
-                    track.Publisher = Publishers[track.PublisherId.Value];
-                
-                if(track.ConductorId != null) 
-                    track.Conductor = Artists[track.ConductorId.Value];
-                
-                if(track.RemixerId != null) 
-                    track.Remixer = Artists[track.RemixerId.Value];
-                
-                track.AudioFormat = AudioFormats[track.AudioFormatId];
-                track.Year = Years[track.YearId];
-                track.Folder = Folders[track.FolderId];
-            }
-            foreach (var album in Albums.Values)
-            {
-                album.Folder = Folders[album.FolderId];
-                album.AlbumArtist = Artists[album.ArtistId];
-                album.Year = Years[album.YearId];
-                if(album.CoverId != null) 
-                    album.Cover = Artworks[album.CoverId.Value];
-            }
-
-            foreach (var disc in Discs.Values)
-                if(disc.AlbumId > 0) 
-                    disc.Album = Albums[disc.AlbumId];
-
-            foreach (var artwork in Artworks.Values)
-            {
-                artwork.Folder = Folders[artwork.FolderId];
-            }
-            foreach (var playlist in Playlists.Values)
-            {
-                playlist.Folder = Folders[playlist.FolderId];
-            }
+            ResolveForeignKeys();
             
             //Resolve all many to many relationships
             var sql = "Select * from TrackGenres";
@@ -153,45 +116,7 @@ public class LibrarySnapshot
             Folders = await Folder.FromDatabaseAsync(db);
             DiscardedFiles = await DiscardedFile.DbSelectAsync(db);
 
-            //Resolve all foreign keys
-            foreach (var track in Tracks.Values)
-            {
-                track.Album = Albums[track.AlbumId];
-                
-                if(track.PublisherId != null) 
-                    track.Publisher = Publishers[track.PublisherId.Value];
-                
-                if(track.ConductorId != null) 
-                    track.Conductor = Artists[track.ConductorId.Value];
-                
-                if(track.RemixerId != null) 
-                    track.Remixer = Artists[track.RemixerId.Value];
-                
-                track.AudioFormat = AudioFormats[track.AudioFormatId];
-                track.Year = Years[track.YearId];
-                track.Folder = Folders[track.FolderId];
-            }
-            foreach (var album in Albums.Values)
-            {
-                album.Folder = Folders[album.FolderId];
-                album.AlbumArtist = Artists[album.ArtistId];
-                album.Year = Years[album.YearId];
-                if(album.CoverId != null) 
-                    album.Cover = Artworks[album.CoverId.Value];
-            }
-
-            foreach (var disc in Discs.Values)
-                if(disc.AlbumId > 0) 
-                    disc.Album = Albums[disc.AlbumId];
-
-            foreach (var artwork in Artworks.Values)
-            {
-                artwork.Folder = Folders[artwork.FolderId];
-            }
-            foreach (var playlist in Playlists.Values)
-            {
-                playlist.Folder = Folders[playlist.FolderId];
-            }
+            ResolveForeignKeys();
             
             //Resolve all many to many relationships
             var sql = "Select * from TrackGenres";
@@ -237,7 +162,7 @@ public class LibrarySnapshot
                 var position =  Convert.ToInt32(row["Position"]);
                 Playlists[playlistId].Tracks.Add((Tracks[trackId],position));
             }
-
+            
             //foreach (var playlist in Playlists.ToList())
             //    if(playlist.Value.Tracks.Count == 0) Playlists.Remove(playlist.Key);
         }
@@ -245,5 +170,67 @@ public class LibrarySnapshot
         {
             Console.WriteLine(ex);
         }
+    }
+
+    private void ResolveForeignKeys()
+    {
+        //Resolve all foreign keys
+            foreach (var track in Tracks.Values)
+            {
+                track.Album = Albums[track.AlbumId];
+                
+                if(track.PublisherId != null) 
+                    track.Publisher = Publishers[track.PublisherId.Value];
+                
+                if(track.ConductorId != null) 
+                    track.Conductor = Artists[track.ConductorId.Value];
+                
+                if(track.RemixerId != null) 
+                    track.Remixer = Artists[track.RemixerId.Value];
+                
+                track.AudioFormat = AudioFormats[track.AudioFormatId];
+                track.Year = Years[track.YearId];
+                track.Folder = Folders[track.FolderId];
+            }
+            foreach (var album in Albums.Values)
+            {
+                album.Folder = Folders[album.FolderId];
+                album.AlbumArtist = Artists[album.ArtistId];
+                album.Year = Years[album.YearId];
+                if(album.CoverId != null) 
+                    album.Cover = Artworks[album.CoverId.Value];
+            }
+
+            foreach (var disc in Discs.Values)
+            {
+                if(disc.AlbumId > 0) 
+                    disc.Album = Albums[disc.AlbumId];
+                if(disc.ArtworkId.HasValue)
+                    disc.Artwork = Artworks[disc.ArtworkId.Value];
+            }
+
+            foreach (var artwork in Artworks.Values)
+            {
+                artwork.Folder = Folders[artwork.FolderId];
+            }
+            foreach (var playlist in Playlists.Values)
+            {
+                playlist.Folder = Folders[playlist.FolderId];
+                if(playlist.ArtworkId.HasValue)
+                    playlist.Artwork = Artworks[playlist.ArtworkId.Value];
+            }
+            foreach (var genre in Genres.Values)
+                if(genre.ArtworkId.HasValue)
+                    genre.Artwork = Artworks[genre.ArtworkId.Value];
+            foreach(var Artist in Artists.Values)
+                if(Artist.ArtworkId.HasValue)
+                    Artist.Artwork = Artworks[Artist.ArtworkId.Value];
+            foreach(var year in Years.Values)
+                if(year.ArtworkId.HasValue)
+                    year.Artwork = Artworks[year.ArtworkId.Value];
+            foreach(var publisher in Publishers.Values)
+                if(publisher.ArtworkId.HasValue)
+                    publisher.Artwork = Artworks[publisher.ArtworkId.Value];
+            
     }
 }

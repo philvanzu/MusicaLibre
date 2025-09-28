@@ -82,7 +82,16 @@
                         Command="{Binding SavePlaylistCommand}"
                         Width="24" Height="24" Padding="4" Background="Transparent"
                         IconData="M15.563 22.282l-3.563.718.72-3.562 2.843 2.844zm-2.137-3.552l2.845 2.845 7.729-7.73-2.845-2.845-7.729 7.73zm-2.426-9.73h2.996v-5h-2.996v5zm-.636 12h-8.364v-18h3v9h12v-9h.172l2.828 2.829v3.545l2-1.999v-2.375l-4-4h-18v22h9.953l.411-2zm-3.364-18h8v7h-8v-7z"/>
-
+                    <ctrl:IconButton 
+                        Command ="{Binding MoveSelectionUpCommand}"
+                        IsEnabled="{Binding IsContiguousSelection}"
+                        Width="8" Height="24" Padding="4" Background="Transparent"
+                        IconData="M4 2 L0 8 H3 V22 H5 V8 H8 L4 2 Z"/>
+                    <ctrl:IconButton 
+                        Command ="{Binding MoveSelectionDownCommand}"
+                        IsEnabled="{Binding IsContiguousSelection}"
+                        Width="8" Height="24" Padding="4" Background="Transparent"
+                        IconData="M4 22 L0 16 H3 V2 H5 V16 H8 L4 22 Z"/>
             </StackPanel>
         </Grid>
         <ScrollViewer Grid.Row="1">
@@ -98,8 +107,9 @@
                                 Margin="2 4"
                                 Padding=" 0 0 16 0"
                                 HorizontalAlignment="Stretch"
-                                Tag="{Binding IsPlaying}"
+                                Tag="{Binding IsSelected}"
                                 Tapped="TrackItemTapped"
+                                DoubleTapped="TrackItemDoubleTapped"
                                 >
                             <Border.Styles>
                                 <!-- default style -->
@@ -115,6 +125,16 @@
                                     <Setter Property="BorderThickness" Value="1"/>
                                 </Style>
                             </Border.Styles>
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Remove from Now Playing List"
+                                              Command="{Binding RemoveSelectionCommand}"/>
+                                    <MenuItem Header="Move selection up" Command = "{Binding MoveSelectionUpCommand}"
+                                              IsEnabled="{Binding Presenter.IsContiguousSelection}"/>
+                                    <MenuItem Header="Move selection down" Command = "{Binding MoveSelectionDownCommand}"
+                                              IsEnabled="{Binding Presenter.IsContiguousSelection}"/>
+                                </ContextMenu>
+                            </Border.ContextMenu>
                             <Grid ColumnDefinitions="50, *" VerticalAlignment="Center">
                                 <Border BorderBrush="White" BorderThickness="1">
                                     <Image Height="48" Width="48" Source="{Binding Thumbnail}"/>

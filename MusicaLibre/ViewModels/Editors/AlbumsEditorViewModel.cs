@@ -15,6 +15,7 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
 {
     TagsEditorViewModel _tagsEditor;
     [ObservableProperty] LibraryViewModel _library;
+    [ObservableProperty] private string _poolFilter;
     [ObservableProperty] private ObservableCollection<Album> _albums;
     [ObservableProperty] private ObservableCollection<DiscViewModel>? _selectedDiscs;
     [ObservableProperty] private Album? _selectedAlbum;
@@ -31,15 +32,30 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
     [ObservableProperty] private ObservableCollection<Track>? _selectedTracks;
     public Bitmap? Thumbnail=>SelectedAlbum?.Cover?.Thumbnail;
 
-    public AlbumsEditorViewModel(TagsEditorViewModel tagsEditor, List<Album> albums)
+    public AlbumsEditorViewModel(TagsEditorViewModel tagsEditor)
     {
         _tagsEditor = tagsEditor;
-        _albums = new ObservableCollection<Album>(albums);
-        Library = tagsEditor.Library;
+        Library = _tagsEditor.Library;
+        _albums = new ObservableCollection<Album>(Library.Data.Albums.Values);
         SelectedIndex = 0;
-        SelectedAlbum = albums[0];
     }
 
+    partial void OnPoolFilterChanged(string value)
+    {
+        var filtered = Library.Data.Albums.Values
+            .Where(x => (!string.IsNullOrEmpty(x.Title) &&
+                         x.Title.StartsWith(value, StringComparison.InvariantCultureIgnoreCase))
+                        || (x.AlbumArtist is not null && !string.IsNullOrEmpty(x.AlbumArtist.Name) &&
+                            x.AlbumArtist.Name.StartsWith(value, StringComparison.InvariantCultureIgnoreCase))
+                        || (x.Year is not null && !string.IsNullOrEmpty(x.Year.Name) &&
+                            x.Year.Name.StartsWith(value, StringComparison.InvariantCultureIgnoreCase))
+                        || (x.Folder is not null && !string.IsNullOrEmpty(x.Folder.Name) &&
+                            x.Folder.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase)));
+        if(filtered is not null)
+            Albums = new ObservableCollection<Album>( filtered );
+    }
+
+    
     partial void OnSelectedIndexChanged(int value)
     {
         if(value >=0 && value < Albums.Count)
@@ -156,7 +172,9 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
         if(SelectedAlbum is null) return;
         
         var tracks = Library.Data.Tracks.Values.Where(x => x.Album == SelectedAlbum).ToList();
-        var artwork = await DialogUtils.ArtworkPicker(_tagsEditor.Window, Library, tracks, ArtworkRole.CoverFront);
+        var paths = tracks.Select(x => x.Folder?.Name).Distinct();
+        var rootDirectory = PathUtils.GetCommonRoot(paths) ?? _library.Path;
+        var artwork = await DialogUtils.PickArtwork(_tagsEditor.Window, Library, rootDirectory, ArtworkRole.CoverFront);
         if (artwork != null)
         {
             _oldArtwork?.ReleaseThumbnail(this);

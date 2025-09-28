@@ -15,17 +15,26 @@
         <conv:NullToInverseBooleanConverter x:Key="InverseNullToBoolean"/>
     </UserControl.Resources>
     
-    <Grid ColumnDefinitions="400, *" RowDefinitions="Auto, *">
-        <Border BorderBrush="White" BorderThickness="1">
-            <ListBox ItemsSource="{Binding Albums}"
-                     SelectedIndex="{Binding SelectedIndex}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Title}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+    <Grid ColumnDefinitions="400, *" >
+        <Border Grid.Column="0" BorderBrush="White" BorderThickness="1">
+            <Grid RowDefinitions="32,*">
+                <Grid ColumnDefinitions="Auto, 32, *">
+                    <TextBlock>Filter:</TextBlock>
+                    <TextBox Grid.Column="2" Text="{Binding PoolFilter}"/>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <ListBox ItemsSource="{Binding Albums}"
+                             SelectedIndex="{Binding SelectedIndex}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Title}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>    
+                </Grid>
+            </Grid>    
         </Border>
+        
         <Border Grid.Column="1" BorderBrush="White" BorderThickness="1"
                 IsVisible="{Binding SelectedAlbum, Converter={StaticResource NullToBoolean}}">
             <Grid RowDefinitions="Auto, 32,32, *">
@@ -103,8 +112,5 @@
                 </ScrollViewer>
             </Grid>
         </Border>
-        <ScrollViewer Grid.Row="1">
-            
-        </ScrollViewer>
     </Grid>
 </UserControl>

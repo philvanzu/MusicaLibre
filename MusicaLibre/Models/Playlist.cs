@@ -20,6 +20,8 @@ public class Playlist
     public DateTime Created { get; set; }
     public DateTime Added { get; set; }
     public DateTime? Played { get; set; }
+    public long? ArtworkId { get; set; }
+    public Artwork? Artwork { get; set; }
     
     public List<(Track track, int position)> Tracks { get; set; } = new();
     
@@ -38,6 +40,7 @@ public class Playlist
         ["$folderpath"] = Folder?.DatabaseIndex,
         ["$created"] = TimeUtils.ToUnixTime(Created),
         ["$modified"] = TimeUtils.ToUnixTime(Modified),
+        ["$artworkid"] = ArtworkId,
     };
     public void DatabaseInsert(Database db)
     {
@@ -74,6 +77,7 @@ public class Playlist
                 FolderId = Convert.ToInt64(row["FolderId"]),
                 Created = TimeUtils.FromUnixTime(created),
                 Modified =TimeUtils.FromUnixTime(modified),
+                ArtworkId = Database.GetValue<long>(row,  "ArtworkId"),
             };
             playlists.Add(playlist.DatabaseIndex, playlist);
         }

@@ -64,10 +64,10 @@ public static class DialogUtils
         };
     }
     
-    public static async Task<Artwork?> ArtworkPicker(Window owner, LibraryViewModel library, List<Track> tracks, ArtworkRole role)
+    public static async Task<Artwork?> PickArtwork(Window owner, LibraryViewModel library, string rootDirectory, ArtworkRole role)
     {
         ArtworkPickerDialog dlg = new ArtworkPickerDialog();
-        ArtworkPickerViewModel vm = new ArtworkPickerViewModel(library, dlg, tracks, role);
+        ArtworkPickerViewModel vm = new ArtworkPickerViewModel(library, dlg, rootDirectory, role);
         dlg.DataContext = vm;
         return await dlg.ShowDialog<Artwork?>(owner);
         

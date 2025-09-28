@@ -115,7 +115,21 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
         Presenter.Library.ChangeOrderingStep(Presenter);
     }
 
-    
+    [RelayCommand]
+    async Task PickArtwork()
+    {
+
+        var paths = Tracks.Select(x => x.Folder?.Name).Distinct();
+        var rootDirectory = PathUtils.GetCommonRoot(paths) ?? Presenter.Library.Path;
+        var artwork = await DialogUtils.PickArtwork(Presenter.Library.MainWindowViewModel.MainWindow, Presenter.Library, rootDirectory, ArtworkRole.CoverFront);
+        if (artwork != null)
+        {
+            Artwork?.ReleaseThumbnail(this);
+            Model.Cover = artwork;
+            artwork.RequestThumbnail(this,()=>OnPropertyChanged(nameof(Thumbnail)));
+            await Model.DbUpdateAsync(Presenter.Library.Database);  
+        }
+    }
 
 }
 

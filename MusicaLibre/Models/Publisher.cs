@@ -33,7 +33,7 @@ public class Publisher:NameTag
         DatabaseIndex =  Convert.ToInt64(id);
     }
     
-    public async Task DbUpdateAsync(Database db)=> await db.ExecuteNonQueryAsync(updateSql, Parameters);
+    public override async Task DbUpdateAsync(Database db)=> await db.ExecuteNonQueryAsync(updateSql, Parameters);
     public async Task DbDeleteAsync(Database db)=> await db.ExecuteNonQueryAsync(deleteSql, Parameters);
     
     public static Dictionary<long, Publisher> FromDatabase(Database db)

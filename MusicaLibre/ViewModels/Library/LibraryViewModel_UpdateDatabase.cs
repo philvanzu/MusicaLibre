@@ -1095,11 +1095,13 @@ public partial class LibraryViewModel
       return Data.Tracks.Values.Any(x=>x.Album == album);
    }
 
-   public void RemoveEmptyAlbum(Album album)
+   public async Task RemoveEmptyAlbum(Album album)
    {
+      List<Task> tasks = new List<Task>();
       foreach (var disc in Data.Discs.Values.Where(x => x.AlbumId == album.DatabaseIndex))
-         _ = disc.DbDeleteAsync(Database);  
-      _ = album.DbDeleteAsync(Database);
+         tasks.Add(disc.DbDeleteAsync(Database));
+      await Task.WhenAll(tasks);
+      await album.DbDeleteAsync(Database);
    }
 
 

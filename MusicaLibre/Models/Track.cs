@@ -231,7 +231,7 @@ public class Track
             string delete = $"DELETE FROM TrackGenres WHERE TrackId = {DatabaseIndex};";
             await library.Database.ExecuteNonQueryAsync(delete);
         
-            string insert = "INSERT INTO TrackGenres (TrackId, GenreId) VALUES ($id, $genreId);";
+            string insert = "INSERT OR IGNORE INTO TrackGenres (TrackId, GenreId) VALUES ($id, $genreId);";
             foreach (var genre in Genres.Select(x => x.DatabaseIndex))
             {
                 _ = library.Database.ExecuteNonQueryAsync(insert, new()
@@ -248,16 +248,28 @@ public class Track
     {
         try
         {
-            string delete = $"DELETE FROM TrackArtists WHERE TrackId = {DatabaseIndex};";
+            string delete = @$"
+                DELETE FROM TrackArtists WHERE TrackId = {DatabaseIndex};
+                DELETE FROM TrackComposers WHERE TrackId = {DatabaseIndex};";
             await library.Database.ExecuteNonQueryAsync(delete);
             
-            string insert=$"INSERT INTO TrackArtists (TrackId, ArtistId) VALUES ($id, $artistId);";
-            foreach (var artist in Artists.Select(x => x.DatabaseIndex))
+            string insertArtist=$"INSERT OR IGNORE INTO TrackArtists (TrackId, ArtistId) VALUES ($id, $artistId);";
+            string insertComposer = $"INSERT OR IGNORE INTO TrackComposers (TrackId, ArtistId) VALUES ($id, $artistId)";
+            foreach (var artist in Artists)
             {
-                _ = library.Database.ExecuteNonQueryAsync(insert, new()
+                _ = library.Database.ExecuteNonQueryAsync(insertArtist, new()
                 {
                     ["$id"] = DatabaseIndex,
-                    ["$artistId"] = artist
+                    ["$artistId"] = artist.DatabaseIndex,
+                });
+            }
+
+            foreach (var composer in Composers)
+            {
+                _ = library.Database.ExecuteNonQueryAsync(insertArtist, new()
+                {
+                    ["$id"] = DatabaseIndex,
+                    ["$artistId"] = composer.DatabaseIndex
                 });
             }
         }

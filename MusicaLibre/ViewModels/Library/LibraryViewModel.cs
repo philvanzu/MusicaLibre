@@ -68,7 +68,7 @@ public partial class LibraryViewModel : ViewModelBase
     [ObservableProperty] private string _searchString=string.Empty;
     //partial void OnSearchStringChanged(string value)=>DataPresenter.Filter(value);
     
-    public LibraryViewModel(Database db, string libraryRoot, MainWindowViewModel mainWindowViewModel)
+    public LibraryViewModel(Database db, string libraryRoot, MainWindowViewModel mainWindowViewModel, LibrarySettingsViewModel? settings = null)
     {
         MainWindowViewModel = mainWindowViewModel;
 
@@ -76,7 +76,7 @@ public partial class LibraryViewModel : ViewModelBase
         Path = libraryRoot;
         Database = db;
         DbSyncManager = new DbSyncManager(this);
-        Settings = LibrarySettingsViewModel.Load(Database);
+        Settings = (settings == null) ? LibrarySettingsViewModel.Load(Database) : settings;
         Settings.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(Settings.SelectedOrdering))
@@ -88,13 +88,13 @@ public partial class LibraryViewModel : ViewModelBase
         _nowPlayingList = new NowPlayingListViewModel(this, new List<Track>());
     }
 
-    public static LibraryViewModel? Create(DirectoryInfo libraryRoot, MainWindowViewModel mainWindowViewModel)
+    public static LibraryViewModel? Create(DirectoryInfo libraryRoot, MainWindowViewModel mainWindowViewModel, LibrarySettingsViewModel settings)
     {
         try
         {
             var db = Database.Create(libraryRoot);
             if( db==null ) throw new Exception("Could not create Database");
-            return new LibraryViewModel(db, libraryRoot.FullName, mainWindowViewModel);
+            return new LibraryViewModel(db, libraryRoot.FullName, mainWindowViewModel, settings);
         }
         catch(Exception ex){Console.WriteLine(ex);}
 
@@ -171,6 +171,7 @@ public partial class LibraryViewModel : ViewModelBase
             {
                 DataPresenter = Navigator.Current;
                 Capsule = DataPresenter.PreviousCapsule;
+                DataPresenter.Refresh();
             }
             else OrderingStepChanged();
         }

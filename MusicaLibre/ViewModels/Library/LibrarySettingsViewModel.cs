@@ -6,16 +6,28 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MusicaLibre.Models;
 using MusicaLibre.Services;
+using MusicaLibre.Views;
+
 namespace MusicaLibre.ViewModels;
 
 public partial class LibrarySettingsViewModel: ViewModelBase
 {
+    [ObservableProperty] string? _libraryRoot;
+    [ObservableProperty] private bool _canCreateLibrary;
+    public LibrarySettingsEditorDialog Window { get; set; }
     private const string defaultOrderings = @"""CustomOrderings"":[{""IsDefault"":false,""Name"":""Albums by Artists"",""Steps"":[{""Type"":0,""SortingKeys"":[{""Kind"":0,""Asc"":true,""SelectedKey"":1},{""Kind"":0,""Asc"":true,""SelectedKey"":2},{""Kind"":0,""Asc"":true,""SelectedKey"":0}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Album"",""OrderedByString"":""Ordered by Artist Name asc""}],""TracksStep"":{""Type"":12,""SortingKeys"":[{""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Kind"":1,""Asc"":true,""SelectedKey"":5}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Track"",""OrderedByString"":""Ordered by Album asc""}},{""IsDefault"":false,""Name"":""Albums by Last Modified desc"",""Steps"":[{""Type"":0,""SortingKeys"":[{""Kind"":0,""Asc"":false,""SelectedKey"":6}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Album"",""OrderedByString"":""Ordered by Date Modified desc""}],""TracksStep"":{""Type"":12,""SortingKeys"":[{""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Kind"":1,""Asc"":true,""SelectedKey"":5}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Track"",""OrderedByString"":""Ordered by Album asc""}},{""IsDefault"":false,""Name"":""Tracks by Path"",""Steps"":[{""Type"":12,""SortingKeys"":[{""Kind"":1,""Asc"":true,""SelectedKey"":4},{""Kind"":1,""Asc"":true,""SelectedKey"":3}],""TracksSortingKeys"":[{""Key"":4,""Kind"":1,""Asc"":true,""SelectedKey"":4},{""Key"":3,""Kind"":1,""Asc"":true,""SelectedKey"":3}],""GroupedByString"":""Grouped by Track"",""OrderedByString"":""Ordered by Folder asc""}],""TracksStep"":{""Type"":12,""SortingKeys"":[{""Kind"":1,""Asc"":true,""SelectedKey"":3}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Track"",""OrderedByString"":""Ordered by FilePath asc""}},{""IsDefault"":false,""Name"":""Playlists"",""Steps"":[{""Type"":11,""SortingKeys"":[{""Kind"":2,""Asc"":true,""SelectedKey"":1}],""TracksSortingKeys"":[{""Key"":25,""Kind"":1,""Asc"":true,""SelectedKey"":25}],""GroupedByString"":""Grouped by Playlist"",""OrderedByString"":""Ordered by Path asc""}],""TracksStep"":{""Type"":12,""SortingKeys"":[{""Kind"":1,""Asc"":true,""SelectedKey"":25}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Track"",""OrderedByString"":""Ordered by PlaylistPosition asc""}},{""IsDefault"":false,""Name"":""Year / Album"",""Steps"":[{""Type"":2,""SortingKeys"":[{""Kind"":3,""Asc"":true,""SelectedKey"":0}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Year"",""OrderedByString"":""Ordered by Name asc""},{""Type"":0,""SortingKeys"":[{""Kind"":0,""Asc"":true,""SelectedKey"":0}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Album"",""OrderedByString"":""Ordered by Title asc""}],""TracksStep"":{""Type"":12,""SortingKeys"":[{""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Kind"":1,""Asc"":true,""SelectedKey"":5}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Track"",""OrderedByString"":""Ordered by Album asc""}},{""IsDefault"":false,""Name"":""Genre / Album"",""Steps"":[{""Type"":4,""SortingKeys"":[{""Kind"":3,""Asc"":true,""SelectedKey"":0}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Genre"",""OrderedByString"":""Ordered by Name asc""},{""Type"":0,""SortingKeys"":[{""Kind"":0,""Asc"":true,""SelectedKey"":1},{""Kind"":0,""Asc"":true,""SelectedKey"":2},{""Kind"":0,""Asc"":true,""SelectedKey"":0}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Album"",""OrderedByString"":""Ordered by Artist Name asc""}],""TracksStep"":{""Type"":12,""SortingKeys"":[{""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Kind"":1,""Asc"":true,""SelectedKey"":5}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Track"",""OrderedByString"":""Ordered by Album asc""}},{""IsDefault"":false,""Name"":""Publisher / Album"",""Steps"":[{""Type"":5,""SortingKeys"":[{""Kind"":3,""Asc"":true,""SelectedKey"":0}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Publisher"",""OrderedByString"":""Ordered by Name asc""},{""Type"":0,""SortingKeys"":[{""Kind"":0,""Asc"":true,""SelectedKey"":2},{""Kind"":0,""Asc"":true,""SelectedKey"":0}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Album"",""OrderedByString"":""Ordered by Year asc""}],""TracksStep"":{""Type"":12,""SortingKeys"":[{""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Kind"":1,""Asc"":true,""SelectedKey"":5}],""TracksSortingKeys"":[{""Key"":1,""Kind"":1,""Asc"":true,""SelectedKey"":1},{""Key"":6,""Kind"":1,""Asc"":true,""SelectedKey"":6},{""Key"":5,""Kind"":1,""Asc"":true,""SelectedKey"":5}],""GroupedByString"":""Grouped by Track"",""OrderedByString"":""Ordered by Album asc""}}]";
     public enum LibCreationAddedDateSources {now, fromCreated, fromModified}
     public LibCreationAddedDateSources LibCreationAddedDateSource { get; set; } = LibCreationAddedDateSources.fromModified;
+    [JsonIgnore] public static string[] DateSources { get; } = EnumUtils.GetDisplayNames<LibCreationAddedDateSources>();
+    public string ArtistArtworkPath { get; set; } = "/_Artwork/Artists";
+    public string YearArtworkPath { get; set; } =  "/_Artwork/Years";
+    public string GenreArtworkPath { get; set; } =  "/_Artwork/Genres";
+    public string PublisherArtworkPath { get; set; } =   "/_Artwork/Publishers";
     
     private List<CustomOrdering> _customOrderings = new() { CustomOrdering.Default, };
     public List<CustomOrdering> CustomOrderings
@@ -83,7 +95,10 @@ public partial class LibrarySettingsViewModel: ViewModelBase
         }
         catch(Exception ex) {Console.WriteLine(ex);}
 
+
         return CreateSettings(db);
+        
+
     }
 
     public static LibrarySettingsViewModel CreateSettings(Database db)
@@ -124,6 +139,29 @@ public partial class LibrarySettingsViewModel: ViewModelBase
         OnPropertyChanged(nameof(CustomOrderings));
         OnPropertyChanged(nameof(OrderingOptions));
         //OnPropertyChanged(nameof(SelectedOrdering));
+    }
+
+    partial void OnLibraryRootChanged(string? value)
+    {
+        CanCreateLibrary = (!string.IsNullOrEmpty(LibraryRoot) && Directory.Exists(LibraryRoot));
+    }
+
+    [RelayCommand]
+    async Task PickDirectory()
+    {
+        LibraryRoot = await DialogUtils.PickDirectoryAsync(Window);
+    }
+
+    [RelayCommand]
+    void CreateLibrary()
+    {
+        Window.Close(LibraryRoot);
+    }
+
+    [RelayCommand]
+    void Cancel()
+    {
+        Window.Close();
     }
     
     

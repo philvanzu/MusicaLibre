@@ -24,18 +24,17 @@ public partial class ArtworkPickerViewModel:ArtworkListManagerViewModel
     [ObservableProperty] private string? _filePath;
     [ObservableProperty] string _rootDirectory;
     
-    public List<Track> _tracks;
+    public List<Track> _trackss;
     LibraryViewModel _library;
     private ArtworkRole _role;
 
-    public ArtworkPickerViewModel(LibraryViewModel library, ArtworkPickerDialog window, List<Track> tracks, ArtworkRole role, Artwork? selected=null)
+    public ArtworkPickerViewModel(LibraryViewModel library, ArtworkPickerDialog window, string rootDirectory, ArtworkRole role, Artwork? selected=null)
     {
         _window = window;
         _library = library;
-        _tracks = tracks;
         _role = role;
-        var paths = _tracks.Select(x => x.Folder?.Name).Distinct();
-        RootDirectory = PathUtils.GetCommonRoot(paths) ?? _library.Path;
+        if(!Directory.Exists(rootDirectory)) Directory.CreateDirectory(rootDirectory);
+        RootDirectory = rootDirectory;
         
         if(selected != null)
             foreach (var artwork in Artworks)

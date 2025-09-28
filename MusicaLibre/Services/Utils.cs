@@ -393,7 +393,7 @@ public static class SearchUtils
         return score;
     }
 
-    public static Dictionary<Track, double> FilterTracks(string searchString, List<Track> tracks, LibraryViewModel library)
+    public static Dictionary<Track, double> FilterTracksAlt(string searchString, List<Track> tracks, LibraryViewModel library)
     {
         var splits = searchString.Split(' ').Select(x => x.Trim()).ToArray();
         
@@ -429,6 +429,42 @@ public static class SearchUtils
         return weights;
     }
 
+    public static Dictionary<Track, double> FilterTracks(string searchString, List<Track> tracks,
+        LibraryViewModel library)
+    {
+        Dictionary<Track, double> weights = new Dictionary<Track, double>();
+        foreach (var track in tracks)
+        {
+            double weight = 0;
+            if (!string.IsNullOrEmpty(track.FilePath) && 
+                track.FilePath.Contains(searchString, StringComparison.CurrentCultureIgnoreCase)) weight += 1;
+            
+            if(!string.IsNullOrEmpty(track.Title) && 
+               track.Title.Contains(searchString, StringComparison.CurrentCultureIgnoreCase)) weight += 1;
+            
+            if(!string.IsNullOrEmpty(track.Album?.AlbumArtist?.Name) &&
+                track.Album.AlbumArtist.Name.Contains(searchString, StringComparison.CurrentCultureIgnoreCase)) weight += 0.7;
+            
+            if(string.Join(" ", track.Artists.Select(x => x.Name))
+               .Contains(searchString, StringComparison.CurrentCultureIgnoreCase)) weight += 0.8;
+            
+            if(!string.IsNullOrEmpty(track.Album?.Title) &&
+                track.Album.Title.Contains(searchString, StringComparison.CurrentCultureIgnoreCase)) weight += 3;
+            
+            if(!string.IsNullOrEmpty(track.Year?.Name) &&
+                track.Year.Name.Equals(searchString, StringComparison.CurrentCultureIgnoreCase)) weight += 0.5;
+            
+            if(!string.IsNullOrEmpty(track.Publisher?.Name) &&
+                track.Publisher.Name.Contains(searchString, StringComparison.CurrentCultureIgnoreCase)) weight += 0.7;
+            
+            if (string.Join(" ", track.Genres.Select(x => x.Name))
+                .Contains(searchString, StringComparison.CurrentCultureIgnoreCase)) weight += 0.2;
+            
+            if(weight > 0)
+                weights[track] = weights.GetValueOrDefault(track) + weight;
+        }
+        return weights; 
+    }
 }
 
 

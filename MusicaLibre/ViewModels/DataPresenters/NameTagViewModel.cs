@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MusicaLibre.Models;
 using MusicaLibre.Services;
+using MusicaLibre.Views;
 
 namespace MusicaLibre.ViewModels;
 
@@ -123,6 +125,11 @@ public abstract partial class NameTagViewModelBase : ViewModelBase, IVirtualizab
         else
             _ = Presenter.Library.TranscodeTracks(Tracks);
     }
+
+    [RelayCommand]
+    protected abstract Task PickArtwork();
+    public abstract bool CanPickArtwork { get; }
+
 }
 public partial class NameTagViewModel<T>:NameTagViewModelBase where T:NameTag
 {
@@ -136,5 +143,40 @@ public partial class NameTagViewModel<T>:NameTagViewModelBase where T:NameTag
     }
     
     public override List<Track> GetTracks() =>TracksDelegate.Invoke(Presenter.TracksPool, Model as T);
-   
+
+    override protected async Task PickArtwork()
+    {
+        string dirpath = Presenter.Library.Path;
+        ArtworkRole role = ArtworkRole.Other;
+        if (typeof(T) == typeof(Artist))
+        {
+            dirpath = Presenter.Library.Settings.ArtistArtworkPath;
+            role = ArtworkRole.Artist;
+        }
+        else if (typeof(T) == typeof(Year)) dirpath = Presenter.Library.Settings.YearArtworkPath;
+        else if (typeof(T) == typeof(Genre)) dirpath = Presenter.Library.Settings.GenreArtworkPath;
+        else if (typeof(T) == typeof(Publisher)) dirpath = Presenter.Library.Settings.PublisherArtworkPath;
+        
+        if (Path.IsPathRooted(dirpath))
+            dirpath = dirpath.TrimStart(Path.DirectorySeparatorChar);
+        dirpath = Path.Combine(Presenter.Library.Path, dirpath);
+        var artwork  = await DialogUtils.PickArtwork(Presenter.Library.MainWindowViewModel.MainWindow, Presenter.Library, dirpath, role);
+        
+        if (artwork != null)
+        {
+            if(Artwork != null)
+                Artwork.ReleaseThumbnail(this);
+            
+            Model.Artwork = artwork;
+            await Model.DbUpdateAsync(Presenter.Library.Database);
+            Artwork!.RequestThumbnail(this, ()=>OnPropertyChanged(nameof(Thumbnail)));    
+        }
+    }
+
+    public override bool CanPickArtwork => 
+        typeof(T) == typeof(Artist)
+        || typeof(T) == typeof(Year)
+        || typeof(T) == typeof(Genre)
+        || typeof(T) == typeof(Publisher);
+
 }

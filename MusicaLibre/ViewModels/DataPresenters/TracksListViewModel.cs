@@ -22,6 +22,7 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
     TrackViewModel? _shiftSelectionAnchor;
     [ObservableProperty] protected List<TrackViewModel> _selectedItems;
     [ObservableProperty] protected TrackViewModel? _selectedItem;
+    [ObservableProperty] private bool _isContiguousSelection;
     partial void OnSelectedItemChanged(TrackViewModel? value)
     {
         if (!InputManager.CtrlPressed && !InputManager.IsDragSelecting && !InputManager.ShiftPressed)
@@ -47,6 +48,20 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
         SelectedItems = Items.Where(x => x.IsSelected).ToList();
         SelectedTracks = SelectedItems.Select(x=>x.Model).ToList();
         
+        var selectedIndices = new List<int>();
+        foreach (var item in SelectedItems)
+            selectedIndices.Add(Items.IndexOf(item));
+        var sorted = selectedIndices.OrderBy(x=>x).ToList();
+        bool isContiguousSelection = true;
+        for (int i = 1; i < sorted.Count; i++)
+        {
+            if (sorted[i] != sorted[i - 1] + 1)
+            {
+                isContiguousSelection = false;
+                break;
+            }
+        }
+        IsContiguousSelection =  isContiguousSelection;
         SelectedTrackChanged();
     }
     protected virtual void SelectedTrackChanged(){}
