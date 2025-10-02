@@ -58,6 +58,7 @@ public partial class MainWindow : WindowBase
             appState.WindowState = WindowState;
             AppData.Instance.AppState = appState;
             AppData.Instance.Save();
+            AppData.Instance.Dispose();
         }
         catch (Exception ex){Console.WriteLine(ex);}
     }

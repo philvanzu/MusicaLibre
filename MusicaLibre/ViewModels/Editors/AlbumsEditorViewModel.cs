@@ -223,3 +223,28 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
     }
 
 }
+
+public partial class DiscViewModel:ViewModelBase, IDisposable
+{
+    
+    [ObservableProperty] private Disc _disc;
+        
+    public Bitmap? Thumbnail => Disc.Artwork?.Thumbnail;
+
+    public DiscViewModel(Disc disc)
+    {
+        _disc = disc;
+        _disc.Artwork?.RequestThumbnail(this, ()=>OnPropertyChanged(nameof(Thumbnail)));
+    }
+
+    public void Dispose()
+    {
+        _disc.Artwork?.ReleaseThumbnail(this);
+    }
+    [RelayCommand]void Update(){}
+    [RelayCommand] async Task PickArtwork()
+    {
+        
+    }
+
+}

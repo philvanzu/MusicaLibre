@@ -16,10 +16,12 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
+        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
@@ -38,6 +40,7 @@ public partial class App : Application
             var vm= new MainWindowViewModel(window);
             window.DataContext = vm;
             desktop.MainWindow = window;
+
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -55,4 +58,5 @@ public partial class App : Application
             BindingPlugins.DataValidators.Remove(plugin);
         }
     }
+    
 }

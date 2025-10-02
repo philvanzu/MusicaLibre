@@ -130,5 +130,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     }
 
-
+    [RelayCommand]
+    async Task EditAppSettings()
+    {
+        var dlg =  new AppSettingsDialog();
+        var vm = new AppSettingsViewModel(dlg);
+        dlg.DataContext = vm;
+        await dlg.ShowDialog(MainWindow);
+    }
 }

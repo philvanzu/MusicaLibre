@@ -28,6 +28,29 @@ public static class DialogUtils
 
         return files.Count > 0 ? files[0].Path.LocalPath : null;
     }
+    public static async Task<string?> SaveFileAsync(
+        Window owner,
+        string directoryPath,
+        IEnumerable<FilePickerFileType>? filters = null,
+        string? suggestedFileName = null)
+    {
+        var options = new FilePickerSaveOptions
+        {
+            Title = "Save file",
+            SuggestedFileName = suggestedFileName ?? "NewFile"
+        };
+
+        if (!string.IsNullOrEmpty(directoryPath))
+            options.SuggestedStartLocation = 
+                await owner.StorageProvider.TryGetFolderFromPathAsync(directoryPath);
+
+        if (filters != null)
+            options.FileTypeChoices = filters.ToList();
+
+        var file = await owner.StorageProvider.SaveFilePickerAsync(options);
+
+        return file?.Path.LocalPath;
+    }
     public static async Task<string?> PickDirectoryAsync(Window owner)
     {
         var folders = await owner.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
@@ -84,6 +107,21 @@ public static class DialogUtils
         };
         dlg.DataContext = vm;
         await dlg.ShowDialog(owner);
+    }
+    
+    public static async Task<bool> YesNoDialog(Window owner, string title, string message)
+    {
+        var dlg = new OkCancelDialog();
+        var vm = new OkCancelViewModel()
+        {
+            Title = title,
+            Content = message,
+            ShowCancelButton = true,
+            OkText = "Yes",
+            CancelText = "No"
+        };
+        dlg.DataContext = vm;
+        return await dlg.ShowDialog<bool>(owner);
     }
 
 }

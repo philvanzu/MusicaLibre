@@ -1,0 +1,45 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+        xmlns:conv="clr-namespace:MusicaLibre.Converters"
+        xmlns:srv="clr-namespace:MusicaLibre.Services"
+        xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MusicaLibre.Views.AppSettingsDialog"
+        x:DataType="vm:AppSettingsViewModel"
+        Title="AppSettingsDialog"
+        Width="800" Height="600"
+        WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:InverseBooleanConverter x:Key="InverseBoolean"/>
+        <conv:BoolToUpdateTextConverter x:Key="MultipleUpdateWarning"></conv:BoolToUpdateTextConverter>
+    </Window.Resources>
+    <TabControl>
+        <TabItem Header="Settings"></TabItem>
+        <TabItem Header="Extenal Devices">
+            <Grid RowDefinitions="Auto, *">
+                <Button Grid.Row="0" Content="Add External Device" Command="{Binding AddDeviceCommand}"/>
+                <ListBox Grid.Row="1" ItemsSource="{Binding ExternalDevices}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="White" BorderThickness="1">
+                                <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="Auto, 32, *">
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}"/>
+                                    
+                                    <TextBlock Grid.Row="1" Grid.Column="0">Music Path</TextBlock>
+                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding MusicPath}"/>
+                                    
+                                    <TextBlock Grid.Row="1" Grid.Column="0">Max Bitrate</TextBlock>
+                                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding MaxBitrate}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</Window>

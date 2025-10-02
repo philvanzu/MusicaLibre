@@ -907,7 +907,7 @@ public partial class LibraryViewModel
                     {
                         try
                         {
-                            playlist.DatabaseInsert(Database);
+                            playlist.DbInsert(Database);
                             Debug.Assert(playlist.DatabaseIndex > 0);
                         }
                         catch (Exception ex)

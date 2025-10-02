@@ -24,10 +24,11 @@ public partial class LibrarySettingsViewModel: ViewModelBase
     public enum LibCreationAddedDateSources {now, fromCreated, fromModified}
     public LibCreationAddedDateSources LibCreationAddedDateSource { get; set; } = LibCreationAddedDateSources.fromModified;
     [JsonIgnore] public static string[] DateSources { get; } = EnumUtils.GetDisplayNames<LibCreationAddedDateSources>();
-    public string ArtistArtworkPath { get; set; } = "/_Artwork/Artists";
-    public string YearArtworkPath { get; set; } =  "/_Artwork/Years";
-    public string GenreArtworkPath { get; set; } =  "/_Artwork/Genres";
-    public string PublisherArtworkPath { get; set; } =   "/_Artwork/Publishers";
+    public string ArtistArtworkPath { get; set; } = "_Artwork/Artists";
+    public string YearArtworkPath { get; set; } =  "_Artwork/Years";
+    public string GenreArtworkPath { get; set; } =  "_Artwork/Genres";
+    public string PublisherArtworkPath { get; set; } =   "_Artwork/Publishers";
+    public string UserPlaylistsPath { get; set; } =  "_MixTapes";
     
     private List<CustomOrdering> _customOrderings = new() { CustomOrdering.Default, };
     public List<CustomOrdering> CustomOrderings

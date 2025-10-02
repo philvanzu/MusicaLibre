@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MusicaLibre.Services;
@@ -27,6 +28,14 @@ public class Playlist
     
     const string selectSql = "SELECT * FROM Playlists;";
     const string deleteSql = "DELETE FROM Playlists WHERE Id = $id;";
+    const string updateSql = @"UPDATE Playlists SET 
+                                FilePath = $filepath,
+                                FileName = $filename,
+                                FolderId = $folderpath,
+                                Created = $created,
+                                Modified = $modified,
+                                ArtworkId = $artworkid
+                                WHERE Id = $id;";
     const string insertSql = @"
         INSERT INTO Playlists (FilePath, FileName, FolderId, Created, Modified)  
         VALUES ($filepath, $filename, $folderpath, $created, $modified);
@@ -42,17 +51,19 @@ public class Playlist
         ["$modified"] = TimeUtils.ToUnixTime(Modified),
         ["$artworkid"] = ArtworkId,
     };
-    public void DatabaseInsert(Database db)
+    public void DbInsert(Database db)
     {
         var playlistId = db.ExecuteScalar(insertSql, Parameters );
         DatabaseIndex = Convert.ToInt64(playlistId);
     }
 
-    public async Task DatabaseInsertAsync(Database db)
+    public async Task DbInsertAsync(Database db)
     {
         var playlistId = await db.ExecuteScalarAsync(insertSql, Parameters );
         DatabaseIndex = Convert.ToInt64(playlistId);
     }
+    public async Task DbUpdateAsync(Database db)
+        => await db.ExecuteNonQueryAsync(updateSql, Parameters );
     
     public async Task DbDeleteAsync(Database db)
         => await db.ExecuteNonQueryAsync(deleteSql, Parameters );
@@ -105,8 +116,26 @@ public class Playlist
         var baseDir = Path.GetDirectoryName(filePath)!;
         return File.ReadAllLines(filePath)
             .Where(l => !string.IsNullOrWhiteSpace(l) && !l.StartsWith("#"))
-            .Select(l => NormalizePath(baseDir, l))
+            .Select(l => PathUtils.NormalizePath(baseDir, l))
             .ToList();
+    }
+    public static void CreateM3u(string outputPath, List<string> audioFiles)
+    {
+        var baseDir = Path.GetDirectoryName(Path.GetFullPath(outputPath))!;
+        var relativePaths = audioFiles
+            .Select(f => Path.GetRelativePath(baseDir, Path.GetFullPath(f)));
+            
+        // Use UTF-8 with BOM so it’s compatible with most players
+        using var writer = new StreamWriter(outputPath, false, new UTF8Encoding(true));
+
+        writer.WriteLine("#EXTM3U"); // Extended M3U header
+
+        foreach (var file in relativePaths)
+        {
+            // Here, we don’t know duration/title -> use placeholders
+            writer.WriteLine("#EXTINF:-1," + Path.GetFileNameWithoutExtension(file));
+            writer.WriteLine(file);
+        }
     }
 
     private static List<string> LoadPLS(string filePath)
@@ -115,7 +144,7 @@ public class Playlist
         return File.ReadAllLines(filePath)
             .Where(l => l.StartsWith("File", StringComparison.OrdinalIgnoreCase))
             .Select(l => l.Split('=', 2)[1].Trim())
-            .Select(l => NormalizePath(baseDir, l))
+            .Select(l => PathUtils.NormalizePath(baseDir, l))
             .ToList();
     }
 
@@ -128,7 +157,7 @@ public class Playlist
             .Where(e => e.Name.LocalName == "media")
             .Select(e => e.Attribute("src")?.Value)
             .Where(v => !string.IsNullOrWhiteSpace(v))
-            .Select(v => NormalizePath(baseDir, v!))
+            .Select(v => PathUtils.NormalizePath(baseDir, v!))
             .ToList();
     }
 
@@ -147,7 +176,7 @@ public class Playlist
             {
                 if (Uri.TryCreate(v, UriKind.Absolute, out var uri) && uri.IsFile)
                     return Path.GetFullPath(Uri.UnescapeDataString(uri.LocalPath));
-                return NormalizePath(baseDir, v);
+                return PathUtils.NormalizePath(baseDir, v);
             })
             .ToList();
     }
@@ -173,7 +202,7 @@ public class Playlist
                 var match = Regex.Match(line, @"^FILE\s+""(.+?)""", RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
-                    var path = NormalizePath(baseDir, match.Groups[1].Value);
+                    var path = PathUtils.NormalizePath(baseDir, match.Groups[1].Value);
                     currentFile = path;
                     trackId = 0;
                     previousIndex = null;
@@ -220,12 +249,7 @@ public class Playlist
         }
         return sheet.Tracks.Select(t => t.File).Distinct().ToList();
     }
-    private static string NormalizePath(string baseDir, string path)
-    {
-        return Path.IsPathRooted(path)
-            ? Path.GetFullPath(path)
-            : Path.GetFullPath(Path.Combine(baseDir, path));
-    }
+
 }
 
 

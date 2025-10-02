@@ -27,6 +27,7 @@
                                 Tag="{Binding IsSelected}"
                                 Tapped="AlbumItemTapped"
                                 DoubleTapped="AlbumItemDoubleTapped"
+                                PointerPressed="ItemPointerPressed"
                                 >
                             <Border.Styles>
                                 <!-- default style -->

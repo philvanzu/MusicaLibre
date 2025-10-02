@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
@@ -12,7 +15,7 @@ namespace MusicaLibre.ViewModels;
 
 public partial class NowPlayingListViewModel:TracksListViewModel
 {
-    private int _playingTrackIndex;
+    private int _playingTrackIndex=-1;
     [ObservableProperty] private TrackViewModel? _playingTrack;
     [ObservableProperty] private TrackViewModel? _nextTrack;
     [ObservableProperty] private string? _countInfo;
@@ -153,17 +156,51 @@ public partial class NowPlayingListViewModel:TracksListViewModel
         }
     }
 
-    [RelayCommand] void SavePlaylist(){}
-    [RelayCommand]
-    void RemoveSelection()
+    [RelayCommand] async Task SavePlaylist()
     {
+        if(Items.Count == 0) return;
+        
+        var playlistsPath = Library.Settings.UserPlaylistsPath;
+        if (!Path.IsPathRooted(playlistsPath))
+            playlistsPath = Path.Combine(Library.Path, playlistsPath);
+        
+        if(!Directory.Exists(playlistsPath))
+            Directory.CreateDirectory(playlistsPath);
+        
+        var suggestedName = "Mixtape.m3u";
+        var i = 0;
+        while (File.Exists(Path.Combine(playlistsPath, suggestedName)))
+            suggestedName = $"Mixtape({++i}).m3u";
+            
+        var filters = new[]
+        {
+            new FilePickerFileType("M3U Playlist")
+            {
+                Patterns = new[] { "*.m3u", "*.m3u8" },
+                MimeTypes = new[] { "audio/x-mpegurl", "application/vnd.apple.mpegurl" }
+            }
+        };
+        var outputPath = await DialogUtils.SaveFileAsync(Library.MainWindowViewModel.MainWindow, playlistsPath, filters, suggestedName);
+        if (outputPath == null) return;
+        if (File.Exists(outputPath))
+        {
+            if (! await DialogUtils.YesNoDialog(Library.MainWindowViewModel.MainWindow,
+                    "File already exists!",
+                    $"{outputPath} already exists! Overwrite?"))
+                return;
+        }
+            
+        Playlist.CreateM3u(outputPath, Items.Select(x=> x.Model.FilePath).ToList());
+    }
+    [RelayCommand] void RemoveSelection()
+    {
+        if (SelectedItem == null) return;
         foreach (var item in SelectedItems)
             _items.Remove(item);
         Update();
     }
 
-    [RelayCommand]
-    void MoveSelectionUp()
+    [RelayCommand] void MoveSelectionUp()
     {
         var firstIndex = _items.IndexOf(SelectedItems.First());
         var lastIndex = _items.IndexOf(SelectedItems.Last());
@@ -186,8 +223,7 @@ public partial class NowPlayingListViewModel:TracksListViewModel
         Update();
     }
 
-    [RelayCommand]
-    void MoveSelectionDown()
+    [RelayCommand] void MoveSelectionDown()
     {
         var firstIndex = _items.IndexOf(SelectedItems.First());
         var lastIndex = _items.IndexOf(SelectedItems.Last());

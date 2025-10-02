@@ -60,7 +60,8 @@
                                       BorderBrush="DodgerBlue"  x:Name="PART_RowBorder"
                                       Tag="{Binding IsSelected}"
                                       DoubleTapped="TrackItemDoubleTapped" 
-                                      PropertyChanged="TrackItemPropertyChanged">
+                                      PropertyChanged="TrackItemPropertyChanged"
+                                      PointerPressed="ItemPointerPressed">
                                 <Border.ContextMenu>
                                   <ContextMenu>
                                     <MenuItem Header="Play" Command="{Binding DoubleTappedCommand}"/>

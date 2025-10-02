@@ -48,6 +48,17 @@ public static class Utils
 }
 public static class PathUtils
 {
+    public static string NormalizePath(string baseDir, string path)
+    {
+        return Path.IsPathRooted(path)
+            ? Path.GetFullPath(path)
+            : Path.GetFullPath(Path.Combine(baseDir, path));
+    }
+    public static string GetRelativePath(string rootPath, string path)
+    {
+        return Path.GetRelativePath(rootPath, path);
+    }
+    
     static readonly HashSet<string> AudioFileExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         // Core formats
@@ -191,10 +202,7 @@ public static class PathUtils
         return string.Join(Path.DirectorySeparatorChar, commonParts);
     }
 
-    public static string GetRelativePath(string rootPath, string path)
-    {
-        throw new NotImplementedException();
-    }
+
 
     public static void OpenInExplorer(string filePath)
     {

@@ -864,7 +864,7 @@ public partial class LibraryViewModel
                     {
                        try
                        {
-                          await playlist.DatabaseInsertAsync(Database);
+                          await playlist.DbInsertAsync(Database);
                           Debug.Assert(playlist.DatabaseIndex > 0);
                           snapshot.Playlists.Add(playlist.DatabaseIndex, playlist);
                        }
@@ -894,6 +894,7 @@ public partial class LibraryViewModel
                                     ["$trackid"] = track.DatabaseIndex,
                                     ["$position"] = position
                                 });
+                                playlist.Tracks.Add((track, position));
                             }
                             catch (Exception ex)
                             {
@@ -948,9 +949,12 @@ public partial class LibraryViewModel
       foreach (var info in playlistFiles)
          existingPlaylists.Add(info.FullName);
       
-      foreach(var playlist in playlistsByPath.Values)
+      foreach(var playlist in playlistsByPath.Values.ToList())
          if (!existingPlaylists.Contains(playlist.FilePath))
+         {
             batch.Add(playlist.DbDeleteAsync(Database));
+            snapshot.Playlists.Remove(playlist.DatabaseIndex);
+         }
       
       await Task.WhenAll(batch);
       batch.Clear();
@@ -1016,6 +1020,16 @@ public partial class LibraryViewModel
             batch.Add(a.DbDeleteAsync(Database));
             snapshot.Artists.Remove(a.DatabaseIndex);
          }
+
+      foreach (var file in snapshot.DiscardedFiles.Values.ToList())
+      {
+         if (existingImages.Contains(file.FilePath)) break;
+         else if (existingPlaylists.Contains(file.FilePath)) break;
+         else if (existingTracks.Contains(file.FilePath)) break;
+         
+         batch.Add(file.DbDeleteAsync(Database));
+         snapshot.DiscardedFiles.Remove(file.FilePath);
+      }
 
       await Task.WhenAll(batch);
       Dispatcher.UIThread.Post(()=>Data = snapshot);

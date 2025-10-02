@@ -14,7 +14,7 @@ using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.ViewModels;
 
-public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
+public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem, IDisposable
 {
     public Album Model { get; init; }
     public virtual string Title => Model.Title;
@@ -69,14 +69,14 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
 
     public void OnCleared()
     {
-        Model.Cover?.ReleaseThumbnail(this);
+        Artwork?.ReleaseThumbnail(this);
     }
 
     public void GetThumbnail()
     {
         
-        if (Model.Cover == null) return;
-        Model.Cover.RequestThumbnail(this, ()=>OnPropertyChanged(nameof(Thumbnail)));
+        if (Artwork == null) return;
+        Artwork.RequestThumbnail(this, ()=>OnPropertyChanged(nameof(Thumbnail)));
 
         
     }
@@ -118,7 +118,11 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
     [RelayCommand]
     async Task PickArtwork()
     {
+        await _PickArtwork();
+    }
 
+    protected virtual async Task _PickArtwork()
+    {
         var paths = Tracks.Select(x => x.Folder?.Name).Distinct();
         var rootDirectory = PathUtils.GetCommonRoot(paths) ?? Presenter.Library.Path;
         var artwork = await DialogUtils.PickArtwork(Presenter.Library.MainWindowViewModel.MainWindow, Presenter.Library, rootDirectory, ArtworkRole.CoverFront);
@@ -131,6 +135,10 @@ public partial class AlbumViewModel : ViewModelBase, IVirtualizableItem
         }
     }
 
+    public void Dispose()
+    {
+        Artwork?.ReleaseThumbnail(this);
+    }
 }
 
 public partial class AlbumDiscViewModel:AlbumViewModel{
@@ -146,5 +154,20 @@ public partial class AlbumDiscViewModel:AlbumViewModel{
     public AlbumDiscViewModel(DiscsListViewModel presenter, Disc model) : base(presenter, model.Album)
     {
         Disc = model;
+    }
+    
+    protected override async Task _PickArtwork()
+    {
+        var paths = Tracks.Select(x => x.Folder.Name).Distinct();
+        var rootDirectory = PathUtils.GetCommonRoot(paths) ?? Presenter.Library.Path;
+        var artwork = await DialogUtils.PickArtwork(Presenter.Library.MainWindowViewModel.MainWindow, Presenter.Library, rootDirectory, ArtworkRole.CoverFront);
+        if (artwork != null)
+        {
+            Artwork?.ReleaseThumbnail(this);
+            Disc.Artwork = artwork;
+            OnPropertyChanged(nameof(Artwork));
+            artwork.RequestThumbnail(this,()=>OnPropertyChanged(nameof(Thumbnail)));
+            await Disc.DbUpdateAsync(Presenter.Library.Database);  
+        }
     }
 }

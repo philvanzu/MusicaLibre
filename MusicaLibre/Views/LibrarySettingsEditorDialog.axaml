@@ -14,11 +14,12 @@
             <TextBox Text="{Binding LibraryRoot}"/>
             <Button Grid.Column="1" Content="Pick Directory" Command="{Binding PickDirectoryCommand}"/>
         </Grid>
-        <Grid Grid.Row="2" ColumnDefinitions="Auto, 32, *" RowDefinitions="Auto, Auto, Auto, Auto, Auto">
+        <Grid Grid.Row="2" ColumnDefinitions="Auto, 32, *" RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto">
             <TextBlock Grid.Column="0" Grid.Row="0">Track Added Date source</TextBlock>
             <ComboBox Grid.Column="2" Grid.Row="0" 
                       ItemsSource="{Binding DateSources}" 
                       SelectedIndex="{Binding LibCreationAddedDateSource, Mode=TwoWay}"/>
+            
             <TextBlock Grid.Column="0" Grid.Row="1">Artists Artwork directory</TextBlock>
             <TextBox Grid.Column="2" Grid.Row="1" Text="{Binding ArtistArtworkPath}"/>
             
@@ -30,6 +31,9 @@
             
             <TextBlock Grid.Column="0" Grid.Row="4">Year Artwork directory</TextBlock>
             <TextBox Grid.Column="2" Grid.Row="4" Text="{Binding YearArtworkPath}"/>
+            
+            <TextBlock Grid.Column="0" Grid.Row="5">User Saved Playlists directory</TextBlock>
+            <TextBox Grid.Column="2" Grid.Row="5" Text="{Binding UserPlaylistsPath}"/>
             
         </Grid>
         <Grid Grid.Row="4" Grid.ColumnDefinitions="*, *">

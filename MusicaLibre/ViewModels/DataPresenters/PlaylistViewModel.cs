@@ -4,9 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DynamicData;
 using MusicaLibre.Models;
 using MusicaLibre.Services;
 
@@ -21,11 +24,13 @@ public partial class PlaylistViewModel:ViewModelBase, IVirtualizableItem
     public string FileName => Model.FileName??"";
     public string FilePath => Model.FilePath??"";
     public Bitmap? Thumbnail => Artwork?.Thumbnail;
+    private Window Window => Presenter.Library.MainWindowViewModel.MainWindow;
     [ObservableProperty]Artwork? _artwork;
 
     public Artwork? FindArtwork()
     {
-        return Presenter.Library.Data.Artworks.Values.Where(x => x.Folder == Model.Folder).FirstOrDefault();
+        if(Model.Artwork != null) return Model.Artwork;
+        return Presenter.Library.Data.Artworks.Values.FirstOrDefault(x => x.Folder == Model.Folder);
     }
     public int RandomIndex { get; set; }
     [ObservableProperty] private bool _isSelected;
@@ -69,4 +74,28 @@ public partial class PlaylistViewModel:ViewModelBase, IVirtualizableItem
     [RelayCommand] void Play()=>Presenter.Library.NowPlayingList.Replace(Tracks);
     [RelayCommand] void InsertNext()=>Presenter.Library.NowPlayingList.Insert(Tracks);
     [RelayCommand] void Append()=>Presenter.Library.NowPlayingList.Append(Tracks);
+
+    [RelayCommand] async Task PickArtwork()
+    {
+        var paths = Tracks.Select(x => x.Folder.Name).Distinct();
+        var rootDirectory = PathUtils.GetCommonRoot(paths) ?? Presenter.Library.Path;
+        var artwork = await DialogUtils.PickArtwork(Window, Presenter.Library, rootDirectory, ArtworkRole.CoverFront);
+        if (artwork != null)
+        {
+            Artwork?.ReleaseThumbnail(this);
+            Artwork = Model.Artwork = artwork;
+            OnPropertyChanged(nameof(Artwork));
+            artwork.RequestThumbnail(this,()=>OnPropertyChanged(nameof(Thumbnail)));
+            await Model.DbUpdateAsync(Presenter.Library.Database);  
+        }
+    }
+
+    [RelayCommand] async Task Delete()
+    {
+        if(await DialogUtils.YesNoDialog(Window, "Delete",$"Delete {Model.FilePath}?"))
+        {
+            File.Delete(Model.FilePath);
+            Presenter.RemoveItem(this);
+        }
+    }
 }

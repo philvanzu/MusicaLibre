@@ -39,8 +39,8 @@
                             <MenuItem Header="Batch fix unknown artist Albums"
                                       Command="{Binding FixUnknownArtistAlbumsCommand}"/>
                         </MenuItem>
+                        <MenuItem Header="Settings" Command="{Binding EditAppSettingsCommand}"/>
                     </MenuItem>
-
                 </Menu>
             </Grid>
             

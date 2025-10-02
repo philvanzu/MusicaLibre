@@ -92,4 +92,20 @@ public partial class PlaylistsListView : UserControl
             _oldvm = vm;
         }
     }
+
+    private void PlaylistItemClicked(object? sender, PointerPressedEventArgs e)
+    {
+        if(e.Handled) return;
+        if (sender is Border border && border.DataContext is PlaylistViewModel vm && !vm.IsSelected)
+        {
+            var kind = e.GetCurrentPoint(this).Properties.PointerUpdateKind;
+            if ( kind is PointerUpdateKind.RightButtonPressed)
+            {
+                var ctrlPressed = InputManager.CtrlPressed;
+                InputManager.CtrlPressed = true;
+                vm.IsSelected = true;
+                InputManager.CtrlPressed = ctrlPressed;
+            }
+        }
+    }
 }

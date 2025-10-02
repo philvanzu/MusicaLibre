@@ -23,6 +23,7 @@
                                 Tag="{Binding IsSelected}"
                                 Tapped="PlaylistItemTapped"
                                 DoubleTapped="PlaylistItemDoubleTapped"
+                                PointerPressed="PlaylistItemClicked"
                                 >
                             <Border.Styles>
                                 <!-- default style -->
@@ -42,6 +43,8 @@
                                 <ContextMenu>
                                     <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"/>
                                     <MenuItem Header="Edit" Command="{Binding EditCommand}" />
+                                    <MenuItem Header="Pick Artwork" Command="{Binding PickArtworkCommand}" />
+                                    <MenuItem Header="Delete Playlist" Command="{Binding DeleteCommand}"/>
                                 </ContextMenu>
                             </Border.ContextMenu>
 

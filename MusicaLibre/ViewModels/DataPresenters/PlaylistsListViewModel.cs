@@ -64,8 +64,12 @@ public partial class PlaylistsListViewModel : LibraryDataPresenter, ISelectVirtu
     {
         _items.Clear();
 
-        
-        var playlistIds = TracksPool.Select(x => x.AlbumId).Distinct().ToList();
+
+        var playlistIds = Library.Data.Playlists.Values
+            .Where(x => x.Tracks.Select(pair => pair.track).Intersect(_tracksPool).Any())
+            .Select(x => x.DatabaseIndex)
+            .Distinct()
+            .ToList();
 
         var playlistsPool = AppData.Instance.UserSettings.FilterOutEmptyPlaylists?
                 Library.Data.Playlists.Values.Where(x => x.Tracks.Count > 0)
@@ -226,5 +230,15 @@ public partial class PlaylistsListViewModel : LibraryDataPresenter, ISelectVirtu
             };
         }
         return null;
+    }
+
+    public void RemoveItem(PlaylistViewModel item)
+    {
+        if(item.IsSelected)
+            item.IsSelected = false;
+        if (_items.Remove(item))
+        {
+            Sort();
+        }
     }
 }

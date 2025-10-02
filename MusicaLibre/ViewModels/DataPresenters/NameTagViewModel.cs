@@ -157,9 +157,9 @@ public partial class NameTagViewModel<T>:NameTagViewModelBase where T:NameTag
         else if (typeof(T) == typeof(Genre)) dirpath = Presenter.Library.Settings.GenreArtworkPath;
         else if (typeof(T) == typeof(Publisher)) dirpath = Presenter.Library.Settings.PublisherArtworkPath;
         
-        if (Path.IsPathRooted(dirpath))
-            dirpath = dirpath.TrimStart(Path.DirectorySeparatorChar);
-        dirpath = Path.Combine(Presenter.Library.Path, dirpath);
+        if (!Path.IsPathRooted(dirpath))
+            dirpath = Path.Combine(Presenter.Library.Path, dirpath);
+        
         var artwork  = await DialogUtils.PickArtwork(Presenter.Library.MainWindowViewModel.MainWindow, Presenter.Library, dirpath, role);
         
         if (artwork != null)

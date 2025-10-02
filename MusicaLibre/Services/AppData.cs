@@ -10,19 +10,19 @@ using MusicaLibre.Models;
 namespace MusicaLibre.Services;
 using System.IO;
 
-public class AppData
+public class AppData: IDisposable
 {
     private static readonly string LinuxFilePath =
         System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".local/share/Musicalibre/");
     
-    static readonly AppData _instance = AppData.Load();
-    public static AppData Instance => _instance;
+    static readonly AppData _instance = AppData.Load(); 
+    public static AppData Instance => _instance; // Called On Framework init completed
 
     [JsonIgnore] public List<string> Libraries { get; set; } = new();
     public AppState AppState { get; set; } = new();
     public UserSettings UserSettings { get; set; } = new();
-    
+    public List<ExternalDevice> ExternalDevices { get; set; } = new();
     public static string Path
     {
         get
@@ -43,6 +43,7 @@ public class AppData
     {
         try
         {
+            ExternalDevicesManager.Instance.Start();
             DirectoryInfo appdataDir = new DirectoryInfo(Path);
             if (!appdataDir.Exists) throw new DirectoryNotFoundException(Path);
             
@@ -58,6 +59,9 @@ public class AppData
                     if (data != null)
                     {
                         data.Libraries = libraries;
+                        foreach(var dev in data.ExternalDevices)
+                            dev.Initialize();
+                        
                         return data;
                     }
                 }
@@ -78,7 +82,14 @@ public class AppData
         catch(Exception ex) {Console.WriteLine(ex);}
         
     }
-    
+
+    // Called On MainWindow Closed
+    public void Dispose() 
+    {
+        foreach(var dev in ExternalDevices)
+            dev.Dispose();
+        ExternalDevicesManager.Instance.Dispose();
+    }
 }
 
 public class AppState
@@ -95,6 +106,7 @@ public class UserSettings
     
     public string ImagesImportPath { get; set; } = "/ImportedImages";
     public bool FilterOutEmptyPlaylists { get; set; } = true;
+    
 }
 
 
