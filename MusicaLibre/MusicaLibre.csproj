@@ -29,7 +29,9 @@
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1"/>
         <PackageReference Include="DynamicData" Version="9.4.1" />
-        <PackageReference Include="GioSharp" Version="3.24.24.117-develop" />
+        <PackageReference Include="GirCore.Gio-2.0" Version="0.7.0-preview.2" />
+        <PackageReference Include="GirCore.GLib-2.0" Version="0.7.0-preview.2" />
+        <PackageReference Include="GirCore.GObject-2.0" Version="0.7.0-preview.2" />
         <PackageReference Include="LibVLCSharp" Version="3.9.4" />
         <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.8.2" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.8" />
