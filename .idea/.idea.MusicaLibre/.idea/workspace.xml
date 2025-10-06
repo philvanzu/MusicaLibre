@@ -8,10 +8,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="297d10ca-c7cc-4d05-ad36-e93d577624fd" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/MusicaLibre.csproj.DotSettings" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/Services/Utils/EnumUtils.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/Services/Utils/LinuxUtils.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/Services/Utils/PathUtils.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/Services/Utils/SearchUtils.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/Services/Utils/TimeUtils.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Models/ExternalDevice.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Models/ExternalDevice.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MusicaLibre/MusicaLibre.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/MusicaLibre.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Services/DialogUtils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Services/Utils/DialogUtils.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MusicaLibre/Services/ExternalDevicesManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Services/ExternalDevicesManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Services/Utils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Services/Utils/Utils.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/AppSettingsViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/AppSettingsViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/DevicePickViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/CommonDialogs/ListPickViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AppSettingsDialog.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AppSettingsDialog.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/DevicePickDialog.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/CommonDialogs/ListPickDialog.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/DevicePickDialog.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/CommonDialogs/ListPickDialog.axaml.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,6 +85,11 @@
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Services/DbSyncManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Services/ExternalDevicesManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Services/FileSystemWatcherService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MusicaLibre/Services/Utils/EnumUtils.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MusicaLibre/Services/Utils/LinuxUtils.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MusicaLibre/Services/Utils/PathUtils.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MusicaLibre/Services/Utils/SearchUtils.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MusicaLibre/Services/Utils/TimeUtils.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/AppSettingsViewModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/ArtistsEditorViewModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Views/Editors/AppSettingsDialog.axaml" root0="FORCE_HIGHLIGHTING" />
@@ -95,25 +113,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Project.MusicaLibre.executor": "Debug",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "XThreadsFramesViewSplitterKey": "0.29590866",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "/home/phil/RiderProjects/MusicaLibre",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Project.MusicaLibre.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.29590866&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/phil/RiderProjects/MusicaLibre&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="MusicaLibre" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
@@ -174,7 +192,9 @@
       <workItem from="1759334437071" duration="28100000" />
       <workItem from="1759429112263" duration="67000" />
       <workItem from="1759495855662" duration="18220000" />
-      <workItem from="1759581110748" duration="9408000" />
+      <workItem from="1759581110748" duration="19879000" />
+      <workItem from="1759671155259" duration="26386000" />
+      <workItem from="1759751539585" duration="2375000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -312,7 +332,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759429155440</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Trying to get a sensible Gio External device manager up and running">
+      <option name="closed" value="true" />
+      <created>1759607876095</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1759607876095</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -352,7 +380,8 @@
     <MESSAGE value="forgot to include all the moved files included here" />
     <MESSAGE value="improved now playin list, ability to pick artwork for various groupings, editors for genres, artists, and albums" />
     <MESSAGE value="progress with External devices mtp support" />
-    <option name="LAST_COMMIT_MESSAGE" value="progress with External devices mtp support" />
+    <MESSAGE value="Trying to get a sensible Gio External device manager up and running" />
+    <option name="LAST_COMMIT_MESSAGE" value="Trying to get a sensible Gio External device manager up and running" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -446,19 +475,6 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="249" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/MusicaLibre/Services/ExternalDevicesManager.cs</url>
-          <line>31</line>
-          <properties documentPath="$PROJECT_DIR$/MusicaLibre/Services/ExternalDevicesManager.cs" containingFunctionPresentation="Lambda expression inside Method 'Start'">
-            <startOffsets>
-              <option value="1075" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1093" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="252" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

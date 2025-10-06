@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace MusicaLibre.Views;
 
-public partial class DevicePickDialog : Window
+public partial class ListPickDialog : Window
 {
-    public DevicePickDialog()
+    public ListPickDialog()
     {
         InitializeComponent();
     }

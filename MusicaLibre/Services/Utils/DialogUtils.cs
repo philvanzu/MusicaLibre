@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using MusicaLibre.Models;
 using MusicaLibre.Views; 
 using MusicaLibre.ViewModels;
@@ -51,13 +53,21 @@ public static class DialogUtils
 
         return file?.Path.LocalPath;
     }
-    public static async Task<string?> PickDirectoryAsync(Window owner)
+    public static async Task<string?> PickDirectoryAsync(Window owner, string? directoryPath=null)
     {
-        var folders = await owner.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        IStorageFolder? startFolder = null;
+        
+        if (!string.IsNullOrWhiteSpace(directoryPath))
+            startFolder = await owner.StorageProvider.TryGetFolderFromPathAsync(directoryPath);
+        
+        var options = new FolderPickerOpenOptions
         {
             AllowMultiple = false,
-            Title = "Select a folder"
-        });
+            Title = "Select a folder",
+            SuggestedStartLocation = startFolder
+        };
+        
+        var folders = await owner.StorageProvider.OpenFolderPickerAsync(options);
 
         return folders.Count > 0 ? folders[0].Path.LocalPath : null;
     }

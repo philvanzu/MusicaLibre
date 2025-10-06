@@ -51,5 +51,9 @@
         <DependentUpon>ArtistsEditorView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="Views\CommonDialogs\ListPickDialog.axaml.cs">
+        <DependentUpon>ListPickDialog.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 </Project>
