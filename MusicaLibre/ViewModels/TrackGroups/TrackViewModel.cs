@@ -13,13 +13,16 @@ using MusicaLibre.Services;
 
 namespace MusicaLibre.ViewModels;
 
-public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
+public partial class TrackViewModel:TracksGroupViewModel, IVirtualizableItem
 {
     private const string playString = "▶️";
     private const string pauseString = "⏸";
         
     [ObservableProperty] private bool _commentsToggle;
-
+    public bool ShowPlayButton => IsPlaying && PlayStatus;
+    public bool ShowPauseButton => IsPlaying && !PlayStatus;
+    
+    public override List<Track> Tracks => Presenter.SelectedTracks ?? new List<Track>(){this.Model};
     private bool _playStatus; // true:playing, false:paused
     public bool PlayStatus
     {
@@ -27,11 +30,12 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
         set
         {
             SetProperty(ref _playStatus, value);
-            OnPropertyChanged(nameof(PlayStatusString));
+            OnPropertyChanged(nameof(ShowPlayButton));
+            OnPropertyChanged(nameof(ShowPauseButton));
         } 
     }
 
-    public string PlayStatusString => IsPlaying ? PlayStatus ? playString : pauseString : string.Empty;
+
     [ObservableProperty] private Track _model; 
     Artwork? _artwork;
     
@@ -98,7 +102,8 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
             else if(oldValue && nowPlayingListVM.PlayingTrack == this)
                 nowPlayingListVM.PlayingTrack = null;
             
-            OnPropertyChanged(nameof(PlayStatusString));
+            OnPropertyChanged(nameof(ShowPlayButton));
+            OnPropertyChanged(nameof(ShowPauseButton));
         }
         
     }
@@ -126,7 +131,7 @@ public partial class TrackViewModel:ViewModelBase, IVirtualizableItem
     public bool IsLastMultitrackFileTrack => Model.End == 1;
     public TracksListViewModel Presenter { get; set; }
     
-    public TrackViewModel(Track model, TracksListViewModel presenter)
+    public TrackViewModel(Track model, TracksListViewModel presenter):base(presenter.Library)
     {
         _model = model;
         Presenter = presenter;

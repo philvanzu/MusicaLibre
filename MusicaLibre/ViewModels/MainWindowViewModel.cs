@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -43,6 +44,23 @@ public partial class MainWindowViewModel : ViewModelBase
             if (Library != null)
             {
                 Library.Open();
+                
+                var nowPlayingTracks = Library.Data.Tracks.Values.Where(x =>
+                    AppData.Instance.AppState.NowPlayingTrackIds.Contains(x.DatabaseIndex))
+                    .ToList(); 
+                
+                if(nowPlayingTracks.Count > 0)
+                    Library.NowPlayingList.Append(nowPlayingTracks);
+
+                if (AppData.Instance.AppState.NowPlayingTrackId is not null)
+                {
+                    foreach (var track in Library.NowPlayingList.Items)
+                        if (track.Model.DatabaseIndex == AppData.Instance.AppState.NowPlayingTrackId)
+                        {
+                            Player.BlockNextAutoPlay();
+                            track.IsPlaying = true; 
+                        }
+                }
             }    
         }
         
@@ -51,6 +69,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (Library != null)
         {
+            
             Library.Close();
         }
     }
@@ -137,5 +156,6 @@ public partial class MainWindowViewModel : ViewModelBase
         var vm = new AppSettingsViewModel(dlg);
         dlg.DataContext = vm;
         await dlg.ShowDialog(MainWindow);
+        DevicesListViewModel.Instance.RefreshSyncedDevicesList();
     }
 }

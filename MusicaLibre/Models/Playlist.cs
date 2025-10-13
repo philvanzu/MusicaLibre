@@ -119,11 +119,12 @@ public class Playlist
             .Select(l => PathUtils.NormalizePath(baseDir, l))
             .ToList();
     }
-    public static void CreateM3u(string outputPath, List<string> audioFiles)
+    public static void CreateM3u(string outputPath, List<string> audioFiles, bool isRelative=false)
     {
         var baseDir = Path.GetDirectoryName(Path.GetFullPath(outputPath))!;
-        var relativePaths = audioFiles
-            .Select(f => Path.GetRelativePath(baseDir, Path.GetFullPath(f)));
+        var relativePaths = isRelative? 
+            audioFiles : 
+            audioFiles.Select(f => Path.GetRelativePath(baseDir, Path.GetFullPath(f)));
             
         // Use UTF-8 with BOM so it’s compatible with most players
         using var writer = new StreamWriter(outputPath, false, new UTF8Encoding(true));

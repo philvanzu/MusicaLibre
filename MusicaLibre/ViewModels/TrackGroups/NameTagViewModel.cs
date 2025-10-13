@@ -13,11 +13,11 @@ using MusicaLibre.Views;
 
 namespace MusicaLibre.ViewModels;
 
-public abstract partial class NameTagViewModelBase : ViewModelBase, IVirtualizableItem
+public abstract partial class NameTagViewModelBase : TracksGroupViewModel, IVirtualizableItem
 {
     [ObservableProperty] protected NameTagsPresenterViewModelBase _presenter;
     [ObservableProperty] protected NameTag _model;
-    public List<Track> Tracks => GetTracks();
+    public override List<Track> Tracks => GetTracks();
     public abstract List<Track> GetTracks();
     public virtual string Title => _model.Name??"";
     public virtual string Count => $"{Tracks.Count} tracks";
@@ -55,7 +55,7 @@ public abstract partial class NameTagViewModelBase : ViewModelBase, IVirtualizab
     public bool IsFirst => Presenter.GetIndex(this) == 0;
     public bool IsPrepared { get; private set; }
 
-    public NameTagViewModelBase(NameTag model, NameTagsPresenterViewModelBase presenter)
+    public NameTagViewModelBase(NameTag model, NameTagsPresenterViewModelBase presenter):base(presenter.Library)
     {
         _presenter = presenter;
         _model = model;

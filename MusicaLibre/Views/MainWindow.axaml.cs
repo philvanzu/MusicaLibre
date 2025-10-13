@@ -56,6 +56,7 @@ public partial class MainWindow : WindowBase
             appState.WindowWidth = Width;
             appState.WindowHeight = Height;
             appState.WindowState = WindowState;
+            
             AppData.Instance.AppState = appState;
             AppData.Instance.Save();
             AppData.Instance.Dispose();

@@ -1,16 +1,20 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MusicaLibre.Models;
 using MusicaLibre.Services;
-using MusicaLibre.ViewModels;
+using MusicaLibre.Views;
 
-namespace MusicaLibre.Models;
+namespace MusicaLibre.ViewModels;
 
 
 public partial class ExternalDevice : ViewModelBase , IDisposable
@@ -22,7 +26,10 @@ public partial class ExternalDevice : ViewModelBase , IDisposable
     [ObservableProperty] private bool _isPlugged = false;
     [ObservableProperty] private string _musicPath = string.Empty;
     [ObservableProperty] private int _maxBitrate = 320;
-    [ObservableProperty] private string _syncRule = "$AlbumArtist/$AlbumTitle/$DiscNumber - $TrackNumber_$TrackTitle";
+    [ObservableProperty] private string _albumSyncRule = "$AlbumArtist/$AlbumTitle/$DiscNumber - $TrackNumber_$TrackTitle";
+    [ObservableProperty] private string _playlistSyncRule = "Mixtapes/$PlaylistName/$PlaylistNumber - $TrackFileName";
+    [ObservableProperty] private string _trackListSyncRule = "$FolderPath/$TrackFileName";
+
     public DateTime LastSeen {get; set;}
     [JsonIgnore] public AppSettingsViewModel? Presenter{get; set;}
     public ExternalDevice() {}
@@ -35,7 +42,7 @@ public partial class ExternalDevice : ViewModelBase , IDisposable
     public override bool Equals(object? obj)
     {
         if(obj is ExternalDevice other)
-            return Info.Equals(other.Info);
+            return Info?.Equals(other.Info) ?? false;
         return false;
     }
 
@@ -47,16 +54,14 @@ public partial class ExternalDevice : ViewModelBase , IDisposable
     public void Initialize()
     {
         IsPlugged = false;
-        ExternalDevicesManager.Instance.DevicesListUpdated += OnDevicesListUpdated;
+        ExternalDevicesManager.DevicesListUpdated += OnDevicesListUpdated;
         OnDevicesListUpdated(null, EventArgs.Empty);
     }
 
     private void OnDevicesListUpdated(object? sender, EventArgs e)
     {
         bool plugged;
-        MtpDeviceInfo? info;
-        lock (ExternalDevicesManager.Instance.DevicesLock)
-            info = ExternalDevicesManager.Instance.Devices.FirstOrDefault(x=> x.Name.Equals(Name));
+        MtpDeviceInfo? info = ExternalDevicesManager.Devices.FirstOrDefault(x=> x.Name.Equals(Name));
 
         if (info != null)
         {
@@ -68,7 +73,7 @@ public partial class ExternalDevice : ViewModelBase , IDisposable
     }
     public void Dispose()
     {
-        ExternalDevicesManager.Instance.DevicesListUpdated -= OnDevicesListUpdated;
+        ExternalDevicesManager.DevicesListUpdated -= OnDevicesListUpdated;
     }
 
     [RelayCommand(CanExecute = nameof(CanPickDirectory))]
@@ -105,5 +110,9 @@ public partial class ExternalDevice : ViewModelBase , IDisposable
 
     [RelayCommand(CanExecute = nameof(CanDelete))] void Delete() => Presenter?.ExternalDevices.Remove(this);
     bool CanDelete()=> Presenter != null;
+
+
+    
+
 
 }

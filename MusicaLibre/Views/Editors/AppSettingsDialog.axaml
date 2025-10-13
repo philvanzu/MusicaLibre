@@ -32,7 +32,7 @@
                                 <Border  BorderBrush="White" BorderThickness="1"
                                          Tag="{Binding IsPlugged}"
                                          Padding="8">
-                                    <Grid RowDefinitions="44, Auto, Auto, Auto" 
+                                    <Grid RowDefinitions="44, Auto, Auto, Auto, Auto, Auto" 
                                            ColumnDefinitions="Auto,32, *">
                                         <TextBlock VerticalAlignment="Center">Name</TextBlock>
                                         <Grid  Grid.Row="0" Grid.Column="2"  ColumnDefinitions="*, Auto">
@@ -50,11 +50,22 @@
                                         </Grid>
                                 
                                         <TextBlock Grid.Row="2" Grid.Column="0">Max Bitrate</TextBlock>
-                                        <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding MaxBitrate}"
-                                                 Width="200" HorizontalAlignment="Left"/>
+                                        <StackPanel Grid.Row="2" Grid.Column="2"   Orientation="Horizontal">
+                                            <TextBox Text="{Binding MaxBitrate}"
+                                                     Width="100" HorizontalAlignment="Left"/>
+                                            <TextBlock FontSize="12" Margin="32 0 0 0 " VerticalAlignment="Center">
+                                                *Tracks with a higher bitrate will be transcoded to fit
+                                            </TextBlock>
+                                        </StackPanel>
                                     
-                                        <TextBlock Grid.Row="3" Grid.Column="0">Sync Rule</TextBlock>
-                                        <TextBox  Grid.Row="3" Grid.Column="2"  Text="{Binding SyncRule}"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="0">Album Sync Rule</TextBlock>
+                                        <TextBox  Grid.Row="3" Grid.Column="2"  Text="{Binding AlbumSyncRule}"/>
+                                        
+                                        <TextBlock Grid.Row="4" Grid.Column="0">Playlist Sync Rule</TextBlock>
+                                        <TextBox  Grid.Row="4" Grid.Column="2"  Text="{Binding PlaylistSyncRule}"/>
+                                        
+                                        <TextBlock Grid.Row="5" Grid.Column="0">TrackList Sync Rule</TextBlock>
+                                        <TextBox  Grid.Row="5" Grid.Column="2"  Text="{Binding TrackListSyncRule}"/>
                                     </Grid>    
                                 </Border>
                             </DataTemplate>

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Data.Common;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
@@ -87,7 +88,7 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
     public TracksListViewModel(LibraryViewModel library, List<Track> tracksPool, List<TrackViewColumn>? columns=null) : base(library, tracksPool)
     {
         Items = new ReadOnlyObservableCollection<TrackViewModel>(_itemsMutable);
-
+        
         _columns = columns != null ? columns : new List<TrackViewColumn>() 
         {
             new("Disc",      TrackSortKeys.DiscNumber,  t => t.Model.DiscNumber.ToString()??"", this, true, true),
@@ -320,5 +321,10 @@ public partial class TracksListViewModel:LibraryDataPresenter, ISelectVirtualiza
     private NavCapsuleViewModel? _capsule;
     public override NavCapsuleViewModel? GetCapsule() => _capsule;
     public void  SetCapsule(NavCapsuleViewModel? capsule)=>_capsule = capsule;
+
+    protected void ScrollToIndex(int idx)
+    {
+        Dispatcher.UIThread.Post(()=>ScrollToIndexRequested?.Invoke(this, idx));
+    }
 }
 

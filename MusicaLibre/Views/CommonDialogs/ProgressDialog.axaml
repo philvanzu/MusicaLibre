@@ -9,7 +9,6 @@
         Title="Progress"
         Width="800"
         SizeToContent="Height"
-        CanResize="False"
         WindowStartupLocation="CenterOwner"
         Background="#505050">
     
@@ -18,7 +17,8 @@
                    Text="{Binding Message}" 
                    FontSize="16"
                    Margin="0,0,0,12"
-                   HorizontalAlignment="Center"/>
+                   HorizontalAlignment="Center"
+                   TextWrapping="Wrap"/>
 
         <ProgressBar Grid.Row="1"
                      Minimum="0" Maximum="1"

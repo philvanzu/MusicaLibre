@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MusicaLibre.Models;
 
@@ -8,6 +9,7 @@ namespace MusicaLibre.ViewModels;
 public abstract partial class LibraryDataPresenter:ViewModelBase
 {
     [ObservableProperty] protected LibraryViewModel _library;
+    
     protected List<Track>? _selectedTracks;
 
     protected List<Track> _tracksPool;
@@ -43,4 +45,5 @@ public abstract partial class LibraryDataPresenter:ViewModelBase
     public abstract NavCapsuleViewModel? GetCapsule();
     public abstract void Filter(string searchString);
     public NavCapsuleViewModel? PreviousCapsule { get; set; }
+    
 }

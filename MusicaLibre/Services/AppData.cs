@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Avalonia;
 using Avalonia.Controls;
 using MusicaLibre.Models;
+using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.Services;
 using System.IO;
@@ -43,7 +44,7 @@ public class AppData: IDisposable
     {
         try
         {
-            ExternalDevicesManager.Instance.Start();
+            ExternalDevicesManager.Start();
             DirectoryInfo appdataDir = new DirectoryInfo(Path);
             if (!appdataDir.Exists) throw new DirectoryNotFoundException(Path);
             
@@ -88,7 +89,7 @@ public class AppData: IDisposable
     {
         foreach(var dev in ExternalDevices)
             dev.Dispose();
-        ExternalDevicesManager.Instance.Dispose();
+        ExternalDevicesManager.Stop();
     }
 }
 
@@ -99,6 +100,9 @@ public class AppState
     public double WindowWidth { get; set; } = 800;
     public double WindowHeight { get; set; } = 600;
     public WindowState WindowState { get; set; } = WindowState.Normal;
+    public double Volume { get; set; } = 1;
+    public List<long> NowPlayingTrackIds { get; set; } = new();
+    public long? NowPlayingTrackId { get; set; }
 }
 
 public class UserSettings

@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using MusicaLibre.Services;
@@ -99,13 +100,21 @@ public partial class PlaylistsListView : UserControl
         if (sender is Border border && border.DataContext is PlaylistViewModel vm && !vm.IsSelected)
         {
             var kind = e.GetCurrentPoint(this).Properties.PointerUpdateKind;
-            if ( kind is PointerUpdateKind.RightButtonPressed)
-            {
-                var ctrlPressed = InputManager.CtrlPressed;
-                InputManager.CtrlPressed = true;
+            if ( kind is PointerUpdateKind.RightButtonPressed && ! vm.IsSelected)
                 vm.IsSelected = true;
-                InputManager.CtrlPressed = ctrlPressed;
-            }
+        }
+    }
+
+
+    private void DeviceMenuItemPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if(sender is Border border && 
+           border.DataContext is ExternalDevice device && 
+           device.IsPlugged &&
+           border.Parent?.Parent is MenuItem mi &&
+           mi.Tag is TracksGroupViewModel vm)
+        {
+            _ = vm.AddToDevice(device);
         }
     }
 }

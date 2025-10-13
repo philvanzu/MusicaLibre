@@ -226,7 +226,9 @@
                                                          Options="{Binding ArtistsOptions}"
                                                          IsMultiValue="True"
                                                          EnterPressedCommand="{Binding ArtistsUpdatedCommand}"/>
-                                           <Button Grid.Row="7" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <Button Grid.Row="7" Grid.Column="4" 
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"
+                                                   Command="{Binding ArtistsUpdatedCommand}"/>
                                            <!--Genres-->
                                            <TextBlock Grid.Row="8" Grid.Column="0" >Genres</TextBlock>
                                            <ctrl:TagBox   Grid.Row="8" Grid.Column="2" 

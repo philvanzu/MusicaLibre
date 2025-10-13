@@ -71,6 +71,20 @@
                                     <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}"/>
                                     <MenuItem Header="Transcode" Command="{Binding TranscodeCommand}"/>
                                     <MenuItem Header="Pick Artwork" />
+                                    <MenuItem Header="_Add To Device..." x:Name="DeviceMenuItem" Tag="{Binding .}" 
+                                              ItemsSource="{Binding ., Source={x:Static vm:DevicesListViewModel.ExternalDevices}}" 
+                                              IsEnabled="{Binding ShowDevicesMenu, Source={x:Static vm:DevicesListViewModel.Instance}}">
+                                      <MenuItem.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ExternalDevice">
+                                          <Border PointerPressed="DeviceMenuItemPressed" Background="Transparent"
+                                                  IsHitTestVisible="True"
+                                                  IsEnabled="{Binding IsPlugged}"
+                                                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                            <TextBlock Text="{Binding Name}" />    
+                                          </Border>
+                                        </DataTemplate>
+                                      </MenuItem.ItemTemplate>
+                                    </MenuItem>
                                   </ContextMenu>
                                 </Border.ContextMenu>
                                 <!-- row grid -->

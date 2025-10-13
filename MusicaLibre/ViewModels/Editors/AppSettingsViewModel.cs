@@ -5,7 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MusicaLibre.Models;
+using MusicaLibre.ViewModels;
 using MusicaLibre.Services;
 using MusicaLibre.Views;
 
@@ -27,7 +27,7 @@ public partial class AppSettingsViewModel:ViewModelBase
             device.Presenter = this;
             if (device.Info is null)
             {
-                device.Info = ExternalDevicesManager.Instance.Devices.FirstOrDefault(x=> x.Name.Equals(device.Name));
+                device.Info = ExternalDevicesManager.Devices.FirstOrDefault(x=> x.Name.Equals(device.Name));
                 if(device.Info is not null)
                     device.IsPlugged = true;    
             }
@@ -64,14 +64,14 @@ public partial class AppSettingsViewModel:ViewModelBase
             Title = $"Device Picker",
             Content =$"Currently Available Devices:",
             ShowCancelButton = true,
-            List = new(ExternalDevicesManager.Instance.Devices.Select(x=>x.Name).ToList()),
+            List = new(ExternalDevicesManager.Devices.Select(x=>x.Name).ToList()),
             SelectedIndex = -1,
         };
         dlg.DataContext = vm;
         if (await dlg.ShowDialog<bool>(Window))
         {
             var deviceName = vm.List[vm.SelectedIndex];
-            var device = ExternalDevicesManager.Instance.Devices.FirstOrDefault(x=> x.Name.Equals(deviceName));
+            var device = ExternalDevicesManager.Devices.FirstOrDefault(x=> x.Name.Equals(deviceName));
             if (device != null)
             {
                 var ed = new ExternalDevice(device)

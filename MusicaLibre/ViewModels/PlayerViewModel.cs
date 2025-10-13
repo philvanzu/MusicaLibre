@@ -14,7 +14,7 @@ namespace MusicaLibre.ViewModels;
 public partial class PlayerViewModel : ViewModelBase
 {
     private readonly LibVLC _libVLC;
-    
+        
     public AudioPlayerVlc? CurrentPlayer { get; set; }
     public AudioPlayerVlc? NextPlayer { get; set; }
     
@@ -26,7 +26,7 @@ public partial class PlayerViewModel : ViewModelBase
     [ObservableProperty] private string _remaining;
     [ObservableProperty] private string _duration;
 
-    [ObservableProperty] private double _volume=1;
+    [ObservableProperty] private double _volume;
     NowPlayingListViewModel? _nowPlayingList;
 
 
@@ -35,15 +35,15 @@ public partial class PlayerViewModel : ViewModelBase
     [ObservableProperty] private MainWindowViewModel _mainVM;
     public TrackViewModel? CurrentTrack => _nowPlayingList?.PlayingTrack;
     public TrackViewModel? NextTrack => _nowPlayingList?.NextTrack;
-
+    private bool _blockNextAutoPlay = false;
     public PlayerViewModel(MainWindowViewModel mainVm)
     {
         Core.Initialize(); // Load libvlc
         _libVLC = new LibVLC();
         MainVM = mainVm;
         MainVM.PropertyChanged += OnMainVMPropertyChanged;
-        
-        
+
+        _volume = AppData.Instance.AppState.Volume;
         _positionTimer = new DispatcherTimer();
         _positionTimer.Interval = TimeSpan.FromMilliseconds(150);
         _positionTimer.Tick += OnPositionTimerTick;
@@ -98,6 +98,8 @@ public partial class PlayerViewModel : ViewModelBase
     {
         if (CurrentPlayer != null)
             CurrentPlayer.SetVolume(value);
+        
+        AppData.Instance.AppState.Volume = value;
     }
     partial void OnPositionChanged(double value)
     {
@@ -121,7 +123,8 @@ public partial class PlayerViewModel : ViewModelBase
             CurrentPlayer.SetPosition( (float)filepos );
         } 
     }
-
+    
+    public void BlockNextAutoPlay(){ _blockNextAutoPlay = true; }
     public void LoadCurrentTrack()
     {
         // check if scheduled track is already playing
@@ -139,7 +142,13 @@ public partial class PlayerViewModel : ViewModelBase
                 CurrentPlayer.SetVolume(Volume);
 
                 IsLoaded = true;
-                CurrentPlayer.Play();
+                if (_blockNextAutoPlay)
+                {
+                    _blockNextAutoPlay = false;
+                    CurrentPlayer.Pause();
+                }
+                else CurrentPlayer.Play();
+                
                 if(CurrentTrack.FileIsMultitrack)
                     CurrentPlayer.SetPosition( (float)CurrentTrack.TrackToFilePosition(0) );
                 IsPlaying = true;
@@ -168,6 +177,7 @@ public partial class PlayerViewModel : ViewModelBase
                 NextPlayer=new AudioPlayerVlc(_libVLC, NextTrack,  TrackEnded);
 
                 NextPlayer.Pause();
+                NextTrack.PlayStatus = false;
                 if(NextTrack.FileIsMultitrack)
                     NextPlayer.SetPosition((float) NextTrack.TrackToFilePosition(0));
             }
@@ -183,6 +193,7 @@ public partial class PlayerViewModel : ViewModelBase
         try{
             if (CurrentPlayer != null)
             {
+
                 if (_nowPlayingList?.RepeatStateIdx == 1)
                 {
                     CurrentPlayer?.Restart();
@@ -192,6 +203,7 @@ public partial class PlayerViewModel : ViewModelBase
                     IsPlaying = true;
                     return;
                 }
+                
                 ReleasePlayer(CurrentPlayer);
                 CurrentPlayer = null;  
             }
@@ -202,6 +214,7 @@ public partial class PlayerViewModel : ViewModelBase
                 Duration = TimeUtils.FormatDuration(CurrentTrack.TrackDuration.Value);
                 CurrentPlayer.SetVolume(Volume);
                 CurrentPlayer.Play();
+                NextTrack!.PlayStatus = true;
                 NextPlayer = null;
             }
             else

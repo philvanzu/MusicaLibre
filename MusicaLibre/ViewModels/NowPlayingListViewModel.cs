@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData;
@@ -22,6 +23,7 @@ public partial class NowPlayingListViewModel:TracksListViewModel
     [ObservableProperty] private string? _durationInfo;
     [ObservableProperty] private int _repeatStateIdx;
     [ObservableProperty] private int _shuffleStateIdx;
+
     
     private bool _shuffled;
 
@@ -83,11 +85,21 @@ public partial class NowPlayingListViewModel:TracksListViewModel
         _count = (uint) i;
         _itemsMutable.Clear();
         _itemsMutable.AddRange(_items);
+        
+        AppData.Instance.AppState.NowPlayingTrackIds.Clear();
+        AppData.Instance.AppState.NowPlayingTrackIds.AddRange(
+            Items.Select(x=> x.Model.DatabaseIndex));
     }
     partial void OnPlayingTrackChanged(TrackViewModel? value)
     {
-        if(PlayingTrack == null)
+        if (PlayingTrack == null)
+        {
             Console.WriteLine("PlayingTrack set to null");
+            AppData.Instance.AppState.NowPlayingTrackId = null;
+        }
+        else 
+            AppData.Instance.AppState.NowPlayingTrackId = PlayingTrack.Model.DatabaseIndex;
+            
 
         var pos = value is not null? Items.IndexOf(value):-1;
         _elapsed = TimeSpan.Zero;
@@ -114,6 +126,8 @@ public partial class NowPlayingListViewModel:TracksListViewModel
         }
         CountInfo = value is not null ?  $"Now Playing track {pos+1}/{_count}": string.Empty;
         DurationInfo = $"{_elapsed:hh\\:mm\\:ss} / {_totalDuration:hh\\:mm\\:ss}";
+        if(pos > -1)
+            ScrollToIndex(pos);
     }
 
     public void OnPlayerTimerTick(TimeSpan trackElapsed)
@@ -131,7 +145,12 @@ public partial class NowPlayingListViewModel:TracksListViewModel
     {
         var pos = _playingTrackIndex + 1;
         if( pos < _items.Count) SetIsPlaying(pos);
-        else if(RepeatStateIdx == 2) SetIsPlaying(0);
+        else
+        {
+            if(RepeatStateIdx == 2) SetIsPlaying(0);
+            else if (PlayingTrack is not null) 
+                PlayingTrack.IsPlaying = false;
+        }
     }
 
     public void Previous()

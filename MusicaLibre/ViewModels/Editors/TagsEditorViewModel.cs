@@ -151,7 +151,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
         var added = TimeUtils.FromDateTimeString(AddedBinding);
         if (added is null)
         {
-            DialogUtils.MessageBox(Window, "Error",
+            await DialogUtils.MessageBox(Window, "Error",
                 "Could not parse time format. Correct format is yyyy-MM-dd HH:mm:ss");
             return;
         }
@@ -160,7 +160,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
             vm.Model.DateAdded = added.Value;
             await vm.Model.DbUpdateAsync(Library.Database);
         }
-        DialogUtils.MessageBox(Window, "Success",
+        await DialogUtils.MessageBox(Window, "Success",
             $"{SelectedItems.Count} file(s) updated successfully");
         SelectedTrackChanged();
     }
@@ -178,17 +178,17 @@ public partial class TagsEditorViewModel:TracksListViewModel
         var modified = TimeUtils.FromDateTimeString(ModifiedBinding);
         if (modified is null)
         {
-            DialogUtils.MessageBox(Window, "Error",
+            await DialogUtils.MessageBox(Window, "Error",
                 "Could not parse time format. Correct format is yyyy-MM-dd HH:mm:ss");
             return;
         }
         foreach (var vm in SelectedItems)
         {
-            File.SetLastWriteTime(vm.Model.FilePath, modified!.Value);
+            File.SetLastWriteTime(vm.Model.FilePath, modified.Value);
             vm.Model.Modified = modified.Value;
             await vm.Model.DbUpdateAsync(Library.Database);
         }
-        DialogUtils.MessageBox(Window, "Success",
+        await DialogUtils.MessageBox(Window, "Success",
             $"{SelectedItems.Count} file(s) updated successfully");
         
         SelectedTrackChanged();
@@ -204,17 +204,17 @@ public partial class TagsEditorViewModel:TracksListViewModel
         var created = TimeUtils.FromDateTimeString(CreatedBinding);
         if (created is null)
         {
-            DialogUtils.MessageBox(Window, "Error",
+            await DialogUtils.MessageBox(Window, "Error",
                 "Could not parse time format. Correct format is yyyy-MM-dd HH:mm:ss");
             return;
         }
         foreach (var vm in SelectedItems)
         {
-            File.SetCreationTime(vm.Model.FilePath, created!.Value);
+            File.SetCreationTime(vm.Model.FilePath, created.Value);
             vm.Model.Created = created.Value;
             await vm.Model.DbUpdateAsync(Library.Database);
         }
-        DialogUtils.MessageBox(Window, "Success",
+        await DialogUtils.MessageBox(Window, "Success",
             $"{SelectedItems.Count} file(s) updated successfully");
         SelectedTrackChanged();
     }
@@ -326,9 +326,9 @@ public partial class TagsEditorViewModel:TracksListViewModel
     //Album
     [ObservableProperty] private string _albumBinding = string.Empty;
     [ObservableProperty] private IEnumerable<string> _albumOptions;
-    public string Album => IsMultiple ? CoalescedAlbum : $"{SelectedItem?.Model.Album?.Title}";
+    public string Album => IsMultiple ? CoalescedAlbum : $"{SelectedItem?.Model.Album.Title}";
     public string CoalescedAlbum =>
-        Utils.Coalesce(SelectedItems.Select(x=>x.Model.Album?.Title).ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>x.Model.Album.Title).ToArray())
         ??_mult;
     partial void OnAlbumBindingChanged(string value)
     {
@@ -338,11 +338,11 @@ public partial class TagsEditorViewModel:TracksListViewModel
 
     [RelayCommand] async Task AlbumUpdated()
     {
-        if(SelectedItems == null || SelectedItems.Count == 0) return;
+        if(SelectedItems.Count == 0) return;
         
         var title = AlbumBinding;
         
-        var oldAlbums = SelectedItems?.Select(x=> x.Model.Album).Distinct().ToList();
+        var oldAlbums = SelectedItems.Select(x=> x.Model.Album).Distinct().ToList();
         ObservableCollection<string>? renames = null;
         try
         {
@@ -358,17 +358,17 @@ public partial class TagsEditorViewModel:TracksListViewModel
             existingAlbums.Select(x => $"{x.Title} : {x.AlbumArtist.Name} : {x.Year.Name}") .ToArray());
         
         
-        Album? album = null;
+        Album? album;
         var createdAlbumCount = 0;
-        var selectionArtist = SelectedItems!.SelectMany(x=>x.Model.Artists).GroupBy(a=> a)
+        var selectionArtist = SelectedItems.SelectMany(x=>x.Model.Artists).GroupBy(a=> a)
             .Select(g => new { Artist = g.Key, Count = g.Count() })
             .OrderBy(x=>x.Count).FirstOrDefault() ?.Artist;
         
-        var selectionYear = SelectedItems!.GroupBy(x=>x.Model.Year)
+        var selectionYear = SelectedItems.GroupBy(x=>x.Model.Year)
             .Select(g => new { Year = g.Key, Count = g.Count() })
             .OrderBy(x=>x.Count).FirstOrDefault()?.Year;
         
-        var selectionDirectories = SelectedItems!.Select(x=>x.Model.Folder.Name).Distinct().ToList();
+        var selectionDirectories = SelectedItems.Select(x=>x.Model.Folder.Name).Distinct().ToList();
         var selectionFolderRoot = PathUtils.GetCommonRoot(selectionDirectories);
         
 
@@ -390,17 +390,19 @@ public partial class TagsEditorViewModel:TracksListViewModel
         {
             if (dlgvm.RenameButtonChecked)
             {
+                if (renames == null)
+                {
+                    await DialogUtils.MessageBox(Window,  "Error","Rename button checked but renames is empty" );
+                    return;
+                }
                 var idx = dlgvm.SelectedRenameIndex;
                 if (renames.Count == 1) idx = 0;
                 
                 if (idx >= 0 && idx < renames.Count)
                 {
                     album = oldAlbums[idx];
-                    if (album != null)
-                    {
-                        album.Title = title;
-                        await album.DbUpdateAsync(Library.Database);
-                    }
+                    album.Title = title;
+                    await album.DbUpdateAsync(Library.Database);
                 }
                 else
                 {
@@ -477,30 +479,28 @@ public partial class TagsEditorViewModel:TracksListViewModel
         else return;        
 
         int createdDisksCount = 0;
-        if ( album is not null && SelectedItems is not null)
+
+        //assign album to all selected tracks
+        foreach (var track in SelectedItems.Where(x => x.Model.Album != album))
         {
-            //assign album to all selected tracks
-            foreach (var track in SelectedItems.Where(x => x.Model.Album != album))
+            track.Model.AlbumId = album.DatabaseIndex;
+            track.Model.Album = album;
+            await track.Model.DbUpdateAsync(Library.Database);
+            if(! Library.Data.Discs.TryGetValue((track.Model.DiscNumber, album.DatabaseIndex), out var disc))
             {
-                track.Model.AlbumId = album.DatabaseIndex;
-                track.Model.Album = album;
-                await track.Model.DbUpdateAsync(Library.Database);
-                if(! Library.Data.Discs.TryGetValue((track.Model.DiscNumber, album.DatabaseIndex), out var disc))
-                {
-                    disc = new Disc(track.Model.DiscNumber, album);
-                    disc.AlbumId = album.DatabaseIndex;
-                    await disc.DbInsertAsync(Library.Database);
-                    Library.Data.Discs.Add((disc.Number, disc.AlbumId), disc);
-                    createdDisksCount++;
-                }
+                disc = new Disc(track.Model.DiscNumber, album);
+                disc.AlbumId = album.DatabaseIndex;
+                await disc.DbInsertAsync(Library.Database);
+                Library.Data.Discs.Add((disc.Number, disc.AlbumId), disc);
+                createdDisksCount++;
             }
         }
 
         int removedAlbumCount = 0;
         //Remove empty albums
-        foreach (var oldAlbum in oldAlbums.Where(x => x != null && Library.IsAlbumEmpty(x)))
+        foreach (var oldAlbum in oldAlbums.Where(x => Library.IsAlbumEmpty(x)))
         {
-            Library.RemoveEmptyAlbum(oldAlbum!);
+            await Library.RemoveEmptyAlbum(oldAlbum);
             removedAlbumCount++;
         }
         var message=$"{SelectedItems.Count} Tracks updated.";
@@ -516,16 +516,16 @@ public partial class TagsEditorViewModel:TracksListViewModel
     
     // AlbumArtist
     [ObservableProperty] private string _albumArtistBinding = string.Empty;
-    public string? AlbumArtist => IsMultiple ? CoalescedAlbumArtist : SelectedItem?.Model.Album?.AlbumArtist.Name;
+    public string? AlbumArtist => IsMultiple ? CoalescedAlbumArtist : SelectedItem?.Model.Album.AlbumArtist.Name;
     public string CoalescedAlbumArtist =>
-        Utils.Coalesce(SelectedItems.Select(x => $"{x.Model.Album?.AlbumArtist.Name}").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x => $"{x.Model.Album.AlbumArtist.Name}").ToArray())
         ??_mult;
 
     [RelayCommand]
     async Task AlbumArtistUpdated()
     {
         var artistName = AlbumArtistBinding;
-        if (string.IsNullOrWhiteSpace(artistName) || SelectedItems is null) return;
+        if (string.IsNullOrWhiteSpace(artistName)) return;
         int createdArtistCount = 0;
         int updatedAlbumCount = 0;
         var artist = Library.Data.Artists.Values.FirstOrDefault(x => x.Name == artistName);
@@ -543,16 +543,15 @@ public partial class TagsEditorViewModel:TracksListViewModel
         List<Task> batch = new();
         foreach (var track in SelectedItems)
         {
-            if (track.Model.Album is null) continue;
-            var albumTitle = track.Model.Album!.Title;
+            var albumTitle = track.Model.Album.Title;
 
             var existing = albumCandidates.FirstOrDefault(x => x.Title == albumTitle);
             if (existing is null)
             {
-                track.Model.Album!.AlbumArtist = artist;
-                track.Model.Album!.ArtistId = artist.DatabaseIndex;
+                track.Model.Album.AlbumArtist = artist;
+                track.Model.Album.ArtistId = artist.DatabaseIndex;
                 batch.Add(track.Model.Album.DbUpdateAsync(Library.Database));
-                albumCandidates.Add(track.Model.Album!);
+                albumCandidates.Add(track.Model.Album);
                 updatedAlbumCount++;
             }
             else
@@ -584,12 +583,12 @@ public partial class TagsEditorViewModel:TracksListViewModel
     
     //Year
     [ObservableProperty] private string _yearBinding = string.Empty;
-    public string Year => IsMultiple ? CoalescedYear : $"{SelectedItem?.Model.Year?.Number}";
+    public string Year => IsMultiple ? CoalescedYear : $"{SelectedItem?.Model.Year.Number}";
     public string CoalescedYear =>
-        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Year?.Number}").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Year.Number}").ToArray())
         ??_mult;
     public string CoalescedAlbumYear =>
-        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Album.Year?.Number}").ToArray())
+        Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Album.Year.Number}").ToArray())
         ??_mult;
 
     [RelayCommand]
@@ -625,14 +624,12 @@ public partial class TagsEditorViewModel:TracksListViewModel
         if(! uint.TryParse(YearBinding, out uint y))
             y = 0;
         
-        int yearCreatedCount = 0;
         var year = Library.Data.Years.Values.FirstOrDefault(x => x.Number.Equals(y));
         if (year is null || year.DatabaseIndex == 0)
         {
             year = new Year(y);
             await year.DbInsertAsync(Library.Database);
             Library.Data.Years.Add(year.DatabaseIndex, year);
-            yearCreatedCount++;
         }
         int albumUpdatedCount = 0;
         foreach (var album in SelectedItems.Select(x => x.Model.Album).Distinct())
@@ -897,7 +894,6 @@ public partial class TagsEditorViewModel:TracksListViewModel
     [RelayCommand]
     async Task UpdateFilesTags()
     {
-        List<Task> batch = new List<Task>();
         foreach (var item in SelectedItems)
         {
             TagWriter.EnqueueFileUpdate(item.Model);

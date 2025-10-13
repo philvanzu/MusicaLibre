@@ -105,7 +105,11 @@ public partial class TagBox : UserControl
             {
                 _currentValue = Options.ElementAt(PART_Listbox.SelectedIndex);
                 if (IsMultiValue)
-                    PART_Textbox.Text = $"{string.Join(", ", _commitedValues)}, {_currentValue}";
+                {
+                    var text = (_commitedValues.Count > 0) ? $"{string.Join(", ", _commitedValues)}, " : string.Empty;
+                    PART_Textbox.Text = $"{text}{_currentValue}";
+                }
+                    
                 else
                     PART_Textbox.Text = _currentValue;
 
@@ -169,7 +173,8 @@ public partial class TagBox : UserControl
                 _currentValue = Options.ElementAt(PART_Listbox.SelectedIndex);
                 if (IsMultiValue)
                 {
-                    PART_Textbox.Text = $"{string.Join(", ", _commitedValues)}, {_currentValue}";
+                    var text = (_commitedValues.Count > 0) ? $"{string.Join(", ", _commitedValues)}, " : string.Empty;
+                    PART_Textbox.Text = $"{text}{_currentValue}";
                 }
                 else PART_Textbox.Text = _currentValue;
             }
