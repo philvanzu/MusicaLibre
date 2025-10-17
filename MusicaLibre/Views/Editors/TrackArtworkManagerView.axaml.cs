@@ -7,16 +7,16 @@ using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.Views;
 
-public partial class ArtworkListManagerView : UserControl
+public partial class TrackArtworkManagerView : UserControl
 {
-    public ArtworkListManagerView()
+    public TrackArtworkManagerView()
     {
         InitializeComponent();
     }
 
     private void ArtworkTapped(object? sender, TappedEventArgs e)
     {
-        if (sender is Border border && border.DataContext is ArtworkViewModel vm)
+        if (sender is Border border && border.DataContext is TrackArtworkViewModel vm)
         {
             vm.IsSelected = true;
         }

@@ -119,8 +119,12 @@ public partial class PlayerViewModel : ViewModelBase
         Position = trackPosition;
         if (CurrentPlayer != null)
         {
-            var filepos = CurrentTrack.TrackToFilePosition(trackPosition);
-            CurrentPlayer.SetPosition( (float)filepos );
+            try
+            {
+                var filepos = (CurrentTrack != null)?CurrentTrack.TrackToFilePosition(trackPosition):0;
+                CurrentPlayer.SetPosition( (float)filepos );   
+            }
+            catch(Exception ex){Console.Error.WriteLine(ex);}
         } 
     }
     

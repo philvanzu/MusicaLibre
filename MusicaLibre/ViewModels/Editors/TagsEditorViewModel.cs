@@ -30,7 +30,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
         Window = window;
         window.Closing += OnWindowClosing;
 
-        _selectedTrackArtwork = new(library, window);
+        _selectedTrackArtwork = new(this, window);
         _columns = new List<TrackViewColumn>()
         {
             new("Path", TrackSortKeys.FilePath, t => t.Model.FileName, this)

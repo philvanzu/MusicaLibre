@@ -265,7 +265,7 @@
                                 </ScrollViewer>                                 
                              </TabItem>
                              <TabItem Header="Embedded Images">
-                                 <v:ArtworkListManagerView DataContext="{Binding SelectedTrackArtwork}" />
+                                 <v:TrackArtworkManagerView DataContext="{Binding SelectedTrackArtwork}" />
                              </TabItem>
                          </TabControl>    
                                

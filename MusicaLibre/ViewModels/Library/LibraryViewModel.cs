@@ -307,6 +307,7 @@ public partial class LibraryViewModel : ViewModelBase
             await dialog.ShowDialog(MainWindowViewModel.MainWindow);
             DataPresenter?.Refresh();
         }
+        catch(Exception ex){Console.WriteLine(ex);}
         finally
         {
             DbSyncManager.SyncLock.Release();

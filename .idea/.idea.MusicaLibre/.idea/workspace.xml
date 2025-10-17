@@ -8,44 +8,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="297d10ca-c7cc-4d05-ad36-e93d577624fd" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/DevicesListViewModel.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/TrackGroups/TracksGroupViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/avalonia.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/avalonia.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MusicaLibre.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Controls/TagBox.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Controls/TagBox.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Models/ExternalDevice.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/TrackGroups/ExternalDevice.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Models/Playlist.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Models/Playlist.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/MusicaLibre.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/MusicaLibre.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/MusicaLibre.csproj.DotSettings" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/MusicaLibre.csproj.DotSettings" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Services/AppData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Services/AppData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Services/ExternalDevicesManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Services/ExternalDevicesManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Services/Utils/Utils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Services/Utils/Utils.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/AlbumViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/TrackGroups/AlbumViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/LibraryDataPresenter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/LibraryDataPresenter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/NameTagViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/TrackGroups/NameTagViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/PlaylistViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/TrackGroups/PlaylistViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/TrackViewColumn.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/TrackGroups/TrackViewColumn.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/TrackViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/TrackGroups/TrackViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/TracksListViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/TracksListViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/AppSettingsViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/AppSettingsViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Models/Artwork.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Models/Artwork.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Models/Track.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Models/Track.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Services/Utils/DialogUtils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Services/Utils/DialogUtils.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/ArtworkListManagerViewModel.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/ArtworkPickerViewModel.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/ArtworkViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TrackArtworkViewModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TagsEditorViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TagsEditorViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/MainWindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/MainWindowViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/NowPlayingListViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/NowPlayingListViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TrackArtworkManagerViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TrackArtworkManagerViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Library/LibraryViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Library/LibraryViewModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/PlayerViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/PlayerViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/CommonDialogs/ProgressDialog.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/CommonDialogs/ProgressDialog.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/AlbumsListView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/AlbumsListView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/AlbumsListView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/AlbumsListView.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/NameTagsListView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/NameTagsListView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/NameTagsListView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/NameTagsListView.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/PlaylistsListView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/PlaylistsListView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/PlaylistsListView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/PlaylistsListView.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/TracksListView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/TracksListView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/TracksListView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/TracksListView.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AppSettingsDialog.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AppSettingsDialog.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtworkListManagerView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TrackArtworkManagerView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtworkListManagerView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TrackArtworkManagerView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtworkPickerDialog.axaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtworkPickerDialog.axaml.cs" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TagsEditorDialog.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TagsEditorDialog.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/MainWindow.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/MainWindow.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/NowPlayingListView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/NowPlayingListView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/PlayerView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/PlayerView.axaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,6 +61,8 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b9c62e8e682440cd84e6081f7672fcd3d1a000/02/9ccb3786/ExceptionDispatchInfo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b9c62e8e682440cd84e6081f7672fcd3d1a000/08/5f7bd82b/AsyncVoidMethodBuilder.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b9c62e8e682440cd84e6081f7672fcd3d1a000/77/64adfb74/ThrowHelper.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b9c62e8e682440cd84e6081f7672fcd3d1a000/aa/5d652cd7/AsyncTaskMethodBuilder`1.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b9c62e8e682440cd84e6081f7672fcd3d1a000/b4/a6a25f37/Path.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b9c62e8e682440cd84e6081f7672fcd3d1a000/b9/ef2796d8/StackFrameIterator.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b9c62e8e682440cd84e6081f7672fcd3d1a000/d6/8daf38b8/SpanHelpers.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d72e815ad95e4afca99d97adba235137d1a000/12/94cb193a/ThrowHelper.cs" root0="FORCE_HIGHLIGHTING" />
@@ -96,9 +78,12 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/1edae082b01099bdadb42fe11ace6837525c82/MusicaLibre.ViewModels.TrackViewModel.g.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/21e59fdccb7f461a7c2fefb42c29a6dcf2d785/MusicaLibre.ViewModels.LibraryDataPresenter.g.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/241572be51bab940bd9485d95fafc43980678ef7131557dbc8f18f63446e463/Functions.Generated.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/752bbcc9cc4f8bd1a0d29d96d43040cdeaeb40f1ef3e19fde544683879d537ef/AsyncRelayCommand.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/844e13507f6e832144d2fb66d4ddb6a48aeb844ee532b636ffa5b4e68ac4f4b6/VolumeMonitor.Functions.Generated.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/9466873dc0f053cc34631bac7c3b60f9581eef5ca94bb1ebd954479a6aa1/BindingFlags.Generated.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/982de4dc13bc8a88ce65a10e85c9cf3bd9db977/MusicaLibre.ViewModels.NameTagViewModelBase.g.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a12848b983dd305ff264763df9aadd83b2a87b/MusicaLibre.ViewModels.TracksListViewModel.g.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/c79fe91e29c86c9b95c77bf39129b1d5c11a4fcd/MusicaLibre.ViewModels.TrackArtworkManagerViewModel.g.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/cfe627784a6047eeb69eb3f1eed9f1c0f32d92b86af82fbb942bea8fe56e62/AsyncRelayCommand{T}.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Controls/MultiStateToggle.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Converters/RadioConverter.cs" root0="FORCE_HIGHLIGHTING" />
@@ -223,7 +208,8 @@
       <workItem from="1759671155259" duration="26386000" />
       <workItem from="1759751539585" duration="4036000" />
       <workItem from="1759760971776" duration="57218000" />
-      <workItem from="1759944767024" duration="96691000" />
+      <workItem from="1759944767024" duration="107165000" />
+      <workItem from="1760480669972" duration="26512000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -377,7 +363,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759759337177</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="persistent now playing state across sessions. File transfer to phone functional at least on kde / cachyos.">
+      <option name="closed" value="true" />
+      <created>1760395362978</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1760395362978</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -419,7 +413,8 @@
     <MESSAGE value="progress with External devices mtp support" />
     <MESSAGE value="Trying to get a sensible Gio External device manager up and running" />
     <MESSAGE value="External device manager landmark" />
-    <option name="LAST_COMMIT_MESSAGE" value="External device manager landmark" />
+    <MESSAGE value="persistent now playing state across sessions. File transfer to phone functional at least on kde / cachyos." />
+    <option name="LAST_COMMIT_MESSAGE" value="persistent now playing state across sessions. File transfer to phone functional at least on kde / cachyos." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -448,19 +443,6 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="223" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/MusicaLibre/Models/Genre.cs</url>
-          <line>51</line>
-          <properties documentPath="$PROJECT_DIR$/MusicaLibre/Models/Genre.cs" containingFunctionPresentation="Method 'DbUpdateAsync'">
-            <startOffsets>
-              <option value="1285" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1337" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="233" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/MusicaLibre/Models/Album.cs</url>
@@ -500,19 +482,6 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="337" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/MusicaLibre/ViewModels/PlayerViewModel.cs</url>
-          <line>140</line>
-          <properties documentPath="$PROJECT_DIR$/MusicaLibre/ViewModels/PlayerViewModel.cs" containingFunctionPresentation="Method 'LoadCurrentTrack'">
-            <startOffsets>
-              <option value="4901" />
-            </startOffsets>
-            <endOffsets>
-              <option value="4971" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="346" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

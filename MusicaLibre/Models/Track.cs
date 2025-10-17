@@ -276,7 +276,27 @@ public class Track
         catch(Exception e){Console.WriteLine(e);}
     }
 
-
+    public async Task UpdateArtworksAsync(LibraryViewModel library)
+    {
+        try
+        {
+            string delete = $"DELETE FROM TrackArtworks WHERE TrackId = {DatabaseIndex};";
+                
+            await library.Database.ExecuteNonQueryAsync(delete);
+            
+            string insertArtwork=$"INSERT OR IGNORE INTO TrackArtworks (TrackId, ArtworkId) VALUES ($id, $artworkId);";
+            foreach (var artwork in Artworks)
+            {
+                _ = library.Database.ExecuteNonQueryAsync(insertArtwork, new()
+                {
+                    ["$id"] = DatabaseIndex,
+                    ["$artworkId"] = artwork.DatabaseIndex,
+                });
+            }
+        }
+        catch(Exception e){Console.WriteLine(e);}
+    }
+    
     public async Task ReloadFileDataAsync(LibraryViewModel library)
     {
 
@@ -305,4 +325,5 @@ public class Track
         Album = Album.Null,
     };
     */
+
 }

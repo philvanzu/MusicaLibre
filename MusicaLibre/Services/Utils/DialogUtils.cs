@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
@@ -99,11 +101,17 @@ public static class DialogUtils
     
     public static async Task<Artwork?> PickArtwork(Window owner, LibraryViewModel library, string rootDirectory, ArtworkRole role)
     {
-        ArtworkPickerDialog dlg = new ArtworkPickerDialog();
-        ArtworkPickerViewModel vm = new ArtworkPickerViewModel(library, dlg, rootDirectory, role);
-        dlg.DataContext = vm;
-        return await dlg.ShowDialog<Artwork?>(owner);
-        
+        var selectedPath = await DialogUtils.PickFileAsync(owner, rootDirectory,new[]
+        {
+            new FilePickerFileType("Image Files") { Patterns = new[] { "*.jpg",  "*.jpeg", "*.png",  "*.bmp",  "*.gif", "*.webp" } },
+            FilePickerFileTypes.All // built-in “All files (*.*)”
+        } );
+        if (!string.IsNullOrEmpty(selectedPath)  && File.Exists(selectedPath))
+        {
+            var defaultFolder = library.Data.Folders.Values.FirstOrDefault(x=> x.Name.Equals(rootDirectory));
+            return await Artwork.InsertIfNotExist(library, selectedPath, role, ArtworkSourceType.External, defaultFolder);
+        }
+        return null;
     }
 
     public static async Task MessageBox(Window owner, string title, string message)

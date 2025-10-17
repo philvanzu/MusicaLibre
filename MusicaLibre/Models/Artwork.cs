@@ -2,6 +2,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -198,6 +199,100 @@ public class Artwork:IDisposable
         }
 
         return artworks;
+    }
+
+    public static async Task <Artwork?>InsertIfNotExist(
+        LibraryViewModel library, 
+        string imagePath, 
+        ArtworkRole role, 
+        ArtworkSourceType sourceType,
+        Folder? defaultFolder = null)
+    {
+        var srcFolderPath = Path.GetDirectoryName(imagePath); 
+        var folder = library.Data.Folders.Values.FirstOrDefault(f => f.Name.Equals(srcFolderPath));
+        if (folder is null)
+        {
+            if (defaultFolder is null)
+            {
+                var importPath = Path.Combine(library.Path, AppData.Instance.UserSettings.ImagesImportPath, Path.GetFileName(imagePath));
+                folder = library.Data.Folders.Values.FirstOrDefault(x=>x.Name.Equals(importPath));
+                if (folder is null)
+                {
+                    folder = new Folder(importPath); 
+                    await folder.DbInsertAsync(library.Database);
+                    library.Data.Folders.Add(folder.DatabaseIndex, folder);
+                }
+            }
+            else folder = defaultFolder;
+            var dstPath = Path.Combine(folder.Name, Path.GetFileName(imagePath));
+            File.Move(imagePath, dstPath);
+            imagePath = dstPath;
+        }
+        var artwork = library.Data.Artworks.Values.FirstOrDefault(x => x.SourcePath.Equals(imagePath));
+        if (artwork == null)
+        {
+            artwork = new Artwork(library.Database)
+            {
+                SourcePath = imagePath,
+                FolderPathstr = folder.Name,
+                Folder = folder,
+                SourceType = sourceType,
+                MimeType = PathUtils.GetMimeType(Path.GetExtension(imagePath)) ?? "image/jpeg",
+                Role = role,
+            };
+            using var fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            artwork.ProcessImage(fileStream);
+            if (string.IsNullOrEmpty(artwork.Hash))
+            {
+                Console.WriteLine($"Failed to process picture");
+                return null;
+            }
+
+            var existing = library.Data.Artworks.Values.FirstOrDefault(x => x.Hash.Equals(artwork.Hash));
+            if (existing != null) artwork = existing;
+            else
+            {
+                try
+                {
+                    await artwork.DbInsertAsync(library.Database);
+                    Debug.Assert(artwork.DatabaseIndex > 0);
+                    library.Data.Artworks.Add(artwork.DatabaseIndex, artwork);
+                }
+                catch (Exception ex) { Console.WriteLine(ex); }
+                finally { artwork.ThumbnailData = null; }
+            }
+        }
+
+        return artwork;
+    }
+
+    public static async Task RemoveUninstanciatedEmbeddedArtworks(LibraryViewModel library)
+    {
+        var embeddedCounts = new Dictionary<long, int>();
+
+        foreach (var track in library.Data.Tracks.Values)
+        {
+            foreach (var artwork in track.Artworks)
+            {
+                if (artwork.SourceType == ArtworkSourceType.Embedded)
+                {
+                    if (embeddedCounts.TryGetValue(artwork.DatabaseIndex, out var count))
+                        embeddedCounts[artwork.DatabaseIndex] = count + 1;
+                    else
+                        embeddedCounts[artwork.DatabaseIndex] = 1;
+                }
+            }
+        }
+
+        var toRemove = library.Data.Artworks.Values
+            .Where(x => x.SourceType == ArtworkSourceType.Embedded && !embeddedCounts.ContainsKey(x.DatabaseIndex))
+            .ToList();
+
+        foreach (var artwork in toRemove)
+        {
+            await artwork.DbDeleteAsync(library.Database);
+            library.Data.Artworks.Remove(artwork.DatabaseIndex);
+        }
     }
 
     public string? ProcessImage()

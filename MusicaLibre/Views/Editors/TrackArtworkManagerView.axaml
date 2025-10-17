@@ -7,7 +7,7 @@
              xmlns:ctrl="clr-namespace:MusicaLibre.Controls"
              xmlns:v="clr-namespace:MusicaLibre.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="MusicaLibre.Views.ArtworkListManagerView"
+             x:Class="MusicaLibre.Views.TrackArtworkManagerView"
              x:DataType="vm:TrackArtworkManagerViewModel">
     <UserControl.Resources>
         <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
@@ -52,14 +52,10 @@
                                         <Setter Property="BorderThickness" Value="1"/>
                                     </Style>
                                 </Border.Styles>
-                                <Canvas Height="100" Width="100">
+                                <StackPanel>
                                     <Image Height="100" Width="100" Source="{Binding Thumbnail}"/>
-                                    <Border Background="#DD999999" BorderBrush="White" BorderThickness="1"
-                                            IsVisible="{Binding IsEmbedded}" 
-                                            Padding="8" Canvas.Left="16" Canvas.Top="16">
-                                        <TextBlock Text="Embed" Foreground="Red"/>    
-                                    </Border>
-                                </Canvas>
+                                    <TextBlock Text="{Binding Index}"/>
+                                </StackPanel>
                             </Border>
                         </DataTemplate>
                     </ctrl:VirtualizedItemsRepeater.ItemTemplate>
@@ -71,7 +67,9 @@
             <StackPanel Orientation="Horizontal">
                 <Button Content="Add" 
                         Command="{Binding AddCommand}"/>
-                <Button Content="Remove" 
+                <Button Content="Remove all embedded pictures from selected tracks" 
+                        Command="{Binding RemoveAllEmbeddedPicturesCommand}"/>
+                <Button Content="Remove selected picture" 
                         IsEnabled="{Binding SelectedArtwork, Converter={StaticResource NullToBoolean}}"
                         Command="{Binding RemoveCommand}"/>
             </StackPanel>
