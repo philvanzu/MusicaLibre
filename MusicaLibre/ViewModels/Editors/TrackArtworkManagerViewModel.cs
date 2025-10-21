@@ -89,7 +89,7 @@ public partial class TrackArtworkManagerViewModel:ViewModelBase, IDisposable, IS
                 thumbnail = new Bitmap(stream);
                 
             }
-            var vm = new TrackArtworkViewModel(this, thumbnail, artwork.Hash);
+            var vm = new TrackArtworkViewModel(this, thumbnail, artwork);
             Artworks.Add(vm);
             
             
@@ -180,5 +180,23 @@ public partial class TrackArtworkManagerViewModel:ViewModelBase, IDisposable, IS
             }
         }
         
+    }
+
+    [RelayCommand]
+    async Task SetSelectedAlbumCover()
+    {
+        if(SelectedTrack is null || SelectedArtwork is null) return;
+        var existing = _library.Data.Artworks.Values.FirstOrDefault(x => x.Hash.Equals(SelectedArtwork.Artwork.Hash));
+        if (existing == null)
+        {
+            var track = SelectedTrack.Model;
+            existing = SelectedArtwork.Artwork;
+            await existing.DbInsertAsync(_library.Database);
+            _library.Data.Artworks.Add(existing.DatabaseIndex, existing);
+        }
+
+        SelectedTrack.Model.Album.Cover = existing;
+        await SelectedTrack.Model.Album.DbUpdateAsync(_library.Database);
+        await DialogUtils.MessageBox(_window, "Success!", "Album Cover updated");
     }
 }

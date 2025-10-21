@@ -221,7 +221,21 @@ public partial class AlbumsEditorViewModel:ViewModelBase, IDisposable
         Created = TimeUtils.FormatDateTime(SelectedAlbum?.Created);
         OnPropertyChanged(nameof(Created));
     }
+    [RelayCommand]
+    void ArrowUp()
+    {
+        var index = SelectedIndex - 1;
+        if (index >=Albums.Count || index < 0) index = Albums.Count-1;
+        SelectedIndex = index;
+    }
 
+    [RelayCommand]
+    void ArrowDown()
+    {
+        var index = SelectedIndex + 1;
+        if (index >=Albums.Count || index < 0) index = 0;
+        SelectedIndex = index;
+    }
 }
 
 public partial class DiscViewModel:ViewModelBase, IDisposable

@@ -282,7 +282,9 @@
         <TabItem Header="Genres">
            <v:GenresEditorView DataContext="{Binding GenresEditor}"/> 
         </TabItem>
-        <TabItem Header="Publishers"></TabItem>
+        <TabItem Header="Publishers">
+            <v:PublishersEditorView DataContext="{Binding PublishersEditor}"/> 
+        </TabItem>
         <TabItem Header="Artworks"></TabItem>
     </TabControl>
 </Window>

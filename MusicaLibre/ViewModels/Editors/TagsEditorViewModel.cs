@@ -21,6 +21,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
     [ObservableProperty] private GenresEditorViewModel _genresEditor;
     [ObservableProperty] private AlbumsEditorViewModel _albumsEditor;
     [ObservableProperty] private ArtistsEditorViewModel _artistsEditor;
+    [ObservableProperty] private PublishersEditorViewModel _publishersEditor;
     
     [ObservableProperty] private TrackArtworkManagerViewModel _selectedTrackArtwork;
     
@@ -62,9 +63,11 @@ public partial class TagsEditorViewModel:TracksListViewModel
         
         GenresEditor = new GenresEditorViewModel(Library);
         ArtistsEditor = new ArtistsEditorViewModel(Library, Window);
+        
         if(PoolAlbums.Any())
             AlbumsEditor = new AlbumsEditorViewModel(this);
         
+        PublishersEditor = new PublishersEditorViewModel(Library, Window);
     }
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
@@ -73,6 +76,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
             GenresEditor.Dispose();
             ArtistsEditor.Dispose();
             AlbumsEditor.Dispose();    
+            PublishersEditor.Dispose();
         }
         catch (Exception ex) {Console.WriteLine(ex);}
     }
@@ -669,7 +673,18 @@ public partial class TagsEditorViewModel:TracksListViewModel
         if (publisher is null)
         {
             publisher = new Publisher(PublisherBinding);
+            var folderpath = Path.Combine(Library.Path, Library.Settings.PublisherArtworkPath.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            var publisherart = Library.Data.Artworks.Values
+                .Where(x => x.Folder.Name.Equals(folderpath));
+            var artwork = publisherart
+                .FirstOrDefault(x=> x.SourcePath.Contains(publisher.Name, StringComparison.OrdinalIgnoreCase));
+            if (artwork is not null)
+            {
+                publisher.Artwork = artwork;
+                publisher.ArtworkId = artwork.DatabaseIndex;
+            }
             await publisher.DbInsertAsync(Library.Database);
+            
             Library.Data.Publishers.Add(publisher.DatabaseIndex, publisher);
             publisherCreatedCount++;
         }

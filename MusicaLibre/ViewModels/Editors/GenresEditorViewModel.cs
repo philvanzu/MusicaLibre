@@ -109,4 +109,20 @@ public partial class GenresEditorViewModel:ViewModelBase, IDisposable
                 SelectedGenreIndex = Genres.IndexOf(genre);
         }
     }
+
+
+    [RelayCommand]
+    void ArrowUp()
+    {
+        var index = SelectedGenreIndex - 1;
+        if (index >=Genres.Count || index < 0) index = Genres.Count-1;
+        SelectedGenreIndex = index;
+    }
+    [RelayCommand]
+    void ArrowDown()
+    {
+        var index = SelectedGenreIndex + 1;
+        if (index >=Genres.Count || index < 0) index = 0;
+        SelectedGenreIndex = index;
+    }
 }

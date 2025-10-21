@@ -6,16 +6,17 @@ using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.Views;
 
-public partial class ArtistsEditorView : UserControl
+public partial class PublishersEditorView : UserControl
 {
-    public ArtistsEditorView()
+    public PublishersEditorView()
     {
         InitializeComponent();
     }
+
     protected override void OnKeyUp(KeyEventArgs e)
     {
         base.OnKeyUp(e);
-        if (DataContext is ArtistsEditorViewModel vm)
+        if (DataContext is PublishersEditorViewModel vm)
         {
             if (e.Key == Key.Down){vm.ArrowDownCommand.Execute(null);}
             if (e.Key == Key.Up){vm.ArrowUpCommand.Execute(null);}    

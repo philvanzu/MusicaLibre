@@ -7,7 +7,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="297d10ca-c7cc-4d05-ad36-e93d577624fd" name="Changes" comment="" />
+    <list default="true" id="297d10ca-c7cc-4d05-ad36-e93d577624fd" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/PublishersEditorViewModel.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/PublishersEditorView.axaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/PublishersEditorView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/avalonia.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/avalonia.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Controls/TagBox.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Controls/TagBox.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Models/Publisher.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Models/Publisher.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/AlbumsEditorViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/AlbumsEditorViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/ArtistsEditorViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/ArtistsEditorViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/GenresEditorViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/GenresEditorViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TagsEditorViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TagsEditorViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TrackArtworkManagerViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TrackArtworkManagerViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TrackArtworkViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TrackArtworkViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AlbumsEditorView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AlbumsEditorView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtistsEditorView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtistsEditorView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/GenresEditorView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/GenresEditorView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TagsEditorDialog.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TagsEditorDialog.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TagsEditorDialog.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TagsEditorDialog.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TrackArtworkManagerView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TrackArtworkManagerView.axaml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,6 +59,7 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/88f6726960da4cf69f735a1ba7996b6078a00/3d/6441d202/Enumerable.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b76a3f46facf431d9da868e60603b9ca7a200/46/da43b02a/File.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b9c62e8e682440cd84e6081f7672fcd3d1a000/02/9ccb3786/ExceptionDispatchInfo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/b9c62e8e682440cd84e6081f7672fcd3d1a000/08/5f7bd82b/AsyncVoidMethodBuilder.cs" root0="FORCE_HIGHLIGHTING" />
@@ -83,12 +105,15 @@
     <setting file="file://$PROJECT_DIR$/MusicaLibre/ViewModels/DataPresenters/DevicesListViewModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/AppSettingsViewModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/ArtistsEditorViewModel.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/PublishersEditorViewModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/ViewModels/TrackGroups/ExternalDevice.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/ViewModels/TrackGroups/TracksGroupViewModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Views/Editors/AppSettingsDialog.axaml" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Views/Editors/AppSettingsDialog.axaml.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtistsEditorView.axaml" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtistsEditorView.axaml.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MusicaLibre/Views/Editors/PublishersEditorView.axaml" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MusicaLibre/Views/Editors/PublishersEditorView.axaml.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Views/LibrarySettingsEditorDialog.axaml" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/Views/LibrarySettingsEditorDialog.axaml.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MusicaLibre/obj/Debug/net9.0/.NETCoreApp,Version=v9.0.AssemblyAttributes.cs" root0="SKIP_HIGHLIGHTING" />
@@ -108,7 +133,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    ".NET Project.MusicaLibre.executor": "Run",
+    ".NET Project.MusicaLibre.executor": "Debug",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -191,6 +216,8 @@
       <workItem from="1759760971776" duration="57218000" />
       <workItem from="1759944767024" duration="107165000" />
       <workItem from="1760480669972" duration="27217000" />
+      <workItem from="1760722760852" duration="33995000" />
+      <workItem from="1760923642893" duration="5526000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -433,19 +460,6 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="223" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/MusicaLibre/Models/Album.cs</url>
-          <line>119</line>
-          <properties documentPath="$PROJECT_DIR$/MusicaLibre/Models/Album.cs" containingFunctionPresentation="Method 'DbDeleteAsync'">
-            <startOffsets>
-              <option value="4038" />
-            </startOffsets>
-            <endOffsets>
-              <option value="4153" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="236" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/MusicaLibre/ViewModels/Library/LibraryViewModel_UpdateDatabase.cs</url>

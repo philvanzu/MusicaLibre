@@ -261,7 +261,20 @@ public partial class ArtistsEditorViewModel: ViewModelBase, IDisposable
         var message = $"{dirtyTracks.Count} tracks updated. \n{dirtyAlbums.Count} albums updated";
         await DialogUtils.MessageBox(_window, "Success", message);
     }
-
+    [RelayCommand]
+    void ArrowUp()
+    {
+        var index = SelectedArtistIndex - 1;
+        if (index >=Artists.Count || index < 0) index = Artists.Count-1;
+        SelectedArtistIndex = index;
+    }
+    [RelayCommand]
+    void ArrowDown()
+    {
+        var index = SelectedArtistIndex + 1;
+        if (index >=Artists.Count || index < 0) index = 0;
+        SelectedArtistIndex = index;
+    }
     private async Task UpdateAndReport(HashSet<Track> dirtyTracks, HashSet<Album> dirtyAlbums)
     {
         if (dirtyTracks.Count > 0 || dirtyAlbums.Count > 0)

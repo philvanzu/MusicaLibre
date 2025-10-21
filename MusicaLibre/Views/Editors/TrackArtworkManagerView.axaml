@@ -72,6 +72,9 @@
                 <Button Content="Remove selected picture" 
                         IsEnabled="{Binding SelectedArtwork, Converter={StaticResource NullToBoolean}}"
                         Command="{Binding RemoveCommand}"/>
+                <Button Content="Selected track Album Cover" 
+                        IsEnabled="{Binding SelectedArtwork, Converter={StaticResource NullToBoolean}}"
+                        Command="{Binding SetSelectedAlbumCoverCommand}"/>
             </StackPanel>
             <Border BorderBrush="White" BorderThickness="1" Background="#505050"
                     IsVisible="{Binding Progress.IsBusy}"

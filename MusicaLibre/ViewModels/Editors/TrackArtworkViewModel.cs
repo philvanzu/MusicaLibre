@@ -14,12 +14,12 @@ public partial class TrackArtworkViewModel:ViewModelBase, IDisposable, IVirtuali
     public string SourcePath {get; set;}
     public Bitmap Thumbnail { get; set; }
     private TrackArtworkManagerViewModel _manager;
-    public string Hash { get; set; }
-    public TrackArtworkViewModel(TrackArtworkManagerViewModel manager, Bitmap thumbnail, string hash)
+    public Artwork Artwork { get; set; }
+    public TrackArtworkViewModel(TrackArtworkManagerViewModel manager, Bitmap thumbnail, Artwork artwork)
     {
         _manager = manager;
         Thumbnail = thumbnail;
-        Hash = hash;
+        Artwork = artwork;
     }
 
     partial void OnIsSelectedChanged(bool oldValue, bool newValue)

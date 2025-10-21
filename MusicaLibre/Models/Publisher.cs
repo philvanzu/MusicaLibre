@@ -13,8 +13,8 @@ public class Publisher:NameTag
     }
  
     const string insertSql = @"
-        INSERT INTO Publishers (Name)
-        VALUES ($name);
+        INSERT INTO Publishers (Name, ArtworkId)
+        VALUES ($name, $artworkId);
         SELECT last_insert_rowid();";
     private const string updateSql = @"
         UPDATE Publishers SET Name = $name, ArtworkId = $artworkId

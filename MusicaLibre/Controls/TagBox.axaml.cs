@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
@@ -8,6 +9,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MusicaLibre.Controls;
@@ -70,10 +72,11 @@ public partial class TagBox : UserControl
     public TagBox()
     {
         InitializeComponent();
-        PART_Listbox.PropertyChanged += ListBoxPropertyChanged;
+        //PART_Listbox.PropertyChanged += ListBoxPropertyChanged;
         PART_Textbox.TextChanged += TextBoxTextChanged;
         PART_Textbox.KeyDown += TextBoxKeyDown;
-        PART_Listbox.KeyDown += ListBoxKeyDown;
+        //PART_Listbox.KeyDown += ListBoxKeyDown;
+
     }
 
     private void TextBoxTextChanged(object? sender, TextChangedEventArgs e)
@@ -95,50 +98,53 @@ public partial class TagBox : UserControl
         PART_Popup.IsOpen = PART_Textbox.IsFocused && Options?.Count() > 0;
     }
 
-    private void ListBoxKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-        {
-            e.Handled = true;
-
-            if (PART_Listbox.SelectedIndex >= 0 && Options != null)
-            {
-                _currentValue = Options.ElementAt(PART_Listbox.SelectedIndex);
-                if (IsMultiValue)
-                {
-                    var text = (_commitedValues.Count > 0) ? $"{string.Join(", ", _commitedValues)}, " : string.Empty;
-                    PART_Textbox.Text = $"{text}{_currentValue}";
-                }
-                    
-                else
-                    PART_Textbox.Text = _currentValue;
-
-                PopupIsOpen = false;
-                PART_Textbox.Focus(); // return focus to TextBox
-                PART_Textbox.CaretIndex = PART_Textbox.Text?.Length ?? 0;
-            }
-        }
-
-        if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            PopupIsOpen = false;
-            PART_Textbox.Focus(); // return focus to TextBox
-            PART_Textbox.CaretIndex = PART_Textbox.Text?.Length ?? 0;
-        }
-    }
-
+   private bool _focusOnListbox = false;
     private void TextBoxKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
         {
             e.Handled = true;
-            EnterPressedCommand?.Execute(null);
+            if (_focusOnListbox)
+            {
+                if (PART_Listbox.SelectedIndex >= 0 && Options != null)
+                {
+            
+                    _currentValue = Options.ElementAt(PART_Listbox.SelectedIndex);
+                    if (IsMultiValue)
+                    {
+                        var text = (_commitedValues.Count > 0) ? $"{string.Join(", ", _commitedValues)}, " : string.Empty;
+                        PART_Textbox.Text = $"{text}{_currentValue}";
+                    }
+                
+                    else
+                        PART_Textbox.Text = _currentValue;
+            
+            
+                    PopupIsOpen = false;
+                    _focusOnListbox = false;
+                    PART_Textbox.Focus(); // return focus to TextBox
+                    PART_Textbox.CaretIndex = PART_Textbox.Text?.Length ?? 0;
+                }
+            }
+            else EnterPressedCommand?.Execute(null);
         }
 
         if (e.Key == Key.Escape)
         {
-            PopupIsOpen = false;
+            if (_focusOnListbox || PopupIsOpen)
+            {
+                e.Handled = true;
+                PopupIsOpen = false;
+                PART_Textbox.Focus(); // return focus to TextBox
+                PART_Textbox.CaretIndex = PART_Textbox.Text?.Length ?? 0;
+                _focusOnListbox = false;    
+            }
+            else
+            {
+                //this breaks keyboard focus for the control
+                PART_Textbox.IsEnabled = false;
+                PART_Textbox.IsEnabled = true;
+            }
         }
 
         if (e.Key == Key.Up)
@@ -150,6 +156,7 @@ public partial class TagBox : UserControl
 
         if (e.Key == Key.Down)
         {
+            e.Handled = true;
             if (PopupEnabled)
             {
                 PopupIsOpen = true;
@@ -157,29 +164,13 @@ public partial class TagBox : UserControl
                     PART_Listbox.SelectedIndex = 0;
                 else if (PART_Listbox.SelectedIndex < _optionsCount - 1)
                     PART_Listbox.SelectedIndex++;
-                
-//                PART_Listbox.Focus(); // move keyboard focus to the ListBox
+
+                _focusOnListbox = true;
+                PART_Listbox.Focus(); // move keyboard focus to the ListBox
             }
         }
     }
 
-
-    private void ListBoxPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property == SelectingItemsControl.SelectedIndexProperty && (Options?.Any()==true))
-        {
-            if (PART_Listbox.SelectedIndex >= 0 && PART_Listbox.SelectedIndex < _optionsCount)
-            {
-                _currentValue = Options.ElementAt(PART_Listbox.SelectedIndex);
-                if (IsMultiValue)
-                {
-                    var text = (_commitedValues.Count > 0) ? $"{string.Join(", ", _commitedValues)}, " : string.Empty;
-                    PART_Textbox.Text = $"{text}{_currentValue}";
-                }
-                else PART_Textbox.Text = _currentValue;
-            }
-        }
-    }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {

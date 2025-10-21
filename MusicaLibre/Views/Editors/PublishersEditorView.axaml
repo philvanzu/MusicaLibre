@@ -1,0 +1,87 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MusicaLibre.ViewModels"
+             xmlns:conv="clr-namespace:MusicaLibre.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MusicaLibre.Views.PublishersEditorView"
+             x:DataType="vm:PublishersEditorViewModel">
+    <UserControl.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBoolean"/>
+        <conv:InverseBooleanConverter x:Key="InverseBoolean"/>
+        <conv:NullToInverseBooleanConverter x:Key="NullToInverseBoolean"/>
+        <conv:RadioConverter x:Key="RadioConverter"/>
+    </UserControl.Resources>
+    <Border  Grid.Column="0"
+             BorderBrush="White" BorderThickness="1">
+        <Grid ColumnDefinitions=" 300, 32, *">
+
+           <Grid Grid.Column="0" RowDefinitions="Auto, *">
+               <Grid ColumnDefinitions="Auto, 32, *">
+                   <TextBlock>Filter:</TextBlock>
+                   <TextBox Grid.Column="2" Text="{Binding PoolFilter}"/>
+               </Grid>
+               <ListBox Grid.Row="1" ItemsSource="{Binding Publishers}"
+                        SelectedIndex="{Binding SelectedPublisherIndex, Mode=TwoWay}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>                                       
+           </Grid>
+
+           <Border Grid.Column="2">
+               <Grid RowDefinitions="Auto, Auto, *, Auto">
+                   <Grid ColumnDefinitions="Auto, Auto">
+                       <StackPanel>
+                           <Image Width="128" Height="128"
+                               Source="{Binding Thumbnail}"/>
+                           <Button Content="Pick Artwork"
+                                   IsVisible="{Binding SelectedPublisher, Converter={StaticResource NullToBoolean}}"
+                                   Command = "{Binding PickArtworkCommand}" />
+                       </StackPanel>
+                       <StackPanel Grid.Column="1" >
+                           <StackPanel Orientation="Horizontal">
+                               <TextBlock Margin="16">Name</TextBlock>
+                               <TextBox Text="{Binding Text, Mode=TwoWay}"
+                                        Width="400" Margin="16"/>    
+                           </StackPanel>
+                           <StackPanel Orientation="Horizontal">
+                               <Button Content="Rename"
+                                       IsVisible="{Binding SelectedPublisher, Converter={StaticResource NullToBoolean}}"
+                                       Command="{Binding RenameCommand}"
+                                       Margin="16"/>
+                               <Button Content="Delete"
+                                       IsVisible="{Binding SelectedPublisher, Converter={StaticResource NullToBoolean}}"
+                                       Command="{Binding DeleteCommand}"
+                                       Margin="16"/>
+                           </StackPanel>
+                           
+                           
+                       </StackPanel>
+                   </Grid>
+                   
+                   <ScrollViewer Grid.Row="2">
+                       <ItemsRepeater ItemsSource="{Binding SelectedList}">
+                           <ItemsRepeater.Layout>
+                               <StackLayout/>
+                           </ItemsRepeater.Layout>
+                           <ItemsRepeater.ItemTemplate>
+                               <DataTemplate>
+                                   <TextBlock Text="{Binding .}"/>
+                               </DataTemplate>
+                           </ItemsRepeater.ItemTemplate>
+                       </ItemsRepeater>    
+                   </ScrollViewer>
+                   <StackPanel Grid.Row="3">
+                       <TextBlock ></TextBlock>
+                       <TextBlock></TextBlock>
+                   </StackPanel>
+                   
+               </Grid>
+           </Border>
+        </Grid>
+        </Border>
+</UserControl>
