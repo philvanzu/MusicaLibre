@@ -13,13 +13,13 @@ public partial class PublishersEditorView : UserControl
         InitializeComponent();
     }
 
-    protected override void OnKeyUp(KeyEventArgs e)
+    private void OnFilterBoxKeyUp(object? sender, KeyEventArgs e)
     {
-        base.OnKeyUp(e);
         if (DataContext is PublishersEditorViewModel vm)
         {
             if (e.Key == Key.Down){vm.ArrowDownCommand.Execute(null);}
-            if (e.Key == Key.Up){vm.ArrowUpCommand.Execute(null);}    
+            if (e.Key == Key.Up){vm.ArrowUpCommand.Execute(null);}  
+            
         }
     }
 }

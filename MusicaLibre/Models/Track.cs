@@ -266,7 +266,7 @@ public class Track
 
             foreach (var composer in Composers)
             {
-                _ = library.Database.ExecuteNonQueryAsync(insertArtist, new()
+                _ = library.Database.ExecuteNonQueryAsync(insertComposer, new()
                 {
                     ["$id"] = DatabaseIndex,
                     ["$artistId"] = composer.DatabaseIndex

@@ -30,6 +30,7 @@
         <entry key="MusicaLibre/Views/Editors/AlbumsEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/Editors/AppSettingsDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/Editors/ArtistsEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/Editors/ArtworksEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/Editors/DevicePickDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/Editors/GenresEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/Editors/PublishersEditorView.axaml" value="MusicaLibre/MusicaLibre.csproj" />

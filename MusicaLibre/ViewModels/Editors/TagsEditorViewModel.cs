@@ -22,7 +22,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
     [ObservableProperty] private AlbumsEditorViewModel _albumsEditor;
     [ObservableProperty] private ArtistsEditorViewModel _artistsEditor;
     [ObservableProperty] private PublishersEditorViewModel _publishersEditor;
-    
+    [ObservableProperty] private ArtworksEditorViewModel _artworksEditor;
     [ObservableProperty] private TrackArtworkManagerViewModel _selectedTrackArtwork;
     
     //Constructor
@@ -68,6 +68,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
             AlbumsEditor = new AlbumsEditorViewModel(this);
         
         PublishersEditor = new PublishersEditorViewModel(Library, Window);
+        ArtworksEditor = new ArtworksEditorViewModel(this);
     }
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
@@ -77,6 +78,7 @@ public partial class TagsEditorViewModel:TracksListViewModel
             ArtistsEditor.Dispose();
             AlbumsEditor.Dispose();    
             PublishersEditor.Dispose();
+            ArtworksEditor.Dispose();
         }
         catch (Exception ex) {Console.WriteLine(ex);}
     }
@@ -804,23 +806,139 @@ public partial class TagsEditorViewModel:TracksListViewModel
     
     //Composers
     [ObservableProperty] private string _composersBinding = string.Empty;
+    [ObservableProperty] private IEnumerable<string>? _composersOptions;
     public string Composers => IsMultiple? CoalescedComposers : $"{SelectedItem?.Composers}";
     public string CoalescedComposers =>
         Utils.Coalesce(SelectedItems.Select(x=>x.Composers).ToArray())
         ??_mult;
+
+    partial void OnComposersBindingChanged(string value)
+    {
+        
+        var splits = value.Split(',').Select(x => x.Trim());
+        var current = splits.LastOrDefault();
+        if (!string.IsNullOrEmpty(current))
+        {
+            ComposersOptions = Library.Data.Artists.Values
+                .Where(x => x.Name.StartsWith(current, StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Name);
+        }
+        else ComposersOptions = null;
+    }
+
+    [RelayCommand]
+    async Task ComposersUpdated()
+    {
+        var splits = ComposersBinding.Split(',').Select(x => x.Trim());
+        var composers = new List<Artist>();
+        foreach (var split in splits)
+        {
+            var artist = Library.Data.Artists.Values.FirstOrDefault(x => x.Name.Equals(split, StringComparison.OrdinalIgnoreCase));
+            if (artist is null)
+            {
+                artist = new Artist(split);
+                await artist.DbInsertAsync(Library.Database);
+                Library.Data.Artists.Add(artist.DatabaseIndex, artist);
+            }
+            composers.Add(artist);
+        }
+        foreach (var item in SelectedItems)
+        {
+            item.Model.Composers = composers;
+            await item.Model.UpdateArtistsAsync(Library);
+        }
+        await DialogUtils.MessageBox(Window, "Success", $"{SelectedItems.Count} tracks updated with {composers.Count} composers");
+    }
     
+    //Remixers
     [ObservableProperty] private string _remixerBinding = string.Empty;
+    [ObservableProperty] private IEnumerable<string>? _remixerOptions;
     public string Remixer => IsMultiple? CoalescedRemixer : $"{SelectedItem?.Model.Remixer?.Name}";
     public string CoalescedRemixer =>
         Utils.Coalesce(SelectedItems.Select(x=>x.Model.Remixer?.Name).ToArray())
         ??_mult;
 
+    partial void OnRemixerBindingChanged(string value)
+    {
+        var current = value.Trim();
+        if (!string.IsNullOrEmpty(current))
+        {
+            RemixerOptions = Library.Data.Artists.Values
+                .Where(x => x.Name.StartsWith(current, StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Name);
+        }
+        else RemixerOptions = null;
+    }
+
+    [RelayCommand]
+    async Task RemixerUpdated()
+    {
+        Artist? artist = null;
+        var name = RemixerBinding.Trim();
+        if (!string.IsNullOrEmpty(name))
+        {
+            artist = Library.Data.Artists.Values.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (artist is null)
+            {
+                artist = new Artist(name);
+                await artist.DbInsertAsync(Library.Database);
+                Library.Data.Artists.Add(artist.DatabaseIndex, artist);
+            }
+        }
+        foreach (var item in SelectedItems)
+        {
+            item.Model.Remixer = artist;
+            item.Model.RemixerId = artist?.DatabaseIndex;
+            await item.Model.DbUpdateAsync(Library.Database);
+        }
+        await DialogUtils.MessageBox(Window, "Success", $"{SelectedItems.Count} tracks updated");
+    }
+    
+    //Conductor
     [ObservableProperty] private string _conductorBinding = string.Empty;
+    [ObservableProperty] private IEnumerable<string>? _conductorOptions;
     public string Conductor => IsMultiple ? CoalescedConductor : $"{SelectedItem?.Model.Conductor?.Name}";
     public string CoalescedConductor =>
         Utils.Coalesce(SelectedItems.Select(x=>$"{x.Model.Conductor?.Name}").ToArray())
         ??_mult;
+
+    partial void OnConductorBindingChanged(string value)
+    {
+        var current = value.Trim();
+        if (!string.IsNullOrEmpty(current))
+        {
+            ConductorOptions = Library.Data.Artists.Values
+                .Where(x => x.Name.StartsWith(current, StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Name);
+        }
+        else RemixerOptions = null;
+    }
+
+    [RelayCommand]
+    async Task ConductorUpdated()
+    {
+        Artist? artist = null;
+        var name = ConductorBinding.Trim();
+        if (!string.IsNullOrEmpty(name))
+        {
+            artist = Library.Data.Artists.Values.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (artist is null)
+            {
+                artist = new Artist(name);
+                await artist.DbInsertAsync(Library.Database);
+                Library.Data.Artists.Add(artist.DatabaseIndex, artist);
+            }
+        }
+        foreach (var item in SelectedItems)
+        {
+            item.Model.Conductor = artist;
+            item.Model.ConductorId = artist?.DatabaseIndex;
+            await item.Model.DbUpdateAsync(Library.Database);
+        }
+        await DialogUtils.MessageBox(Window, "Success", $"{SelectedItems.Count} tracks updated");        
+    }
     
+    // Comments
     [ObservableProperty]private string _commentsBinding = string.Empty;
     public string Comments => IsMultiple ? CoalescedComments : $"{SelectedItem?.Model.Comment}";
     public string CoalescedComments =>

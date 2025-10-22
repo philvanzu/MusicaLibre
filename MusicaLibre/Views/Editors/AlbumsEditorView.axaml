@@ -20,7 +20,7 @@
             <Grid RowDefinitions="32,*">
                 <Grid ColumnDefinitions="Auto, 32, *">
                     <TextBlock>Filter:</TextBlock>
-                    <TextBox Grid.Column="2" Text="{Binding PoolFilter}"/>
+                    <TextBox Grid.Column="2" Text="{Binding PoolFilter}"   KeyUp="OnFilterBoxKeyUp"/>
                 </Grid>
                 <Grid Grid.Row="1">
                     <ListBox ItemsSource="{Binding Albums}"

@@ -6,15 +6,16 @@ using MusicaLibre.ViewModels;
 
 namespace MusicaLibre.Views;
 
-public partial class ArtistsEditorView : UserControl
+public partial class ArtworksEditorView : UserControl
 {
-    public ArtistsEditorView()
+    public ArtworksEditorView()
     {
         InitializeComponent();
     }
+
     private void OnFilterBoxKeyUp(object? sender, KeyEventArgs e)
     {
-        if (DataContext is ArtistsEditorViewModel vm)
+        if (DataContext is ArtworksEditorViewModel vm)
         {
             if (e.Key == Key.Down){vm.ArrowDownCommand.Execute(null);}
             if (e.Key == Key.Up){vm.ArrowUpCommand.Execute(null);}  

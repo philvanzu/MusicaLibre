@@ -181,7 +181,7 @@
                                            <Grid Grid.Row="4" Grid.Column="2" ColumnDefinitions="*,16, Auto">
                                                <ctrl:TagBox Grid.Column="0" IsMultiValue="False" 
                                                             Text="{Binding AlbumArtistBinding}"
-                                                            Options="{Binding ArtistsOptions}"
+                                                            Options="{Binding ArtistsOptions}" 
                                                             EnterPressedCommand="{Binding AlbumArtistUpdatedCommand}" />
                                                <Button  Grid.Column="2" 
                                                         Content="From track"
@@ -241,12 +241,25 @@
                                                    Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Composers-->
                                            <TextBlock Grid.Row="9" Grid.Column="0" >Composers</TextBlock>
-                                           <TextBox  Grid.Row="9" Grid.Column="2" Text="{Binding ComposersBinding}"/>
-                                           <Button Grid.Row="9" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <TextBox Text="{Binding ComposersBinding}"/>
+                                           <ctrl:TagBox Grid.Row="9" Grid.Column="2"  
+                                              Text="{Binding ComposersBinding}"
+                                              Options="{Binding ComposersOptions}"
+                                              IsMultiValue="True"
+                                              EnterPressedCommand="{Binding ComposersUpdatedCommand}"/>
+                                           <Button Grid.Row="9" Grid.Column="4" 
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"
+                                                   Command="{Binding ComposersUpdatedCommand}"/>
                                            <!--Remixer-->
                                            <TextBlock Grid.Row="10" Grid.Column="0" >Remixer</TextBlock>
-                                           <TextBox  Grid.Row="10" Grid.Column="2" Text="{Binding RemixerBinding}"/>
-                                           <Button Grid.Row="10" Grid.Column="4" Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
+                                           <ctrl:TagBox Grid.Row="10" Grid.Column="2"  
+                                                        Text="{Binding RemixerBinding}"
+                                                        Options="{Binding RemixerOptions}"
+                                                        IsMultiValue="False"
+                                                        EnterPressedCommand="{Binding RemixerUpdatedCommand}"/>
+                                           <Button Grid.Row="10" Grid.Column="4" 
+                                                   Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"
+                                                   Command="{Binding RemixerUpdatedCommand}"/>
                                            <!--Conductor-->
                                            <TextBlock Grid.Row="11" Grid.Column="0" >Conductor</TextBlock>
                                            <TextBox  Grid.Row="11" Grid.Column="2" Text="{Binding ConductorBinding}"/>
@@ -285,6 +298,8 @@
         <TabItem Header="Publishers">
             <v:PublishersEditorView DataContext="{Binding PublishersEditor}"/> 
         </TabItem>
-        <TabItem Header="Artworks"></TabItem>
+        <TabItem Header="Artworks">
+            <v:ArtworksEditorView DataContext="{Binding ArtworksEditor}"/>
+        </TabItem>
     </TabControl>
 </Window>

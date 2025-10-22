@@ -138,6 +138,20 @@ public class Artwork:IDisposable
         SELECT last_insert_rowid();";
     const string selectSql = "SELECT * FROM Artworks;";
     const string deleteSql = "DELETE FROM Artworks WHERE Id=$id;";
+    const string updateSql = @"
+        UPDATE Artworks SET 
+            Hash=$hash, 
+            Width = $width, 
+            Height = $height, 
+            Thumbnail = $thumb,
+            MimeType = $mime, 
+            SourcePath = $sourcePath, 
+            FolderId = $sourceFolder, 
+            SourceType = $sourceType, 
+            Role = $role, 
+            EmbedIdx = $embedIdx,  
+            BookletPage = $bookletPage 
+        WHERE Id=$id;";
     private Dictionary<string, object?> Parameters => new()
     {
         ["$id"] = DatabaseIndex,
@@ -166,6 +180,8 @@ public class Artwork:IDisposable
         DatabaseIndex =  Convert.ToInt64(id);
         callback?.Invoke(DatabaseIndex);
     }
+    public async Task DbUpdateAsync(Database db, Action<long>? callback=null)
+        => await db.ExecuteNonQueryAsync(updateSql, Parameters );
     public async Task DbDeleteAsync(Database db)
         => await db.ExecuteNonQueryAsync(deleteSql, Parameters );
     public static Dictionary<long, Artwork> FromDatabase(Database db)
@@ -293,6 +309,57 @@ public class Artwork:IDisposable
             await artwork.DbDeleteAsync(library.Database);
             library.Data.Artworks.Remove(artwork.DatabaseIndex);
         }
+    }
+
+    public async Task<bool> ReplaceImage(string path, LibraryViewModel library, Window window)
+    {
+        SourcePath = path;
+        ThumbnailData = null;
+        Hash = string.Empty;
+        bool tmbNull = Thumbnail is null;
+
+        if(!tmbNull)
+            Thumbnail?.Dispose();
+        
+        if (PathUtils.IsImage(path))
+        {
+            ProcessImage();
+        }
+        else if (PathUtils.IsAudioFile(path))
+        {
+            using var file = TagLib.File.Create(path);
+            if (file == null) return false;
+            var embeds = file.Tag.Pictures;
+
+            if (embeds is null || embeds.Length == 0) return false;
+            ProcessImage(new MemoryStream(embeds[0].Data.Data));
+        }
+        
+        var folderpath = Path.GetDirectoryName(path);
+        if(folderpath is null) return false;
+        if (!Folder.Name.Equals(folderpath))
+        {
+            var folder = library.Data.Folders.Values.FirstOrDefault(x => x.Name.Equals(folderpath));
+            if (folder is null)
+            {
+                folder = new Folder(folderpath);
+                await folder.DbInsertAsync(library.Database);
+            };
+            Folder = folder;
+            FolderId = folder.DatabaseIndex;    
+        }
+        
+        await DbUpdateAsync(library.Database);
+        if (!string.IsNullOrEmpty(Hash))
+        {
+            if (!tmbNull)
+            {
+                using var stream = new MemoryStream(ThumbnailData);
+                Thumbnail = new Bitmap(stream);    
+            }
+            return true;
+        }
+        return false;
     }
 
     public string? ProcessImage()
