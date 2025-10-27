@@ -57,6 +57,7 @@ public static class TagWriter
                 file.Tag.Composers = track.Composers.Select(x => x.Name).ToArray();
                 file.Tag.RemixedBy = track.Remixer?.Name;
                 file.Tag.Performers = track.Artists.Select(x => x.Name).ToArray();
+                file.Tag.Publisher = track.Publisher?.Name;
                 file.Tag.Conductor = track.Conductor?.Name;
                 file.Tag.Disc = track.DiscNumber;
                 file.Tag.Track = track.TrackNumber;

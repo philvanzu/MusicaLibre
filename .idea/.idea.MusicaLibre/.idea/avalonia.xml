@@ -22,6 +22,7 @@
         <entry key="MusicaLibre/Views/CommonDialogs/CreatePlaylistDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/CommonDialogs/OkCancelDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/CommonDialogs/ProgressDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
+        <entry key="MusicaLibre/Views/CommonDialogs/ProgressView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/CreateLibraryDialog.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/DataPresenters/AlbumsListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />
         <entry key="MusicaLibre/Views/DataPresenters/NameTagsListView.axaml" value="MusicaLibre/MusicaLibre.csproj" />

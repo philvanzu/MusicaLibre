@@ -241,7 +241,6 @@
                                                    Content="{Binding IsMultiple, Converter={StaticResource MultipleUpdateWarning}}"/>
                                            <!--Composers-->
                                            <TextBlock Grid.Row="9" Grid.Column="0" >Composers</TextBlock>
-                                           <TextBox Text="{Binding ComposersBinding}"/>
                                            <ctrl:TagBox Grid.Row="9" Grid.Column="2"  
                                               Text="{Binding ComposersBinding}"
                                               Options="{Binding ComposersOptions}"

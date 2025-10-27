@@ -8,23 +8,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="297d10ca-c7cc-4d05-ad36-e93d577624fd" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/ArtworksEditorViewModel.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtworksEditorView.axaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtworksEditorView.axaml.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/Views/CommonDialogs/OkCancelDialog.axaml.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MusicaLibre/Views/CommonDialogs/ProgressView.axaml.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/avalonia.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/avalonia.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MusicaLibre/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Models/Artwork.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Models/Artwork.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Models/Track.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Models/Track.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TagsEditorViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/ViewModels/Editors/TagsEditorViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AlbumsEditorView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AlbumsEditorView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AlbumsEditorView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/AlbumsEditorView.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtistsEditorView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtistsEditorView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtistsEditorView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/ArtistsEditorView.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/GenresEditorView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/GenresEditorView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/GenresEditorView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/GenresEditorView.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/PublishersEditorView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/PublishersEditorView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/PublishersEditorView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/PublishersEditorView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Models/AudioFormat.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Models/AudioFormat.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicaLibre/Services/TagWriter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Services/TagWriter.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TagsEditorDialog.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/MusicaLibre/Views/Editors/TagsEditorDialog.axaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -135,25 +124,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Project.MusicaLibre.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "XThreadsFramesViewSplitterKey": "0.094545454",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "/home/phil/RiderProjects/MusicaLibre",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Project.MusicaLibre.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.094545454&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/phil/RiderProjects/MusicaLibre&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="MusicaLibre" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
@@ -222,6 +211,7 @@
       <workItem from="1760480669972" duration="27217000" />
       <workItem from="1760722760852" duration="33995000" />
       <workItem from="1760923642893" duration="26874000" />
+      <workItem from="1761493040344" duration="5615000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -486,19 +476,6 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="249" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/AlbumsListView.axaml.cs</url>
-          <line>121</line>
-          <properties documentPath="$PROJECT_DIR$/MusicaLibre/Views/DataPresenters/AlbumsListView.axaml.cs" containingFunctionPresentation="Method 'DeviceMenuItemPressed'">
-            <startOffsets>
-              <option value="3485" />
-            </startOffsets>
-            <endOffsets>
-              <option value="3702" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="337" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

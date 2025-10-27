@@ -89,14 +89,7 @@ public class AudioFormat:NameTag
         // Lossless: don't bin by bitrate
         if (codec is "FLAC" or "ALAC" or "APE" or "WavPack")
         {
-            return bitrate switch
-            {
-                < 500 => "Low bitrate",
-                < 1000 => "Medium bitrate",
-                < 2000 => "High bitrate",
-                < 3000 => "Very High bitrate",
-                _ => "Ultra High bitrate"
-            };
+            return  "Lossless";
         }
 
         if (codec == "MP3" || codec == "AAC" || codec == "Vorbis" || codec == "WMA")
